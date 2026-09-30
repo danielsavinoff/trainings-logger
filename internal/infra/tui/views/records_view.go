@@ -1,0 +1,43 @@
+package views
+
+import (
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
+
+	"github.com/danielsavinoff/trainings-logger/internal/infra/tui/components"
+)
+
+func (m RecordsModel) View() tea.View {
+	styles := []lipgloss.Style{components.BaseStyle, components.BaseStyle}
+	styles[m.activePanel] = styles[m.activePanel].BorderForeground(components.ActivePanelColor)
+
+	content := lipgloss.JoinVertical(
+		lipgloss.Left,
+		lipgloss.JoinHorizontal(lipgloss.Top,
+			components.PanelSpacing.Render(components.RenderPane(styles[exercisesPanel], "Exercises <ge>", m.exercisesView(), components.Position(m.table.Cursor(), len(m.table.Rows())))),
+			components.PanelSpacing.Render(components.RenderPane(styles[setsPanel], "Sets <gs>", m.setsView(), components.Position(m.setCursor, len(m.setLines)))),
+		),
+		m.helpView(),
+	)
+	if m.width > 0 && m.height > 0 {
+		content = lipgloss.NewStyle().MaxWidth(m.width).MaxHeight(m.height).Render(content)
+	}
+
+	layers := []*lipgloss.Layer{lipgloss.NewLayer(content).ID("panels")}
+	var cursor *tea.Cursor
+	if m.dialog != nil {
+		var dialogLayers []*lipgloss.Layer
+		dialogLayers, cursor = m.dialog.Layers()
+		layers = append(layers, dialogLayers...)
+	}
+
+	canvas := lipgloss.NewCanvas(max(0, m.width), max(0, m.height))
+	content = canvas.Compose(lipgloss.NewCompositor(layers...)).Render()
+
+	v := tea.NewView(content)
+	v.Cursor = cursor
+	v.AltScreen = true
+	v.MouseMode = tea.MouseModeCellMotion
+
+	return v
+}

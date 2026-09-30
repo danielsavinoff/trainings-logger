@@ -7,4 +7,5 @@ type ExerciseRepository interface {
 	FindAll(ctx context.Context) ([]Exercise, error)
 	ExistsByName(ctx context.Context, name string) (bool, error)
 	ExistsByID(ctx context.Context, id string) (bool, error)
+	DeleteByID(ctx context.Context, id string) error
 }

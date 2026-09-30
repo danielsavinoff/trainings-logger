@@ -1,5 +1,9 @@
 package shared
 
+import (
+	"math"
+)
+
 type Weight struct {
 	Value float64    `json:"value"`
 	Unit  WeightUnit `json:"unit"`
@@ -8,6 +12,14 @@ type Weight struct {
 func NewWeight(value float64, unit WeightUnit) (Weight, error) {
 	if unit == "" {
 		return Weight{}, ErrEmptyWeightUnit
+	}
+
+	if unit != WeightUnitG && unit != WeightUnitKg && unit != WeightUnitLb {
+		return Weight{}, ErrInvalidWeightUnit
+	}
+
+	if math.IsNaN(value) || math.IsInf(value, 0) || value < 0 {
+		return Weight{}, ErrInvalidWeight
 	}
 
 	return Weight{
