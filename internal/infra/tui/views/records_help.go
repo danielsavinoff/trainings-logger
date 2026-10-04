@@ -36,9 +36,9 @@ func (m RecordsModel) helpView() string {
 			false,
 		)
 	}
-	hints := "?  help    q  quit"
+	hints := "? - help    q - quit"
 	if lipgloss.Width(hints) > width {
-		hints = "?  help\nq  quit"
+		hints = "? - help\nq - quit"
 	}
 	status := ""
 	if m.err != "" {

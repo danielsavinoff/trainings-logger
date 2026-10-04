@@ -1,0 +1,141 @@
+<GraceChangePlan graceVersion="4.0" status="approved">
+  <C-VIM-RECORDS-JUMPS>
+    <IntentSummary>Add active-panel Vim-style first-row navigation with gg, document the existing G last-row binding, and record the project convention for future keyboard shortcuts.</IntentSummary>
+    <BaselineAssertions>
+      <MustExist>
+        <Value>AGENTS.md</Value>
+        <Value>internal/infra/tui/views/records_update.go</Value>
+        <Value>internal/infra/tui/views/records_navigation_test.go</Value>
+        <Value>internal/infra/tui/views/help.go</Value>
+        <Value>internal/infra/tui/views/help_test.go</Value>
+        <Value>.grace/graph/main.xml</Value>
+        <Value>.grace/verification/main.xml</Value>
+        <Value>.grace/changes/archive/C-RECORDS-HELP-VIEW/spec.xml</Value>
+        <Value>.grace/changes/archive/C-RECORDS-HELP-VIEW/plan.xml</Value>
+      </MustExist>
+      <MustContain>
+        <File>internal/infra/tui/views/records_update.go</File>
+        <Text>if m.goPending {</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/help.go</File>
+        <Text>{key: "home", explanation: "first row"}</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/records_navigation_test.go</File>
+        <Text>func TestRecordsPanelNavigation</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/changes/archive/C-RECORDS-HELP-VIEW/spec.xml</File>
+        <Text>&lt;Replacement&gt;C-VIM-RECORDS-JUMPS&lt;/Replacement&gt;</Text>
+      </MustContain>
+    </BaselineAssertions>
+    <TargetAssertions>
+      <MustContain>
+        <File>AGENTS.md</File>
+        <Text>## Keyboard Shortcuts</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/records_update.go</File>
+        <Text>case "g":</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/help.go</File>
+        <Text>{key: "home/gg", explanation: "first row"}</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/records_navigation_test.go</File>
+        <Text>func TestRecordsVimRowJumpShortcuts</Text>
+      </MustContain>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-TUI-RECORDS</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-TUI-HELP</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-TUI-RECORDS</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-TUI-HELP</Anchor>
+      </MustOwn>
+      <MustVerify>
+        <Module>M-TUI-RECORDS</Module>
+        <Module>M-TUI-HELP</Module>
+      </MustVerify>
+      <MustContain>
+        <File>.grace/graph/main.xml</File>
+        <Text>gg selects the first row in the active panel</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/verification/main.xml</File>
+        <Text>TestRecordsVimRowJumpShortcuts</Text>
+      </MustContain>
+      <MustPassCommand>
+        <Command budgetSeconds="30">go test ./...</Command>
+        <Command budgetSeconds="15">go vet ./...</Command>
+      </MustPassCommand>
+    </TargetAssertions>
+    <DurableScope>
+      <GraphAnchors>
+        <M-TUI-RECORDS />
+        <M-TUI-HELP />
+      </GraphAnchors>
+      <VerificationAnchors>
+        <V-M-TUI-RECORDS />
+        <V-M-TUI-HELP />
+      </VerificationAnchors>
+      <GraphDocuments>
+        <GD-MAIN />
+      </GraphDocuments>
+      <VerificationDocuments>
+        <VD-MAIN />
+      </VerificationDocuments>
+    </DurableScope>
+    <ObservedWriteScope>
+      <File>AGENTS.md</File>
+      <File>internal/infra/tui/views/records_update.go</File>
+      <File>internal/infra/tui/views/records_navigation_test.go</File>
+      <File>internal/infra/tui/views/help.go</File>
+      <File>internal/infra/tui/views/help_test.go</File>
+      <File>.grace/graph/main.xml</File>
+      <File>.grace/verification/main.xml</File>
+    </ObservedWriteScope>
+    <ImplementationPlan>
+      <T-001>
+        <Title>Implement and verify Vim-style row jumps</Title>
+        <DependsOn></DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Handle gg as a first-row jump for the active exercises or sets panel without changing ge/gs focus sequences. Preserve Home and End behavior and the existing G last-row jump.</Criterion>
+          <Criterion>Update help to list home/gg for first row and end/G for last row. Add a concise AGENTS.md rule preferring Vim-style keyboard shortcuts for new shortcuts when suitable.</Criterion>
+          <Criterion>Add interaction coverage for gg and G on both panels and for ge/gs focus; add help assertions for both row-jump entries.</Criterion>
+          <Criterion>Run go test ./internal/infra/tui/views and inspect formatting and diffs.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./internal/infra/tui/views</Command>
+        </Verification>
+      </T-001>
+      <T-002>
+        <Title>Reconcile GRACE records and help projections</Title>
+        <DependsOn>T-001</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Update M-TUI-RECORDS and M-TUI-HELP behavior text to describe the active-panel gg and G row jumps and the help documentation.</Criterion>
+          <Criterion>Extend V-M-TUI-RECORDS and V-M-TUI-HELP scenarios and trace assertions to verify both panel jumps and displayed help bindings.</Criterion>
+          <Criterion>Pass go test ./... and go vet ./... with normal validation and no snapshot regeneration.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./...</Command>
+          <Command>go vet ./...</Command>
+        </Verification>
+      </T-002>
+    </ImplementationPlan>
+    <ExecutionNotes>
+      <Note>The previously approved C-RECORDS-HELP-VIEW had already reached its target durable state but remained active with stale baseline assertions. It was superseded and archived with an explicit Replacement reference before this plan's baseline check.</Note>
+      <Note>The active exercises and sets panel is the navigation context. Existing Home/End bindings remain available as aliases alongside gg/G.</Note>
+    </ExecutionNotes>
+  </C-VIM-RECORDS-JUMPS>
+</GraceChangePlan>

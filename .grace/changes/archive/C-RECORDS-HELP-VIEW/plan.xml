@@ -1,6 +1,7 @@
-<GraceChangePlan graceVersion="4.0" status="approved">
+<GraceChangePlan graceVersion="4.0" status="superseded">
   <C-RECORDS-HELP-VIEW>
-    <IntentSummary>Implement the approved dedicated records help screen, compact ? - help and q - quit footer, and application-wide Ctrl+Z quit support alongside Ctrl+C. Retain the records model while displaying help, isolate help input, preserve browsing state, and establish scoped graph ownership and verification for the touched TUI modules.</IntentSummary>
+    <Replacement>C-VIM-RECORDS-JUMPS</Replacement>
+    <IntentSummary>Superseded by C-VIM-RECORDS-JUMPS. Implement the approved dedicated records help screen, compact ? - help and q - quit footer, and application-wide Ctrl+Z quit support alongside Ctrl+C. Retain the records model while displaying help, isolate help input, preserve browsing state, and establish scoped graph ownership and verification for the touched TUI modules.</IntentSummary>
     <BaselineAssertions>
       <MustExist>
         <Value>internal/infra/tui/views/records.go</Value>

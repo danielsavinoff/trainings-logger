@@ -5,8 +5,10 @@
       <Scenario>Open help from each panel and return with any key without triggering that key's records action; preserve selection, page, scroll position, and existing errors across resizing.</Scenario>
       <Scenario>Help actions and mouse events do not mutate records or access persistence; dialog insert mode retains ? and q as text.</Scenario>
       <Scenario>Compact and wide snapshots preserve terminal modes and dialog cursors while showing the shortened footer and additional panel space.</Scenario>
+      <Scenario>On either active panel, gg selects the first row and G selects the last row; ge and gs continue to change panel focus.</Scenario>
       <TraceAssertion>TestRecordsHelpStatePreservation compares rendered records and browsing state across help transitions and resizing.</TraceAssertion>
       <TraceAssertion>TestRecordsHelpInputIsolation observes zero transaction calls and unchanged records after help input; TestRecordsHelpQuitAndDialogInput checks quit and text-entry routing.</TraceAssertion>
+      <TraceAssertion>TestRecordsVimRowJumpShortcuts verifies active-panel first and last row jumps and preserves Home, End, ge, and gs behavior.</TraceAssertion>
       <TestFiles>
         <File>internal/infra/tui/views/records_help_test.go</File>
         <File>internal/infra/tui/views/records_test.go</File>
@@ -17,7 +19,9 @@
       <Command>go test ./internal/infra/tui/views -run '^TestHelp'</Command>
       <Scenario>Render titled, tab-aligned groups without a separate page title at compact, wide, tiny, and zero sizes; use active-panel color for keys and inactive-border color for the borderless records hints.</Scenario>
       <Scenario>Place groups side by side when space allows, stack on compact widths, and reach all content by scrolling.</Scenario>
+      <Scenario>Render the first-row home/gg binding and last-row end/G binding in the help page.</Scenario>
       <TraceAssertion>TestHelpRendering checks content, display bounds, and hints; TestHelpScrollingAndResize checks content accessibility and scroll behavior.</TraceAssertion>
+      <TraceAssertion>TestHelpRendering checks that home/gg and end/G are documented.</TraceAssertion>
       <TestFiles><File>internal/infra/tui/views/help_test.go</File></TestFiles>
     </V-M-TUI-HELP>
     <V-M-TUI-STARTER>

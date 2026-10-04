@@ -86,6 +86,17 @@ func (m RecordsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.focusPanel(setsPanel)
 
 				return m, nil
+			case "g":
+				if m.activePanel == exercisesPanel {
+					m.table.GotoTop()
+					m.syncExercisePager()
+					m.refreshSelectedSets()
+				} else if len(m.setLines) > 0 {
+					m.setCursor = 0
+					m.refreshTimeline()
+				}
+
+				return m, nil
 			}
 		} else if msg.String() == "g" {
 			m.goPending = true

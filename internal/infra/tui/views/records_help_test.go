@@ -232,10 +232,10 @@ func TestRecordsCompactFooter(t *testing.T) {
 		}
 		if width >= 8 && (!strings.Contains(
 			footer,
-			"?  help",
+			"? - help",
 		) || !strings.Contains(
 			footer,
-			"q  quit",
+			"q - quit",
 		)) {
 			t.Fatal("footer hides hints")
 		}

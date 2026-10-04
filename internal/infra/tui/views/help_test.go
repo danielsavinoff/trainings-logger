@@ -75,6 +75,18 @@ func TestHelpRendering(t *testing.T) {
 	}
 	if !strings.Contains(
 		wide,
+		"home/gg",
+	) || !strings.Contains(
+		wide,
+		"end/G",
+	) {
+		t.Fatalf(
+			"missing first or last row shortcuts: %q",
+			wide,
+		)
+	}
+	if !strings.Contains(
+		wide,
 		"Navigation",
 	) || !strings.Contains(
 		wide,

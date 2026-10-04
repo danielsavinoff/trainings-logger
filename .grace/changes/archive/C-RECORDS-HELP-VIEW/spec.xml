@@ -1,6 +1,7 @@
-<GraceChangeSpec graceVersion="4.0" status="approved">
+<GraceChangeSpec graceVersion="4.0" status="superseded">
   <C-RECORDS-HELP-VIEW>
-    <Summary>Add a dedicated records help view and shorten the records footer to help and quit hints.</Summary>
+    <Replacement>C-VIM-RECORDS-JUMPS</Replacement>
+    <Summary>Superseded by C-VIM-RECORDS-JUMPS. Add a dedicated records help view and shorten the records footer to help and quit hints.</Summary>
     <Problem>The records view currently displays multiple rows of keyboard hints. A separate help view should make the available commands discoverable while leaving more room for workout records.</Problem>
     <Goals>
       <Goal>Open a dedicated help screen with ? from the records view and return without losing the records browsing state.</Goal>

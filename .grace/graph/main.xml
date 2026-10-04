@@ -15,7 +15,7 @@
       </Files>
       <Links><M-TUI-HELP /></Links>
       <Boundary>Ownership is limited to these six governed files. Existing data, persistence, dialog, and navigation helpers in the package remain outside this initial markup coverage.</Boundary>
-      <Behavior>? opens help outside dialogs; any key returns to records without running its records action. The borderless ? / q hints use the inactive-border color.</Behavior>
+      <Behavior>? opens help outside dialogs; any key returns to records without running its records action. The borderless ? / q hints use the inactive-border color. gg selects the first row in the active panel, while G selects its last row; this applies to exercises and sets. Home and End remain supported.</Behavior>
     </M-TUI-RECORDS>
     <M-TUI-HELP>
       <Name>Records keyboard help</Name>
@@ -23,7 +23,7 @@
       <Path>internal/infra/tui/views/help.go</Path>
       <Purpose>Render titled shortcut groups in responsive columns with aligned descriptions and active-color keys, without an extra page heading.</Purpose>
       <Files><File>internal/infra/tui/views/help.go</File></Files>
-      <Behavior>Arrange groups side by side when space allows and stack them on narrow terminals. Any key returns to records; scrolling and display do not access persistence.</Behavior>
+      <Behavior>Arrange groups side by side when space allows and stack them on narrow terminals. Document home/gg for the first row and end/G for the last row. Any key returns to records; scrolling and display do not access persistence.</Behavior>
     </M-TUI-HELP>
     <M-TUI-STARTER>
       <Name>Application input wrapper</Name>

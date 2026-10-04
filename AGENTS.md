@@ -93,3 +93,7 @@ These paths describe the observed package layout. The initial GRACE graph and ve
 
 - In every `.go` source file, including tests, write calls to functions or methods with more than one argument using one argument per line, with a trailing comma after the final argument.
 - Separate distinct logical blocks of Go code with a blank line. Keep statements that form one continuous operation together.
+
+## Keyboard Shortcuts
+
+- When adding keyboard shortcuts, prefer familiar Vim-style bindings where they fit the existing interaction model.

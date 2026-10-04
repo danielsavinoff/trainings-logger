@@ -57,7 +57,7 @@ var recordsHelp = []helpGroup{
 			{key: "→/l/pgdown/f/space", explanation: "next page"},
 			{key: "u/ctrl+u", explanation: "half page up"},
 			{key: "ctrl+d", explanation: "half page down"},
-			{key: "home", explanation: "first row"},
+			{key: "home/gg", explanation: "first row"},
 			{key: "end/G", explanation: "last row"},
 		},
 	},

@@ -1,0 +1,42 @@
+<GraceChangeSpec graceVersion="4.0" status="approved">
+  <C-VIM-RECORDS-JUMPS>
+    <Summary>Add Vim-style first-row navigation to records and establish a project shortcut convention.</Summary>
+    <Problem>Records supports first-row navigation with Home and last-row navigation with End/G, but does not support the Vim-style gg first-row binding or document a convention for future shortcuts.</Problem>
+    <Goals>
+      <Goal>Support gg to move to the first row in the currently active records panel while preserving ge and gs focus sequences.</Goal>
+      <Goal>Document gg and G as first-row and last-row navigation in the records help.</Goal>
+      <Goal>Set a project rule to prefer familiar Vim-style keyboard shortcuts when adding shortcuts where they fit the interaction.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>Keep the shortcut scoped to records navigation and operate on the active exercises or sets panel.</Constraint>
+      <Constraint>Preserve existing Home and End row-jump behavior and existing ge/gs panel focus behavior.</Constraint>
+      <Constraint>Follow Go formatting rules in all changed Go source and test files.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>Change paging, dialog input, help dismissal, persistence, or workout data behavior.</NonGoal>
+      <NonGoal>Replace existing keyboard shortcuts or introduce configurable key bindings.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>On the exercises panel, gg selects the first exercise; on the sets panel, gg selects the first set. G continues to select the last row in either active panel.</Criterion>
+      <Criterion>ge and gs remain usable after the g-prefix handling change, and Home/End behavior remains available.</Criterion>
+      <Criterion>The help view documents first row as home/gg and last row as end/G.</Criterion>
+      <Criterion>AGENTS.md instructs contributors to prefer familiar Vim-style bindings when adding keyboard shortcuts where appropriate.</Criterion>
+      <Criterion>Interaction tests verify first/last row jumps for both panels and existing panel-focus sequences; package and project checks pass.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-TUI-RECORDS />
+      <M-TUI-HELP />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>go test ./internal/infra/tui/views</ExpectedCommand>
+      <ExpectedCommand>go test ./...</ExpectedCommand>
+      <ExpectedCommand>go vet ./...</ExpectedCommand>
+      <ExpectedEvidence>Interaction tests verify row-jump endpoints in the exercises and sets panels, and confirm that ge and gs retain their focus behavior.</ExpectedEvidence>
+      <ExpectedEvidence>Help rendering exposes the Vim-style shortcuts and project instructions record the convention. GRACE graph and verification behavior matches the implementation.</ExpectedEvidence>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>Existing Home and End shortcuts remain supported as aliases.</Assumption>
+      <Assumption>Vim-style preference applies when adding shortcuts and does not require retroactively replacing current bindings.</Assumption>
+    </Assumptions>
+  </C-VIM-RECORDS-JUMPS>
+</GraceChangeSpec>
