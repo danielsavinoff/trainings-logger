@@ -1,0 +1,5 @@
+<GraceUXGuidelines graceVersion="4.0">
+  <Applicability>applicable</Applicability>
+  <Audience>Individuals tracking their workouts in a terminal.</Audience>
+  <Guideline>Preserve keyboard navigation and visible key hints, exercise and set panels, pagination, dialog modes, field-level validation feedback, and error messages. Keep compact and wide terminal layouts, resize behavior, native cursor positioning, and Unicode input covered by the existing TUI tests. Additional accessibility and branding requirements are unspecified.</Guideline>
+</GraceUXGuidelines>

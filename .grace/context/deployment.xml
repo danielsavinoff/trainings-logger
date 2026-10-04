@@ -1,0 +1,5 @@
+<GraceDeployment graceVersion="4.0">
+  <Applicability>applicable</Applicability>
+  <Target>A local Go executable built from ./cmd/cli, running in an interactive terminal with a writable operating-system user configuration directory.</Target>
+  <Notes>Deployment applies to local executable distribution; no hosted service or release pipeline is configured. SQLite migrations are embedded from migrations/sqlite and applied on database open. The database uses foreign keys, WAL mode, a 5000 ms busy timeout, and a single open connection. Supported release platforms, packaging, and rollback procedures are not yet specified.</Notes>
+</GraceDeployment>
