@@ -1,3 +1,18 @@
+// START_MODULE_CONTRACT
+//   PURPOSE: Construct records state and retain help state.
+//   SCOPE: Records model types, initial queries, and construction.
+//   DEPENDS: M-TUI-HELP
+//   LINKS: M-TUI-RECORDS, V-M-TUI-RECORDS
+//   MAP_MODE: SUMMARY
+// END_MODULE_CONTRACT
+//
+// START_MODULE_MAP
+//   RecordsModel - retain records, dialogs, and help state
+//   NewRecordsModel - load preferences and records
+//   newRecordsModel - construct initial browsing state
+//   Init - initialize the records model
+// END_MODULE_MAP
+
 package views
 
 import (
@@ -14,6 +29,7 @@ import (
 	"github.com/danielsavinoff/trainings-logger/internal/infra/tui/components"
 )
 
+// START_BLOCK_RECORDS_MODEL
 type panel int
 
 const (
@@ -40,28 +56,43 @@ type RecordsModel struct {
 	width          int
 	height         int
 	dialog         *recordDialog
+	help           helpModel
+	showingHelp    bool
 }
 
 // NewRecordsModel loads the initial records and creates the terminal UI.
 func NewRecordsModel(ctx context.Context, app tui.App) (RecordsModel, error) {
 	store := &recordStore{App: app}
-	prefs, err := store.GetPreferences.Handle(ctx, query.GetPreferences{})
+	prefs, err := store.GetPreferences.Handle(
+		ctx,
+		query.GetPreferences{},
+	)
 	if err != nil {
 		return RecordsModel{}, err
 	}
 
-	data, err := store.ListExercises.Handle(ctx, query.ListExercises{})
+	data, err := store.ListExercises.Handle(
+		ctx,
+		query.ListExercises{},
+	)
 	if err != nil {
 		return RecordsModel{}, err
 	}
 
-	exercises := make([]exerciseRecord, 0, len(data.Result))
+	exercises := make(
+		[]exerciseRecord,
+		0,
+		len(data.Result),
+	)
 	for _, e := range data.Result {
-		exercises = append(exercises, exerciseRecord{
-			id:              e.ID,
-			name:            e.Name,
-			bodyWeightShare: e.BodyWeightShare,
-		})
+		exercises = append(
+			exercises,
+			exerciseRecord{
+				id:              e.ID,
+				name:            e.Name,
+				bodyWeightShare: e.BodyWeightShare,
+			},
+		)
 	}
 
 	m := newRecordsModel(exercises)
@@ -91,6 +122,10 @@ func newRecordsModel(exercises []exerciseRecord) RecordsModel {
 	return m.resize()
 }
 
-func (m RecordsModel) Init() tea.Cmd { return nil }
+func (m RecordsModel) Init() tea.Cmd {
+	return nil
+}
 
 var _ tea.Model = RecordsModel{}
+
+// END_BLOCK_RECORDS_MODEL

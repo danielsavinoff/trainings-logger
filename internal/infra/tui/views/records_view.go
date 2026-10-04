@@ -1,3 +1,15 @@
+// START_MODULE_CONTRACT
+//   PURPOSE: Render the active records or help screen.
+//   SCOPE: Terminal modes, panels, dialog layers, and cursor.
+//   DEPENDS: M-TUI-HELP
+//   LINKS: M-TUI-RECORDS, V-M-TUI-RECORDS
+//   MAP_MODE: SUMMARY
+// END_MODULE_CONTRACT
+//
+// START_MODULE_MAP
+//   View - compose the active screen and terminal modes
+// END_MODULE_MAP
+
 package views
 
 import (
@@ -7,15 +19,39 @@ import (
 	"github.com/danielsavinoff/trainings-logger/internal/infra/tui/components"
 )
 
+// START_BLOCK_RECORDS_VIEW
 func (m RecordsModel) View() tea.View {
+	if m.showingHelp {
+		v := tea.NewView(m.help.view())
+		v.AltScreen = true
+		v.MouseMode = tea.MouseModeCellMotion
+		return v
+	}
 	styles := []lipgloss.Style{components.BaseStyle, components.BaseStyle}
 	styles[m.activePanel] = styles[m.activePanel].BorderForeground(components.ActivePanelColor)
 
 	content := lipgloss.JoinVertical(
 		lipgloss.Left,
-		lipgloss.JoinHorizontal(lipgloss.Top,
-			components.PanelSpacing.Render(components.RenderPane(styles[exercisesPanel], "Exercises <ge>", m.exercisesView(), components.Position(m.table.Cursor(), len(m.table.Rows())))),
-			components.PanelSpacing.Render(components.RenderPane(styles[setsPanel], "Sets <gs>", m.setsView(), components.Position(m.setCursor, len(m.setLines)))),
+		lipgloss.JoinHorizontal(
+			lipgloss.Top,
+			components.PanelSpacing.Render(components.RenderPane(
+				styles[exercisesPanel],
+				"Exercises <ge>",
+				m.exercisesView(),
+				components.Position(
+					m.table.Cursor(),
+					len(m.table.Rows()),
+				),
+			)),
+			components.PanelSpacing.Render(components.RenderPane(
+				styles[setsPanel],
+				"Sets <gs>",
+				m.setsView(),
+				components.Position(
+					m.setCursor,
+					len(m.setLines),
+				),
+			)),
 		),
 		m.helpView(),
 	)
@@ -28,10 +64,22 @@ func (m RecordsModel) View() tea.View {
 	if m.dialog != nil {
 		var dialogLayers []*lipgloss.Layer
 		dialogLayers, cursor = m.dialog.Layers()
-		layers = append(layers, dialogLayers...)
+		layers = append(
+			layers,
+			dialogLayers...,
+		)
 	}
 
-	canvas := lipgloss.NewCanvas(max(0, m.width), max(0, m.height))
+	canvas := lipgloss.NewCanvas(
+		max(
+			0,
+			m.width,
+		),
+		max(
+			0,
+			m.height,
+		),
+	)
 	content = canvas.Compose(lipgloss.NewCompositor(layers...)).Render()
 
 	v := tea.NewView(content)
@@ -41,3 +89,5 @@ func (m RecordsModel) View() tea.View {
 
 	return v
 }
+
+// END_BLOCK_RECORDS_VIEW

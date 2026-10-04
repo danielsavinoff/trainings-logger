@@ -1,0 +1,139 @@
+<GraceChangePlan graceVersion="4.0" status="approved">
+  <C-RECORDS-HELP-VIEW>
+    <IntentSummary>Implement the approved dedicated records help screen, compact ? - help and q - quit footer, and application-wide Ctrl+Z quit support alongside Ctrl+C. Retain the records model while displaying help, isolate help input, preserve browsing state, and establish scoped graph ownership and verification for the touched TUI modules.</IntentSummary>
+    <BaselineAssertions>
+      <MustExist>
+        <Value>internal/infra/tui/views/records.go</Value>
+        <Value>internal/infra/tui/views/records_update.go</Value>
+        <Value>internal/infra/tui/views/records_view.go</Value>
+        <Value>internal/infra/tui/views/records_layout.go</Value>
+        <Value>internal/infra/tui/views/records_keys.go</Value>
+        <Value>internal/infra/tui/views/records_help.go</Value>
+        <Value>internal/infra/tui/views/records_test.go</Value>
+        <Value>internal/infra/tui/views/records_navigation_test.go</Value>
+        <Value>internal/infra/tui/starter/model.go</Value>
+      </MustExist>
+      <MustNotExist>
+        <Value>M-TUI-RECORDS</Value>
+        <Value>M-TUI-HELP</Value>
+        <Value>M-TUI-STARTER</Value>
+        <Value>V-M-TUI-RECORDS</Value>
+        <Value>V-M-TUI-HELP</Value>
+        <Value>V-M-TUI-STARTER</Value>
+        <Value>internal/infra/tui/views/help.go</Value>
+        <Value>internal/infra/tui/views/help_test.go</Value>
+        <Value>internal/infra/tui/views/records_help_test.go</Value>
+        <Value>internal/infra/tui/starter/model_test.go</Value>
+      </MustNotExist>
+      <MustContain><File>.grace/graph/main.xml</File><Text>&lt;GD-MAIN&gt;&lt;/GD-MAIN&gt;</Text></MustContain>
+      <MustContain><File>.grace/verification/main.xml</File><Text>&lt;VD-MAIN&gt;&lt;/VD-MAIN&gt;</Text></MustContain>
+      <MustContain><File>internal/infra/tui/starter/model.go</File><Text>press.String() == "ctrl+c"</Text></MustContain>
+      <MustContain><File>internal/infra/tui/views/records_update.go</File><Text>return m.updateDialog(msg)</Text></MustContain>
+      <MustContain><File>internal/infra/tui/views/records_help.go</File><Text>center.Render(help.ShortHelpView(actions))</Text></MustContain>
+      <MustContain><File>internal/infra/tui/views/records_keys.go</File><Text>key.WithKeys("q")</Text></MustContain>
+    </BaselineAssertions>
+    <TargetAssertions>
+      <MustExist>
+        <Value>internal/infra/tui/views/help.go</Value>
+        <Value>internal/infra/tui/views/help_test.go</Value>
+        <Value>internal/infra/tui/views/records_help_test.go</Value>
+        <Value>internal/infra/tui/starter/model_test.go</Value>
+      </MustExist>
+      <MustOwn><Owner>GD-MAIN</Owner><Anchor>M-TUI-RECORDS</Anchor></MustOwn>
+      <MustOwn><Owner>GD-MAIN</Owner><Anchor>M-TUI-HELP</Anchor></MustOwn>
+      <MustOwn><Owner>GD-MAIN</Owner><Anchor>M-TUI-STARTER</Anchor></MustOwn>
+      <MustOwn><Owner>VD-MAIN</Owner><Anchor>V-M-TUI-RECORDS</Anchor></MustOwn>
+      <MustOwn><Owner>VD-MAIN</Owner><Anchor>V-M-TUI-HELP</Anchor></MustOwn>
+      <MustOwn><Owner>VD-MAIN</Owner><Anchor>V-M-TUI-STARTER</Anchor></MustOwn>
+      <MustLink><From>M-TUI-RECORDS</From><To>M-TUI-HELP</To></MustLink>
+      <MustLink><From>M-TUI-STARTER</From><To>M-TUI-RECORDS</To></MustLink>
+      <MustVerify><Module>M-TUI-RECORDS</Module><Module>M-TUI-HELP</Module><Module>M-TUI-STARTER</Module></MustVerify>
+      <MustContain><File>internal/infra/tui/views/help_test.go</File><Text>func TestHelpRendering</Text></MustContain>
+      <MustContain><File>internal/infra/tui/views/records_help_test.go</File><Text>func TestRecordsHelpStatePreservation</Text></MustContain>
+      <MustContain><File>internal/infra/tui/views/records_help_test.go</File><Text>func TestRecordsHelpInputIsolation</Text></MustContain>
+      <MustContain><File>internal/infra/tui/starter/model_test.go</File><Text>func TestGlobalQuitShortcuts</Text></MustContain>
+      <MustPassCommand>
+        <Command budgetSeconds="30">go test ./...</Command>
+        <Command budgetSeconds="15">go vet ./...</Command>
+      </MustPassCommand>
+    </TargetAssertions>
+    <DurableScope>
+      <GraphAnchors><M-TUI-RECORDS /><M-TUI-HELP /><M-TUI-STARTER /></GraphAnchors>
+      <VerificationAnchors><V-M-TUI-RECORDS /><V-M-TUI-HELP /><V-M-TUI-STARTER /></VerificationAnchors>
+      <GraphDocuments><GD-MAIN /></GraphDocuments>
+      <VerificationDocuments><VD-MAIN /></VerificationDocuments>
+    </DurableScope>
+    <ObservedWriteScope>
+      <File>internal/infra/tui/views/help.go</File>
+      <File>internal/infra/tui/views/help_test.go</File>
+      <File>internal/infra/tui/views/records.go</File>
+      <File>internal/infra/tui/views/records_update.go</File>
+      <File>internal/infra/tui/views/records_view.go</File>
+      <File>internal/infra/tui/views/records_layout.go</File>
+      <File>internal/infra/tui/views/records_keys.go</File>
+      <File>internal/infra/tui/views/records_help.go</File>
+      <File>internal/infra/tui/views/records_help_test.go</File>
+      <File>internal/infra/tui/views/records_test.go</File>
+      <File>internal/infra/tui/views/records_navigation_test.go</File>
+      <File>internal/infra/tui/starter/model.go</File>
+      <File>internal/infra/tui/starter/model_test.go</File>
+      <Glob>internal/infra/tui/views/testdata/*.golden.json</Glob>
+    </ObservedWriteScope>
+    <ImplementationPlan>
+      <T-001>
+        <Title>Build a responsive help view with isolated scrolling</Title>
+        <DependsOn></DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Add a self-contained help model in views/help.go with grouped records shortcuts, visible Esc/? return hints, q - quit, and no Ctrl+C or Ctrl+Z quit hints. Use existing styles and a viewport for overflowing content; wrap content to terminal width.</Criterion>
+          <Criterion>Document effective bindings from the records dispatcher and local table/paginator bindings: up/k and down/j row movement; ge/gs panel focus; Enter to focus sets; left/h/pgup/b and right/l/pgdown/f/space pagination; u/Ctrl+U and Ctrl+D half-page movement; Home and End/G jumps; n/e/d actions. Do not advertise d as half-page down or bare g as top because records dispatch overrides those library defaults.</Criterion>
+          <Criterion>Support keyboard scrolling using arrows/j/k and page keys and mouse-wheel scrolling of help only. Keep return instructions visible when content overflows, and handle zero or tiny resize dimensions without panic.</Criterion>
+          <Criterion>Add TestHelpRendering and behavioral tests for compact/wide views, wrapping, complete content access by scrolling, resizing, and the displayed return and quit hints.</Criterion>
+        </AcceptanceCriteria>
+        <Verification><Command>go test ./internal/infra/tui/views -run '^TestHelp'</Command></Verification>
+      </T-001>
+      <T-002>
+        <Title>Integrate help into records and replace the footer</Title>
+        <DependsOn>T-001</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Retain the existing RecordsModel and add help state. Open help on ? only after respecting the dialog input path. Route help input before records mouse, navigation, and mutation handling; Esc/? closes help and q returns tea.Quit. Clear a pending g prefix when entering help.</Criterion>
+          <Criterion>Render the help screen in place of panels while active, preserving terminal modes and hiding any inappropriate input cursor. Opening and closing help must not reload data, write persistence, or rebuild the records model.</Criterion>
+          <Criterion>Preserve active panel, exercise/set selection, pagination, scroll state, and errors across entry/return at unchanged dimensions. Propagate resize events to help and records layout so selection and focus survive dimension changes.</Criterion>
+          <Criterion>Replace detailed footer rows with literal ? - help and q - quit, using one row when it fits and wrapping at narrow widths without losing either hint. Size panels using the actual footer/error height and preserve error display.</Criterion>
+          <Criterion>Add TestRecordsHelpStatePreservation and TestRecordsHelpInputIsolation, covering both panels, pagination and scrolling, resize, return keys, q quit, record actions and mouse input while in help, and preservation of errors. Use a fake store or equivalent observable fixture to prove no persistence writes on help entry, input, or return.</Criterion>
+          <Criterion>Verify ? and q remain text in dialog insert mode and existing dialog navigation is preserved. Extend rendering coverage for help, compact footer and errors, and review every intentionally updated records/dialog-background golden snapshot.</Criterion>
+        </AcceptanceCriteria>
+        <Verification><Command>go test ./internal/infra/tui/views</Command></Verification>
+      </T-002>
+      <T-003>
+        <Title>Add Ctrl+Z to application-wide quit dispatch</Title>
+        <DependsOn></DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Extend starter.Model.Update to return tea.Quit for Ctrl+Z alongside Ctrl+C before dispatch to its child. Preserve ordinary child dispatch and q handling in the child view.</Criterion>
+          <Criterion>Add TestGlobalQuitShortcuts using a child spy to prove both control shortcuts emit tea.QuitMsg, never tea.SuspendMsg, and bypass child handling regardless of the current screen. Check q and ordinary input are delegated.</Criterion>
+        </AcceptanceCriteria>
+        <Verification><Command>go test ./internal/infra/tui/starter</Command></Verification>
+      </T-003>
+      <T-004>
+        <Title>Verify integrated behavior and prepare durable GRACE ownership</Title>
+        <DependsOn>T-002, T-003</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Extend starter tests with an in-memory application fixture or temporary SQLite database to exercise the actual records, help, and open-dialog states. Verify Ctrl+C/Ctrl+Z quit in each state, q quits records/help, and q remains usable in dialog text input. Do not open the real user database.</Criterion>
+          <Criterion>Add file-local contracts, module maps and relevant semantic block anchors for production files governed by this change. Define M-TUI-RECORDS ownership for the six touched records production files; M-TUI-HELP for help.go; and M-TUI-STARTER for starter/model.go. Avoid claiming markup coverage for untouched records helpers or unrelated packages.</Criterion>
+          <Criterion>Prepare graph declarations under GD-MAIN and corresponding index ownership, including records-to-help and starter-to-records links. Prepare V-M-TUI-RECORDS, V-M-TUI-HELP, and V-M-TUI-STARTER under VD-MAIN with corresponding index routes, commands, scenarios, and test evidence. Durable changes affect only .grace/graph/index.xml, .grace/graph/main.xml, .grace/verification/index.xml, and .grace/verification/main.xml and are applied centrally by grace-execute.</Criterion>
+          <Criterion>Format changed Go files, review intended snapshots, and pass the two declared target commands with normal validation leaving UPDATE_GOLDEN unset. No production domain, persistence, migrations, component dialogs, dependencies, or project context changes are required.</Criterion>
+          <Criterion>Use selected baseline lint before writes and selected target lint with command execution after writes. Leave final lifecycle validation and archival to grace-execute; never run current assertion mode after implementation writes.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./...</Command>
+          <Command>go vet ./...</Command>
+        </Verification>
+      </T-004>
+    </ImplementationPlan>
+    <ExecutionNotes>
+      <Note>Reference-host baseline measurements during planning: go test ./... passed in 2.92 seconds and go vet ./... passed in 0.77 seconds. Target command budgets of 30 and 15 seconds include headroom for new tests and recompilation. Neither command requires external substrate startup.</Note>
+      <Note>T-001 and T-003 have no mutual dependency; T-002 needs T-001, and T-004 needs both integrated records behavior and global quit support. This dependency graph does not require delegation.</Note>
+      <Note>The current graph and verification documents are empty bootstrap projections. The plan introduces only the scoped TUI ownership; it does not imply complete repository governance. Source files with no existing semantic anchors were inspected directly.</Note>
+      <Note>No other active change bundle or existing plan was found during planning. Baseline assertions check the bootstrap projection and key routing surfaces; recheck the selected baseline before edits and treat failures as stale-plan evidence rather than rewriting an approved plan.</Note>
+    </ExecutionNotes>
+  </C-RECORDS-HELP-VIEW>
+</GraceChangePlan>

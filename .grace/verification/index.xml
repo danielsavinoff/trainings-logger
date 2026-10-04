@@ -2,7 +2,11 @@
   <VerificationDocuments>
     <VD-MAIN>
       <Path>verification/main.xml</Path>
-      <Owns></Owns>
+      <Owns>
+        <V-M-TUI-RECORDS />
+        <V-M-TUI-HELP />
+        <V-M-TUI-STARTER />
+      </Owns>
     </VD-MAIN>
   </VerificationDocuments>
 </GraceVerificationIndex>

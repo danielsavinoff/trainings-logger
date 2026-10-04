@@ -2,7 +2,11 @@
   <GraphDocuments>
     <GD-MAIN>
       <Path>graph/main.xml</Path>
-      <Owns></Owns>
+      <Owns>
+        <M-TUI-RECORDS />
+        <M-TUI-HELP />
+        <M-TUI-STARTER />
+      </Owns>
     </GD-MAIN>
   </GraphDocuments>
 </GraceGraphIndex>

@@ -1,0 +1,50 @@
+<GraceChangeSpec graceVersion="4.0" status="approved">
+  <C-RECORDS-HELP-VIEW>
+    <Summary>Add a dedicated records help view and shorten the records footer to help and quit hints.</Summary>
+    <Problem>The records view currently displays multiple rows of keyboard hints. A separate help view should make the available commands discoverable while leaving more room for workout records.</Problem>
+    <Goals>
+      <Goal>Open a dedicated help screen with ? from the records view and return without losing the records browsing state.</Goal>
+      <Goal>Display only ? - help and q - quit as the records footer command hints.</Goal>
+      <Goal>Support q, Ctrl+C, and Ctrl+Z as quit shortcuts while displaying only q - quit in the footer and help screen.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>Use the existing Bubble Tea and styling patterns; preserve exercise and set operations, SQLite persistence, and validation.</Constraint>
+      <Constraint>Keep existing record action and navigation bindings. Opening help must not intercept text input or alter existing dialog behavior.</Constraint>
+      <Constraint>Keep Ctrl+C as an application-wide quit shortcut and add Ctrl+Z with the same application-wide behavior. Keep q scoped to records and help so dialog text entry remains usable.</Constraint>
+      <Constraint>Preserve visible records error messages independently of the shortened command hints.</Constraint>
+      <Constraint>Keep help usable in compact and wide terminal layouts and after resizing.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>Redesign record dialogs, their inline help, or the exercise and set panels beyond space reclaimed by the shorter footer.</NonGoal>
+      <NonGoal>Change workout data, database schemas, application commands, or repository interfaces.</NonGoal>
+      <NonGoal>Add configurable key bindings or a general documentation browser.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>With no dialog open, pressing ? on records displays a distinct help screen in place of the records panels.</Criterion>
+      <Criterion>Help describes existing records controls, including row movement, panel focus via ge and gs, Enter to focus sets, pagination, supported jump and half-page movement, and n/e/d record actions. Descriptions match actual behavior and distinguish panel focus from pagination.</Criterion>
+      <Criterion>Help visibly explains how to return. Esc or ? returns to records with the same active panel, selected exercise and set, page, and scroll position when terminal dimensions are unchanged. After resizing, preserve selection and focus while adapting pagination and layout to the new dimensions.</Criterion>
+      <Criterion>The records command footer displays ? - help and q - quit on one line when space permits, without the previous detailed navigation and action rows. Narrow layouts keep both hints accessible without horizontal overflow.</Criterion>
+      <Criterion>The quit hint in both records and help is q - quit; neither displays Ctrl+C or Ctrl+Z as additional quit hints.</Criterion>
+      <Criterion>q quits from records and help. Ctrl+C and Ctrl+Z quit from records, help, and an open dialog; Ctrl+Z does not suspend the application.</Criterion>
+      <Criterion>While help is open, records action keys and mouse input do not modify records or their underlying selection. Help content remains accessible at small terminal sizes, using scrolling when needed.</Criterion>
+      <Criterion>Opening and closing help performs no persistence writes. Existing record errors remain visible on return, and dialog input and inline hints retain their existing behavior apart from the new application-wide Ctrl+Z quit shortcut.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-TUI-RECORDS />
+      <M-TUI-HELP />
+      <M-TUI-STARTER />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>go test ./...</ExpectedCommand>
+      <ExpectedCommand>go vet ./...</ExpectedCommand>
+      <ExpectedEvidence>Interaction tests cover help entry and return, preservation of records state, isolation from record mutations, dialog input behavior, and all three quit shortcuts in their specified contexts.</ExpectedEvidence>
+      <ExpectedEvidence>Rendering tests cover the shortened footer, accurate help content, visible return instructions, compact and wide layouts, resizing, and access to overflowing help content. Review intentional golden snapshot changes; normal validation does not set UPDATE_GOLDEN=1.</ExpectedEvidence>
+      <ExpectedEvidence>Input dispatch tests verify Ctrl+Z returns the quit command, including at the application wrapper, rather than a suspend command.</ExpectedEvidence>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>A separate full help screen is intended, opened only from records when no dialog is active. Esc and ? are the proposed return bindings.</Assumption>
+      <Assumption>The help screen documents records controls; existing dialog-specific hints remain in dialogs.</Assumption>
+      <Assumption>The affected module anchors are proposed ownership boundaries for planning: records view and tests in internal/infra/tui/views, a new help view and its tests, and application-wide input in internal/infra/tui/starter. The current graph is an empty bootstrap skeleton; planning must define the relevant graph and verification changes.</Assumption>
+    </Assumptions>
+  </C-RECORDS-HELP-VIEW>
+</GraceChangeSpec>

@@ -88,3 +88,8 @@ These paths describe the observed package layout. The initial GRACE graph and ve
 - `go vet ./...`: Go static checks.
 - Do not set `UPDATE_GOLDEN=1` during normal validation; review snapshot updates when changing intended rendering.
 - Run the application with `go run ./cmd/cli` only when interactive execution is needed; it opens the real user database and applies embedded migrations.
+
+## Go Source Formatting
+
+- In every `.go` source file, including tests, write calls to functions or methods with more than one argument using one argument per line, with a trailing comma after the final argument.
+- Separate distinct logical blocks of Go code with a blank line. Keep statements that form one continuous operation together.

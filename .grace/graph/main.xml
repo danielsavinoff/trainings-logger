@@ -1,3 +1,38 @@
 <GraceGraphDocument graceVersion="4.0">
-  <GD-MAIN></GD-MAIN>
+  <GD-MAIN>
+    <M-TUI-RECORDS>
+      <Name>Records screen and help routing</Name>
+      <Type>runtime</Type>
+      <Path>internal/infra/tui/views</Path>
+      <Purpose>Retain workout browsing state, route records/dialog/help input, render the active screen, and display compact help/quit hints with errors.</Purpose>
+      <Files>
+        <File>internal/infra/tui/views/records.go</File>
+        <File>internal/infra/tui/views/records_update.go</File>
+        <File>internal/infra/tui/views/records_view.go</File>
+        <File>internal/infra/tui/views/records_layout.go</File>
+        <File>internal/infra/tui/views/records_keys.go</File>
+        <File>internal/infra/tui/views/records_help.go</File>
+      </Files>
+      <Links><M-TUI-HELP /></Links>
+      <Boundary>Ownership is limited to these six governed files. Existing data, persistence, dialog, and navigation helpers in the package remain outside this initial markup coverage.</Boundary>
+      <Behavior>? opens help outside dialogs; any key returns to records without running its records action. The borderless ? / q hints use the inactive-border color.</Behavior>
+    </M-TUI-RECORDS>
+    <M-TUI-HELP>
+      <Name>Records keyboard help</Name>
+      <Type>runtime</Type>
+      <Path>internal/infra/tui/views/help.go</Path>
+      <Purpose>Render titled shortcut groups in responsive columns with aligned descriptions and active-color keys, without an extra page heading.</Purpose>
+      <Files><File>internal/infra/tui/views/help.go</File></Files>
+      <Behavior>Arrange groups side by side when space allows and stack them on narrow terminals. Any key returns to records; scrolling and display do not access persistence.</Behavior>
+    </M-TUI-HELP>
+    <M-TUI-STARTER>
+      <Name>Application input wrapper</Name>
+      <Type>runtime</Type>
+      <Path>internal/infra/tui/starter/model.go</Path>
+      <Purpose>Load the records model and intercept Ctrl+C and Ctrl+Z as application-wide quit commands before child input handling.</Purpose>
+      <Files><File>internal/infra/tui/starter/model.go</File></Files>
+      <Links><M-TUI-RECORDS /></Links>
+      <Behavior>Ctrl+C and Ctrl+Z emit quit outside help. In help every key, including both control shortcuts, is delegated so it returns to records rather than quitting.</Behavior>
+    </M-TUI-STARTER>
+  </GD-MAIN>
 </GraceGraphDocument>
