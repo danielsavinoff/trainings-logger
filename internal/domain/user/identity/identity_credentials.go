@@ -6,11 +6,11 @@ import (
 )
 
 type IdentityCredentials struct {
-	IdentityID            string
-	AccessTokenEncrypted  string
-	RefreshTokenEncrypted string
-	AccessTokenExpiresAt  time.Time
-	UpdatedAt             time.Time
+	IdentityID            string    `json:"identity_id"`
+	AccessTokenEncrypted  string    `json:"access_token_encrypted"`
+	RefreshTokenEncrypted string    `json:"refresh_token_encrypted"`
+	AccessTokenExpiresAt  time.Time `json:"access_token_expires_at"`
+	UpdatedAt             time.Time `json:"updated_at"`
 }
 
 func NewIdentityCredentials(

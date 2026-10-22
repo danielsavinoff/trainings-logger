@@ -3,8 +3,8 @@ package identity
 import "strings"
 
 type Identity struct {
-	ID       string
-	Provider Provider
+	ID       string   `json:"id"`
+	Provider Provider `json:"provider"`
 }
 
 func NewIdentity(
