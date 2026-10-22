@@ -1,0 +1,33 @@
+<GraceChangeSpec graceVersion="4.0" status="applied">
+  <C-DROPBOX-CONTENT-REQUEST-FIX>
+    <Summary>Correct Dropbox content requests and permission diagnostics within the previously approved save/load work.</Summary>
+    <Problem>After successful Chrome authorization, save/load report HTTP 400. Downloads incorrectly include the upload Content-Type header, and plain-text HTTP 400 scope failures lose their actionable explanation.</Problem>
+    <Goals>
+      <Goal>Send Dropbox download requests without a Content-Type header or body while retaining binary upload requests.</Goal>
+      <Goal>Recognize documented permission failures and distinguish unresolved request failures without exposing provider response bodies.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>Preserve encrypted credentials, PKCE, token refresh, transfer bounds, atomic restore, and existing keyboard behavior.</Constraint>
+      <Constraint>Do not access the real user database or Dropbox account during automated verification.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>Change Safari configuration, OAuth flow, remote backup format, or local persistence.</NonGoal>
+      <NonGoal>Claim that the upload failure is diagnosed from its status alone.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>Downloads omit Content-Type and send an empty body; uploads retain application/octet-stream and snapshot bytes.</Criterion>
+      <Criterion>HTTP 400 documented scope failures show the required file permission and relinking instructions; unknown responses remain sanitized and include HTTP status.</Criterion>
+      <Criterion>A real local HTTP server rejects the old download request and verifies a successful save/load round trip with corrected requests.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas><M-INFRA-DROPBOX-STATE /></AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>go test ./...</ExpectedCommand>
+      <ExpectedCommand>go vet ./...</ExpectedCommand>
+      <ExpectedEvidence>Deterministic HTTP wire-contract and sanitized permission-error regressions, without live credentials.</ExpectedEvidence>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>The user's explicit approval and execution instruction for C-DROPBOX-SAVE-LOAD covers correcting demonstrated application defects in those same requests. This is sequential corrective work, with no additional product scope.</Assumption>
+      <Assumption>The user confirms consent succeeds in Chrome; Safari failure remains browser-specific and outside this correction.</Assumption>
+    </Assumptions>
+  </C-DROPBOX-CONTENT-REQUEST-FIX>
+</GraceChangeSpec>

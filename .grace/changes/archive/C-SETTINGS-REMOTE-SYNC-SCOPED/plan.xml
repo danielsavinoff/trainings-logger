@@ -1,0 +1,312 @@
+<GraceChangePlan graceVersion="4.0" status="superseded">
+  <C-SETTINGS-REMOTE-SYNC-SCOPED>
+    <Replacement>C-SETTINGS-REMOTE-SYNC-FINAL-SCOPE</Replacement>
+    <IntentSummary>Continue the approved settings and remote-sync implementation and explicitly scope both source and destination paths for prior GRACE bundle moves.</IntentSummary>
+    <BaselineAssertions>
+      <MustExist>
+        <Value>AGENTS.md</Value>
+        <Value>cmd/cli/bootstrap.go</Value>
+        <Value>internal/app/ports/transaction_runner.go</Value>
+        <Value>internal/domain/user/preferences/preferences.go</Value>
+        <Value>internal/domain/user/preferences/preferences_repository.go</Value>
+        <Value>internal/infra/persistence/sqlite/preferences_repository.go</Value>
+        <Value>internal/infra/tui/app.go</Value>
+        <Value>internal/infra/tui/starter/model.go</Value>
+        <Value>internal/infra/tui/views/records_update.go</Value>
+        <Value>internal/infra/tui/views/records_help.go</Value>
+        <Value>internal/infra/tui/views/help.go</Value>
+        <Value>migrations/sqlite/20260927094609_initial.up.sql</Value>
+        <Value>.grace/graph/index.xml</Value>
+        <Value>.grace/graph/main.xml</Value>
+        <Value>.grace/verification/index.xml</Value>
+        <Value>.grace/verification/main.xml</Value>
+        <Value>.grace/changes/archive/C-VIM-RECORDS-JUMPS/spec.xml</Value>
+        <Value>.grace/changes/archive/C-VIM-RECORDS-JUMPS/plan.xml</Value>
+        <Value>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC/spec.xml</Value>
+        <Value>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC/plan.xml</Value>
+        <Value>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-RECONCILED/spec.xml</Value>
+        <Value>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-RECONCILED/plan.xml</Value>
+      </MustExist>
+      <MustNotExist>
+        <Value>internal/domain/user/identity/identity.go</Value>
+        <Value>internal/infra/tui/views/preferences.go</Value>
+        <Value>internal/infra/tui/views/sync.go</Value>
+        <Value>migrations/sqlite/20261004160000_identity_sync.up.sql</Value>
+        <Value>migrations/sqlite/20261004160000_identity_sync.down.sql</Value>
+      </MustNotExist>
+      <MustContain>
+        <File>internal/domain/user/preferences/preferences.go</File>
+        <Text>WeightUnit shared.WeightUnit</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/records_update.go</File>
+        <Text>case "s":</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/help.go</File>
+        <Text>{key: "home/gg", explanation: "first row"}</Text>
+      </MustContain>
+      <MustContain>
+        <File>AGENTS.md</File>
+        <Text>prefer familiar Vim-style bindings</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/changes/archive/C-VIM-RECORDS-JUMPS/spec.xml</File>
+        <Text>&lt;Replacement&gt;C-SETTINGS-REMOTE-SYNC&lt;/Replacement&gt;</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC/spec.xml</File>
+        <Text>&lt;Replacement&gt;C-SETTINGS-REMOTE-SYNC-SCOPED&lt;/Replacement&gt;</Text>
+      </MustContain>
+    </BaselineAssertions>
+    <TargetAssertions>
+      <MustExist>
+        <Value>internal/domain/user/identity/identity.go</Value>
+        <Value>internal/domain/user/identity/identity_repository.go</Value>
+        <Value>internal/infra/persistence/sqlite/identity_repository.go</Value>
+        <Value>internal/infra/tui/views/preferences.go</Value>
+        <Value>internal/infra/tui/views/sync.go</Value>
+        <Value>migrations/sqlite/20261004160000_identity_sync.up.sql</Value>
+        <Value>migrations/sqlite/20261004160000_identity_sync.down.sql</Value>
+        <Value>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-RECONCILED/spec.xml</Value>
+        <Value>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-RECONCILED/plan.xml</Value>
+      </MustExist>
+      <MustContain>
+        <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-RECONCILED/spec.xml</File>
+        <Text>&lt;Replacement&gt;C-SETTINGS-REMOTE-SYNC-SCOPED&lt;/Replacement&gt;</Text>
+      </MustContain>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-TUI-RECORDS</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-TUI-HELP</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-TUI-STARTER</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-TUI-PREFERENCES-SYNC</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-DOMAIN-IDENTITY</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-DOMAIN-USER-PREFERENCES</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-APP-REMOTE-STATE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-INFRA-PERSISTENCE-SQLITE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-TUI-RECORDS</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-TUI-HELP</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-TUI-PREFERENCES-SYNC</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-DOMAIN-IDENTITY</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-APP-REMOTE-STATE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-INFRA-PERSISTENCE-SQLITE</Anchor>
+      </MustOwn>
+      <MustVerify>
+        <Module>M-TUI-RECORDS</Module>
+        <Module>M-TUI-HELP</Module>
+        <Module>M-TUI-PREFERENCES-SYNC</Module>
+        <Module>M-DOMAIN-IDENTITY</Module>
+        <Module>M-APP-REMOTE-STATE</Module>
+        <Module>M-INFRA-PERSISTENCE-SQLITE</Module>
+      </MustVerify>
+      <MustContain>
+        <File>internal/infra/tui/views/records_navigation_test.go</File>
+        <Text>TestPreferencesAndSyncNavigation</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/persistence/sqlite/identity_repository_test.go</File>
+        <Text>TestIdentityRepository</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/help_test.go</File>
+        <Text>home/gg</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/graph/main.xml</File>
+        <Text>Preferences and Sync views</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/verification/main.xml</File>
+        <Text>TestPreferencesAndSyncNavigation</Text>
+      </MustContain>
+      <MustPassCommand>
+        <Command budgetSeconds="30">go test ./...</Command>
+        <Command budgetSeconds="15">go vet ./...</Command>
+      </MustPassCommand>
+    </TargetAssertions>
+    <DurableScope>
+      <GraphAnchors>
+        <M-TUI-RECORDS />
+        <M-TUI-HELP />
+        <M-TUI-STARTER />
+        <M-TUI-PREFERENCES-SYNC />
+        <M-DOMAIN-IDENTITY />
+        <M-DOMAIN-USER-PREFERENCES />
+        <M-APP-REMOTE-STATE />
+        <M-INFRA-PERSISTENCE-SQLITE />
+      </GraphAnchors>
+      <VerificationAnchors>
+        <V-M-TUI-RECORDS />
+        <V-M-TUI-HELP />
+        <V-M-TUI-PREFERENCES-SYNC />
+        <V-M-DOMAIN-IDENTITY />
+        <V-M-APP-REMOTE-STATE />
+        <V-M-INFRA-PERSISTENCE-SQLITE />
+      </VerificationAnchors>
+      <GraphDocuments>
+        <GD-MAIN />
+      </GraphDocuments>
+      <VerificationDocuments>
+        <VD-MAIN />
+      </VerificationDocuments>
+    </DurableScope>
+    <ObservedWriteScope>
+      <File>.grace/changes/active/C-VIM-RECORDS-JUMPS/spec.xml</File>
+      <File>.grace/changes/active/C-VIM-RECORDS-JUMPS/plan.xml</File>
+      <File>.grace/changes/archive/C-VIM-RECORDS-JUMPS/spec.xml</File>
+      <File>.grace/changes/archive/C-VIM-RECORDS-JUMPS/plan.xml</File>
+      <File>.grace/changes/active/C-SETTINGS-REMOTE-SYNC/spec.xml</File>
+      <File>.grace/changes/active/C-SETTINGS-REMOTE-SYNC/plan.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC/spec.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC/plan.xml</File>
+      <File>.grace/changes/active/C-SETTINGS-REMOTE-SYNC-RECONCILED/spec.xml</File>
+      <File>.grace/changes/active/C-SETTINGS-REMOTE-SYNC-RECONCILED/plan.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-RECONCILED/spec.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-RECONCILED/plan.xml</File>
+      <File>migrations/sqlite/20261004160000_identity_sync.up.sql</File>
+      <File>migrations/sqlite/20261004160000_identity_sync.down.sql</File>
+      <File>internal/domain/user/identity/identity.go</File>
+      <File>internal/domain/user/identity/identity_repository.go</File>
+      <File>internal/domain/user/identity/identity_credentials.go</File>
+      <File>internal/domain/user/identity/identity_credentials_repository.go</File>
+      <File>internal/domain/user/preferences/preferences.go</File>
+      <File>internal/domain/user/preferences/preferences_repository.go</File>
+      <File>internal/app/ports/remote_state.go</File>
+      <File>internal/app/command/update_preferences.go</File>
+      <File>internal/infra/persistence/sqlite/identity_repository.go</File>
+      <File>internal/infra/persistence/sqlite/identity_credentials_repository.go</File>
+      <File>internal/infra/persistence/sqlite/identity_repository_test.go</File>
+      <File>internal/infra/tui/app.go</File>
+      <File>internal/infra/tui/starter/model.go</File>
+      <File>internal/infra/tui/starter/model_test.go</File>
+      <File>internal/infra/tui/views/records.go</File>
+      <File>internal/infra/tui/views/records_keys.go</File>
+      <File>internal/infra/tui/views/records_update.go</File>
+      <File>internal/infra/tui/views/records_view.go</File>
+      <File>internal/infra/tui/views/records_help.go</File>
+      <File>internal/infra/tui/views/help.go</File>
+      <File>internal/infra/tui/views/help_test.go</File>
+      <File>internal/infra/tui/views/preferences.go</File>
+      <File>internal/infra/tui/views/preferences_test.go</File>
+      <File>internal/infra/tui/views/sync.go</File>
+      <File>internal/infra/tui/views/sync_test.go</File>
+      <File>internal/infra/tui/views/records_navigation_test.go</File>
+      <File>cmd/cli/bootstrap.go</File>
+      <File>.grace/graph/index.xml</File>
+      <File>.grace/graph/main.xml</File>
+      <File>.grace/verification/index.xml</File>
+      <File>.grace/verification/main.xml</File>
+      <File>.grace/changes/archive/C-VIM-RECORDS-JUMPS/spec.xml</File>
+      <File>.grace/changes/archive/C-VIM-RECORDS-JUMPS/plan.xml</File>
+    </ObservedWriteScope>
+    <ImplementationPlan>
+      <T-001>
+        <Title>Apply shared spacing to help and align records hints</Title>
+        <DependsOn></DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Apply the existing one-row vertical and two-column horizontal panel padding around the complete help view, accounting for the reduced inner dimensions on resize.</Criterion>
+          <Criterion>Align records footer hints to the left edge of the padded content; retain their current wording, colors, and responsive wrapping.</Criterion>
+          <Criterion>Add rendering checks for the outer inset and left alignment at wide and compact terminal sizes.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./internal/infra/tui/views -run 'TestHelpRendering|TestRecordsCompactFooter'</Command>
+        </Verification>
+      </T-001>
+      <T-002>
+        <Title>Add identity domain and SQLite credential storage</Title>
+        <DependsOn></DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Add identity and credential domain types with string IDs and a Dropbox provider enum, plus repository interfaces for identity and credentials.</Criterion>
+          <Criterion>Add a reversible SQLite migration for identities and one identity_credentials row per identity, with the requested encrypted token, expiry, and update fields and a cascading identity foreign key.</Criterion>
+          <Criterion>Implement SQLite repositories and tests for identity and credential round trips, provider validation, and missing or invalid references.</Criterion>
+          <Criterion>Treat token fields as opaque encrypted values; do not add encryption or OAuth behavior.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./internal/infra/persistence/sqlite</Command>
+        </Verification>
+      </T-002>
+      <T-003>
+        <Title>Define preferences and remote-state application contracts</Title>
+        <DependsOn></DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Add an application operation for saving a selected weight preference through the existing repository and transaction pattern.</Criterion>
+          <Criterion>Define application contracts to store and load a complete remote-state snapshot containing exercises, sets, and preferences while excluding identities and credentials.</Criterion>
+          <Criterion>Expose those operations through TUI application bindings so screens can use real or test implementations.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./internal/app/command ./internal/app/ports</Command>
+        </Verification>
+      </T-003>
+      <T-004>
+        <Title>Add Preferences and Sync views and route shortcuts</Title>
+        <DependsOn>T-001, T-003</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Route p to Preferences and s to Sync outside dialogs/help, while preserving ge/gs and existing row navigation. Restore records state when leaving either view.</Criterion>
+          <Criterion>Show g, kg, and lb in Preferences, persist the selected value, and reflect it in records behavior.</Criterion>
+          <Criterion>Show remote store and load actions in Sync and call the application contracts when configured; otherwise show unavailable without changing local data.</Criterion>
+          <Criterion>Document p and s in help and cover responsive view rendering, actions, errors, return behavior, and unchanged gs routing with tests.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./internal/infra/tui/views ./internal/infra/tui/starter</Command>
+        </Verification>
+      </T-004>
+      <T-005>
+        <Title>Update GRACE projections and verify the integrated change</Title>
+        <DependsOn>T-002, T-004</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Update graph and verification indexes and routed documents for the records/help routing, preferences/sync UI, identity domain, remote-state ports, and SQLite identity persistence.</Criterion>
+          <Criterion>Run the full test suite and vet with normal validation; review snapshots and migration up/down behavior. Do not use snapshot regeneration during final checks.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./...</Command>
+          <Command>go vet ./...</Command>
+        </Verification>
+      </T-005>
+    </ImplementationPlan>
+    <ExecutionNotes>
+      <Note>The previous approved C-VIM-RECORDS-JUMPS plan overlapped the help module and was superseded by this change with a Replacement reference. This scope includes source and destination paths for all superseded bundle moves. Its existing gg/G behavior remains part of the baseline.</Note>
+      <Note>Reference-host baseline checks measured go test ./... at approximately 0.20 seconds and go vet ./... at approximately 0.20 seconds with warm build caches. Budgets include substantial recompilation headroom.</Note>
+      <Note>This approved plan replaces C-SETTINGS-REMOTE-SYNC and C-SETTINGS-REMOTE-SYNC-RECONCILED, carrying their requirements forward while accounting for all bundle move paths.</Note>
+    </ExecutionNotes>
+  </C-SETTINGS-REMOTE-SYNC-SCOPED>
+</GraceChangePlan>

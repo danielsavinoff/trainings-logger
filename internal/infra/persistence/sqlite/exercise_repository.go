@@ -57,8 +57,22 @@ func (r *ExerciseRepository) FindAll(
 
 	var result []exercise.Exercise
 	for rows.Next() {
-		var e exercise.Exercise
-		if err := rows.Scan(&e.ID, &e.Name, &e.BodyWeightShare); err != nil {
+		var id string
+		var name string
+		var bodyWeightShare float32
+		if err := rows.Scan(
+			&id,
+			&name,
+			&bodyWeightShare,
+		); err != nil {
+			return nil, err
+		}
+		e, err := exercise.NewExercise(
+			id,
+			name,
+			bodyWeightShare,
+		)
+		if err != nil {
 			return nil, err
 		}
 

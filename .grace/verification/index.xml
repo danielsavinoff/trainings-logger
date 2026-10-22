@@ -6,6 +6,17 @@
         <V-M-TUI-RECORDS />
         <V-M-TUI-HELP />
         <V-M-TUI-STARTER />
+        <V-M-TUI-QUESTIONNAIRE />
+        <V-M-APP-QUESTIONNAIRE />
+        <V-M-INFRA-DROPBOX-AUTH />
+        <V-M-DOMAIN-IDENTITY />
+        <V-M-DOMAIN-USER-PREFERENCES />
+        <V-M-APP-REMOTE-STATE />
+        <V-M-INFRA-DROPBOX-STATE />
+        <V-M-INFRA-PERSISTENCE-SQLITE />
+        <V-M-DOMAIN-EXERCISE />
+        <V-M-DOMAIN-SET />
+        <V-M-DOMAIN-SHARED-WEIGHT />
       </Owns>
     </VD-MAIN>
   </VerificationDocuments>

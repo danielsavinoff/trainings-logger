@@ -1,0 +1,60 @@
+<GraceChangeSpec graceVersion="4.0" status="superseded">
+  <C-SETTINGS-REMOTE-SYNC-SCOPED>
+    <Replacement>C-SETTINGS-REMOTE-SYNC-FINAL-SCOPE</Replacement>
+    <Summary>Continue the approved settings and remote-sync change with complete observed scope for superseded bundle moves.</Summary>
+    <Problem>The TUI has no dedicated preferences or sync destinations, and the domain and persistence layers do not represent remote identities or transferable application state.</Problem>
+    <Goals>
+      <Goal>Inset the help view using the records panels' existing padding and left-align the records footer hints.</Goal>
+      <Goal>Open a Preferences view with p and a Sync view with s while preserving the existing gs focus-sets sequence.</Goal>
+      <Goal>Allow users to select and persist the existing g, kg, and lb weight units from Preferences.</Goal>
+      <Goal>Define a Dropbox-capable identity domain and persist identities and encrypted credential fields in SQLite.</Goal>
+      <Goal>Define application ports for storing the local application state remotely and loading it from remote storage; expose those actions in the Sync view.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>Use the existing records panel spacing of one row vertically and two columns horizontally as the help view's outer padding, adapting to small terminal sizes.</Constraint>
+      <Constraint>Do not intercept p or s inside dialogs or while help owns input; preserve records navigation including ge and gs.</Constraint>
+      <Constraint>Use string IDs consistent with current domain entities and follow the embedded SQLite migration mechanism.</Constraint>
+      <Constraint>The transferable application state contains exercises, sets, and preferences. Identity credentials remain local and are excluded from remote state.</Constraint>
+      <Constraint>The identity credential fields store opaque encrypted values; encryption and token acquisition are outside this change.</Constraint>
+      <Constraint>When no remote adapter is configured, the Sync view reports that remote operations are unavailable and does not alter local state.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>Implement Dropbox OAuth, API transport, token encryption or decryption, or a concrete remote-state adapter.</NonGoal>
+      <NonGoal>Change workout record behavior, database contents beyond additive identity tables, or existing dialog interactions.</NonGoal>
+      <NonGoal>Add identity management or account-connection flows to the TUI.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>The help view has the same responsive outer inset as records panels, and the records footer hints are left-aligned rather than centered.</Criterion>
+      <Criterion>Pressing p outside a dialog/help opens Preferences; its g, kg, and lb choices persist and are reflected by records operations.</Criterion>
+      <Criterion>Pressing s outside a dialog/help opens Sync, while gs continues to focus the sets panel. The help view documents p and s.</Criterion>
+      <Criterion>The Sync view offers remote store and load actions through application ports. Without a configured adapter it clearly reports unavailable and leaves local data unchanged.</Criterion>
+      <Criterion>The identity domain has a string ID and a provider enum containing Dropbox. SQLite migrations create identities and identity_credentials, with identity_id, access_token_encrypted, refresh_token_encrypted, access_token_expires_at, and updated_at credential fields and an identity relationship.</Criterion>
+      <Criterion>Tests cover responsive help padding, left-aligned hints, preferences selection and persistence, p/s routing with gs preservation, identity repository persistence, and Sync unavailable behavior.</Criterion>
+      <Criterion>GRACE graph and verification projections describe the added UI, identity, and remote-state boundaries; project tests and static checks pass.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-TUI-RECORDS />
+      <M-TUI-HELP />
+      <M-TUI-STARTER />
+      <M-TUI-PREFERENCES-SYNC />
+      <M-DOMAIN-IDENTITY />
+      <M-DOMAIN-USER-PREFERENCES />
+      <M-APP-REMOTE-STATE />
+      <M-INFRA-PERSISTENCE-SQLITE />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>go test ./...</ExpectedCommand>
+      <ExpectedCommand>go vet ./...</ExpectedCommand>
+      <ExpectedEvidence>Interaction and rendering tests cover help spacing and hint alignment, Preferences/Sync navigation, preserved shortcuts, and weight preference persistence.</ExpectedEvidence>
+      <ExpectedEvidence>Domain and SQLite tests verify identity/provider and credential round trips, migration constraints, and remote-state port behavior without a Dropbox network dependency.</ExpectedEvidence>
+      <ExpectedEvidence>Final GRACE assertions validate the updated graph and verification projections, with normal tests run without snapshot regeneration.</ExpectedEvidence>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>The current supported weight units g, kg, and lb are the choices shown in Preferences.</Assumption>
+      <Assumption>Each identity has at most one credentials row; credentials use identity_id as their foreign key and cascade deletion with their identity.</Assumption>
+      <Assumption>Dropbox OAuth, encryption mechanisms, and a concrete remote adapter will be handled in a later change. This change defines ports and views but does not perform network synchronization.</Assumption>
+      <Assumption>p and s are available from the records view outside dialogs and help; the existing gs chord retains priority as focus-sets.</Assumption>
+      <Assumption>This approved replacement carries forward C-SETTINGS-REMOTE-SYNC requirements and accounts for source and destination paths for superseded bundle moves.</Assumption>
+    </Assumptions>
+  </C-SETTINGS-REMOTE-SYNC-SCOPED>
+</GraceChangeSpec>

@@ -1,0 +1,55 @@
+<GraceChangeSpec graceVersion="4.0" status="applied">
+  <C-STARTUP-QUESTIONNAIRE>
+    <Summary>Replace Preferences and Sync with a full-screen first-start questionnaire and r to reopen it, with explicit optional answers, real Dropbox authorization, and descriptive repository names.</Summary>
+    <Problem>Startup reads currently create a default preferences row, preventing reliable first-start detection. Separate Preferences and Sync screens do not provide the requested optional setup flow, and identity repository interfaces have generic names.</Problem>
+    <Goals>
+      <Goal>Show the questionnaire automatically only when no preferences row exists, and allow r to reopen it from records.</Goal>
+      <Goal>Ask for preferred weight unit using an input and choices 1. kg and 2. lb, with an Enter-to-skip/default hint; then ask for identity provider with choice 1. Dropbox and an Enter-to-skip/no-save hint.</Goal>
+      <Goal>Implement real Dropbox account authorization with a browser and code input, using PKCE and encrypted credential persistence.</Goal>
+      <Goal>Persist only explicitly answered settings after completion. Skipping all questions or cancelling without completion does not write application rows.</Goal>
+      <Goal>Remove the separate Preferences and Sync screens and their p/s routing, and name each repository interface and implementation after its corresponding model and file.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>Keep the questionnaire in the alternate terminal screen and fill available dimensions with main-view border styling and spacing; support resizing and compact/tiny sizes.</Constraint>
+      <Constraint>Reading missing preferences returns a valid in-memory kg default and a presence flag without inserting a row. Existing saved preferences suppress automatic startup setup.</Constraint>
+      <Constraint>Answers remain pending until questionnaire completion. Empty Enter skips that question. All skipped answers produce zero preference, identity, and credential writes. r opens the flow without deleting existing preferences or accounts.</Constraint>
+      <Constraint>Skipping the unit on reset retains the existing saved unit. An explicit unit selection is applied to displayed weights only after successful completion. Skipping provider leaves identities and credentials unchanged.</Constraint>
+      <Constraint>Dropbox uses the authorization-code flow with S256 PKCE, offline access, and an app key configured through the environment. Omit redirect_uri so the user can paste the displayed authorization code; no client secret is embedded.</Constraint>
+      <Constraint>OAuth code exchange runs asynchronously with cancellation and timeout. Browser-launch failure offers the authorization URL for manual opening. Invalid input, denied authorization, missing configuration, token errors, and persistence failures leave the questionnaire usable without silently creating identity rows.</Constraint>
+      <Constraint>Use the verified Dropbox account ID. Encrypt access and refresh tokens using authenticated encryption and a local key file with restricted permissions; do not show, log, or save plaintext tokens. Save selected preferences and linked account/credentials together through the transaction runner.</Constraint>
+      <Constraint>Rename identity.Repository to IdentityRepository and identity.CredentialsRepository to IdentityCredentialsRepository. Give the SQLite credential repository its own corresponding file and type; use existing transaction context for all identity and credential operations.</Constraint>
+      <Constraint>Preserve existing workout data, domain constructor invariants, ge/gs navigation, dialogs, help-return behavior, and global quit shortcuts. Use repository Go formatting and semantic markup conventions.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>Implement remote workout synchronization, additional providers, token refresh scheduling, or an account-management screen.</NonGoal>
+      <NonGoal>Delete existing preferences or identities when opening/resetting the questionnaire, or create a preferences row merely to mark skipped setup complete.</NonGoal>
+      <NonGoal>Perform a real Dropbox authorization using the developer's account during automated verification or alter the real user database.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>A fresh temporary database opens the full-screen unit question before records, shows 1. kg and 2. lb and the skip/default hint, then shows the Dropbox provider question and skip/no-save hint.</Criterion>
+      <Criterion>Entering no answers and pressing Enter through both questions opens records with kg in memory and leaves preferences, identities, and credentials tables empty. The questionnaire appears again on a later startup while preferences remain absent.</Criterion>
+      <Criterion>Entering 1 or 2 and confirming with Enter selects kg or lb. After finishing the provider step, only the explicit unit is saved if provider is skipped; later startups go directly to records.</Criterion>
+      <Criterion>Choosing Dropbox starts browser authorization and a code-entry step. A successful mocked exchange saves the verified account and encrypted credentials; denied, invalid, cancelled, or failed exchanges do not save them. Linking alone does not create a skipped preferences row.</Criterion>
+      <Criterion>r reopens the questionnaire from records and retains browsing state. Skipping or cancelling it preserves existing settings and identities, and no r/p/s actions intercept dialog text or help-owned input.</Criterion>
+      <Criterion>Preferences and Sync view files, obsolete tests, and p/s help entries are removed. Help documents r to reopen setup; ge/gs remain intact.</Criterion>
+      <Criterion>Every repository interface and implementation has a descriptive model-prefixed Repository name matching its source file, including IdentityRepository and IdentityCredentialsRepository.</Criterion>
+      <Criterion>Tests cover row-presence detection, write-free defaults, skip/partial/complete/reset/cancel flows, invalid input, exact full-screen bounds and cursor position, PKCE/token exchange/encryption, atomic rollback, and preserved records navigation.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-TUI-RECORDS /><M-TUI-HELP /><M-TUI-STARTER /><M-TUI-PREFERENCES-SYNC /><M-TUI-QUESTIONNAIRE />
+      <M-DOMAIN-USER-PREFERENCES /><M-DOMAIN-IDENTITY /><M-INFRA-PERSISTENCE-SQLITE /><M-APP-QUESTIONNAIRE /><M-INFRA-DROPBOX-AUTH />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>go test ./...</ExpectedCommand>
+      <ExpectedCommand>go vet ./...</ExpectedCommand>
+      <ExpectedEvidence>Temporary SQLite integration tests verify first-start/reset behavior, absence of implicit writes, selective persistence, and rollback without opening the real database.</ExpectedEvidence>
+      <ExpectedEvidence>Injected browser and HTTP transport tests verify the real PKCE flow and encrypted storage without contacting a live account. Rendering and interaction tests verify full-screen setup, resize/cursor bounds, and record-state retention.</ExpectedEvidence>
+      <ExpectedEvidence>Review intentional help snapshot changes, then validate normally without UPDATE_GOLDEN=1. GRACE final assertions verify replacement projections and descriptive repository names.</ExpectedEvidence>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>The user explicitly approves specification and plan creation and sequential execution in this request.</Assumption>
+      <Assumption>Dropbox app configuration is supplied via DROPBOX_APP_KEY. A manual code-entry flow avoids requiring a registered local callback URL.</Assumption>
+      <Assumption>Skipping all setup means no preferences row is created, so automatic setup repeats on subsequent starts until an explicit unit preference is saved.</Assumption>
+    </Assumptions>
+  </C-STARTUP-QUESTIONNAIRE>
+</GraceChangeSpec>

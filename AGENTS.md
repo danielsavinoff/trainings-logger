@@ -94,6 +94,13 @@ These paths describe the observed package layout. The initial GRACE graph and ve
 - In every `.go` source file, including tests, write calls to functions or methods with more than one argument using one argument per line, with a trailing comma after the final argument.
 - Separate distinct logical blocks of Go code with a blank line. Keep statements that form one continuous operation together.
 
+## Domain Model Construction
+
+- Initialize every domain model through a constructor function whose name starts with `New` and validates all model invariants before returning the model.
+- Keep each domain model in its own source file with its constructor in that file; keep each enum in its own source file.
+- Do not add `Valid` methods as a substitute for constructor validation. Call the constructor at persistence and application boundaries instead of assembling domain model values directly.
+- Define domain errors only in package's errors.go file.
+
 ## Keyboard Shortcuts
 
 - When adding keyboard shortcuts, prefer familiar Vim-style bindings where they fit the existing interaction model.

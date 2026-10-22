@@ -1,8 +1,8 @@
 // START_MODULE_CONTRACT
-//   PURPOSE: Render the active records or help screen.
+//   PURPOSE: Render records, help, or setup in the alternate screen.
 //   SCOPE: Terminal modes, panels, dialog layers, and cursor.
-//   DEPENDS: M-TUI-HELP
-//   LINKS: M-TUI-RECORDS, V-M-TUI-RECORDS
+//   DEPENDS: M-TUI-HELP, M-TUI-QUESTIONNAIRE
+//   LINKS: M-TUI-RECORDS, V-M-TUI-RECORDS, M-TUI-QUESTIONNAIRE
 //   MAP_MODE: SUMMARY
 // END_MODULE_CONTRACT
 //
@@ -21,6 +21,9 @@ import (
 
 // START_BLOCK_RECORDS_VIEW
 func (m RecordsModel) View() tea.View {
+	if m.questionnaire != nil {
+		return m.questionnaireView()
+	}
 	if m.showingHelp {
 		v := tea.NewView(m.help.view())
 		v.AltScreen = true

@@ -6,8 +6,14 @@ type ExerciseWeight struct {
 	Weight shared.Weight `json:"weight"`
 }
 
-func NewExerciseWeight(value float64, unit shared.WeightUnit) (ExerciseWeight, error) {
-	weight, err := shared.NewWeight(value, unit)
+func NewExerciseWeight(
+	value float64,
+	unit shared.WeightUnit,
+) (ExerciseWeight, error) {
+	weight, err := shared.NewWeight(
+		value,
+		unit,
+	)
 	if err != nil {
 		return ExerciseWeight{}, err
 	}

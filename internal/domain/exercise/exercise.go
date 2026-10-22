@@ -16,6 +16,10 @@ func NewExercise(
 	name string,
 	bodyWeightShare float32,
 ) (Exercise, error) {
+	if strings.TrimSpace(id) == "" {
+		return Exercise{}, ErrEmptyExerciseID
+	}
+
 	name = strings.TrimSpace(name)
 	if name == "" {
 		return Exercise{}, ErrEmptyExerciseName

@@ -1,0 +1,154 @@
+<GraceChangePlan graceVersion="4.0" status="superseded">
+  <C-PREFERENCES-SYNC-FULL-SCREEN>
+    <Replacement>C-PREFERENCES-SYNC-FULL-SCREEN-RECONCILED</Replacement>
+    <IntentSummary>Keep Preferences and Sync in the alternate terminal screen and expand their shared frame to the available terminal area using main-view styling, with responsive bounds and preserved interactions.</IntentSummary>
+    <BaselineAssertions>
+      <MustExist>
+        <Value>internal/infra/tui/views/preferences.go</Value>
+        <Value>internal/infra/tui/views/sync.go</Value>
+        <Value>internal/infra/tui/views/records_view.go</Value>
+        <Value>internal/infra/tui/views/preferences_test.go</Value>
+        <Value>internal/infra/tui/views/sync_test.go</Value>
+        <Value>internal/infra/tui/views/records_navigation_test.go</Value>
+        <Value>internal/infra/tui/components/styles.go</Value>
+        <Value>.grace/graph/main.xml</Value>
+        <Value>.grace/verification/main.xml</Value>
+      </MustExist>
+      <MustContain>
+        <File>internal/infra/tui/views/preferences.go</File>
+        <Text>func (m RecordsModel) secondaryFrame(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/sync.go</File>
+        <Text>return m.secondaryFrame(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/records_view.go</File>
+        <Text>return tea.NewView(m.preferencesView())</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/records_navigation_test.go</File>
+        <Text>func TestPreferencesAndSyncNavigation(</Text>
+      </MustContain>
+      <MustOwn><Owner>GD-MAIN</Owner><Anchor>M-TUI-RECORDS</Anchor></MustOwn>
+      <MustOwn><Owner>GD-MAIN</Owner><Anchor>M-TUI-PREFERENCES-SYNC</Anchor></MustOwn>
+      <MustOwn><Owner>VD-MAIN</Owner><Anchor>V-M-TUI-RECORDS</Anchor></MustOwn>
+      <MustOwn><Owner>VD-MAIN</Owner><Anchor>V-M-TUI-PREFERENCES-SYNC</Anchor></MustOwn>
+    </BaselineAssertions>
+    <TargetAssertions>
+      <MustExist>
+        <Value>internal/infra/tui/views/preferences.go</Value>
+        <Value>internal/infra/tui/views/sync.go</Value>
+        <Value>internal/infra/tui/views/records_view.go</Value>
+      </MustExist>
+      <MustContain>
+        <File>internal/infra/tui/views/preferences_test.go</File>
+        <Text>func TestPreferencesFullScreenLayout(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/sync_test.go</File>
+        <Text>func TestSyncFullScreenLayout(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/records_navigation_test.go</File>
+        <Text>func TestSecondaryScreenStatePreservation(</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/graph/main.xml</File>
+        <Text>Preferences and Sync remain in the alternate terminal screen</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/verification/main.xml</File>
+        <Text>TestPreferencesFullScreenLayout</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/verification/main.xml</File>
+        <Text>TestSyncFullScreenLayout</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/verification/main.xml</File>
+        <Text>TestSecondaryScreenStatePreservation</Text>
+      </MustContain>
+      <MustOwn><Owner>GD-MAIN</Owner><Anchor>M-TUI-RECORDS</Anchor></MustOwn>
+      <MustOwn><Owner>GD-MAIN</Owner><Anchor>M-TUI-PREFERENCES-SYNC</Anchor></MustOwn>
+      <MustOwn><Owner>VD-MAIN</Owner><Anchor>V-M-TUI-RECORDS</Anchor></MustOwn>
+      <MustOwn><Owner>VD-MAIN</Owner><Anchor>V-M-TUI-PREFERENCES-SYNC</Anchor></MustOwn>
+      <MustVerify><Module>M-TUI-RECORDS</Module><Module>M-TUI-PREFERENCES-SYNC</Module></MustVerify>
+      <MustPassCommand>
+        <Command budgetSeconds="120">go test ./...</Command>
+        <Command budgetSeconds="60">go vet ./...</Command>
+      </MustPassCommand>
+    </TargetAssertions>
+    <DurableScope>
+      <GraphAnchors><M-TUI-RECORDS /><M-TUI-PREFERENCES-SYNC /></GraphAnchors>
+      <VerificationAnchors><V-M-TUI-RECORDS /><V-M-TUI-PREFERENCES-SYNC /></VerificationAnchors>
+      <GraphDocuments><GD-MAIN /></GraphDocuments>
+      <VerificationDocuments><VD-MAIN /></VerificationDocuments>
+    </DurableScope>
+    <ObservedWriteScope>
+      <File>internal/infra/tui/views/records_view.go</File>
+      <File>internal/infra/tui/views/preferences.go</File>
+      <File>internal/infra/tui/views/sync.go</File>
+      <File>internal/infra/tui/views/preferences_test.go</File>
+      <File>internal/infra/tui/views/sync_test.go</File>
+      <File>internal/infra/tui/views/records_navigation_test.go</File>
+      <File>.grace/graph/main.xml</File>
+      <File>.grace/verification/main.xml</File>
+      <File>.grace/changes/active/C-PREFERENCES-SYNC-FULL-SCREEN/spec.xml</File>
+      <File>.grace/changes/active/C-PREFERENCES-SYNC-FULL-SCREEN/plan.xml</File>
+      <File>.grace/changes/archive/C-PREFERENCES-SYNC-FULL-SCREEN/spec.xml</File>
+      <File>.grace/changes/archive/C-PREFERENCES-SYNC-FULL-SCREEN/plan.xml</File>
+    </ObservedWriteScope>
+    <ImplementationPlan>
+      <T-001>
+        <Title>Render Preferences and Sync as full-screen destinations</Title>
+        <DependsOn></DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>In records_view.go, enable alternate-screen mode for both secondary views, preserving the main view's terminal configuration where appropriate.</Criterion>
+          <Criterion>In the shared secondaryFrame helper, derive the usable panel dimensions from the current terminal size minus outer spacing and the border/padding frame, and explicitly expand the panel in both dimensions.</Criterion>
+          <Criterion>Reuse BaseStyle and PanelSpacing, with the active-panel border color and one-row vertical and two-column horizontal outer spacing when space permits.</Criterion>
+          <Criterion>Keep each existing title, action list, status message, and return hint; account for their space before rendering, constrain long text and tiny terminal output to bounds, and recompute dimensions on resize.</Criterion>
+          <Criterion>Keep preference persistence, weight conversion, remote dispatch, and keyboard handlers unchanged. Preserve existing edits and synchronize file-local module contracts, maps, and block anchors for edited governed files.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./internal/infra/tui/views ./internal/infra/tui/starter</Command>
+        </Verification>
+      </T-001>
+      <T-002>
+        <Title>Verify full-screen dimensions, terminal modes, and retained interactions</Title>
+        <DependsOn>T-001</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Add TestPreferencesFullScreenLayout and TestSyncFullScreenLayout in their existing test files. Assert alternate-screen mode and exact expanded border extents and outer spacing at 100x40, rather than checking only that output is smaller than the terminal.</Criterion>
+          <Criterion>Exercise wide, compact, and tiny sizes, including zero dimensions, and resize while each screen is active. Assert output bounds, useful content where space allows, and long/error status bounds.</Criterion>
+          <Criterion>Add TestSecondaryScreenStatePreservation in records_navigation_test.go. From both active panels, verify p/s entry and q/esc return, alternate-screen mode across transitions, and retained selections, page, and scroll state without unintended record actions.</Criterion>
+          <Criterion>Retain coverage for preference persistence and visible weight conversion, Sync store/load dispatch and unavailable/error/success status messages, and the existing ge/gs shortcuts.</Criterion>
+          <Criterion>Use repository-compliant Go formatting and meaningful rendering or interaction assertions. Do not regenerate existing records/help/dialog snapshots, because their intended rendering is outside this change.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./internal/infra/tui/views ./internal/infra/tui/starter</Command>
+        </Verification>
+      </T-002>
+      <T-003>
+        <Title>Apply scoped GRACE updates and verify the integrated change</Title>
+        <DependsOn>T-002</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Update only M-TUI-RECORDS and M-TUI-PREFERENCES-SYNC in graph/main.xml to describe alternate-screen routing and responsive expanded frames. Include the sentence fragment required by TargetAssertions.</Criterion>
+          <Criterion>Update only V-M-TUI-RECORDS and V-M-TUI-PREFERENCES-SYNC in verification/main.xml with the layout, terminal-mode, resize, and state-preservation scenarios and named test evidence.</Criterion>
+          <Criterion>Retain existing graph and verification ownership; no index or context writes are required. Preserve all unrelated projection entries.</Criterion>
+          <Criterion>Pass the full test suite and vet without UPDATE_GOLDEN=1, and use selected target and final GRACE checks externally through grace-execute before applying and archiving this bundle.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./...</Command>
+          <Command>go vet ./...</Command>
+        </Verification>
+      </T-003>
+    </ImplementationPlan>
+    <ExecutionNotes>
+      <Note>The user explicitly approved both specification and plan on 2026-10-10. This plan implements only the approved full-screen scope; application source is not changed during planning.</Note>
+      <Note>Execute sequentially. C-DOMAIN-MODEL-CONSTRUCTORS currently overlaps the same source files, graph anchors, verification anchors, and routed documents. Complete and archive that predecessor through its own approved lifecycle before this plan's observed source writes; do not run both plans concurrently or edit the predecessor's approved plan.</Note>
+      <Note>After the predecessor is archived, rerun the active-baseline and selected baseline checks and inspect the attributable workspace delta before execution. Preserve unrelated existing edits. If the baseline or final-scope gate is stale, use the GRACE recovery/replacement workflow rather than broadening this approved plan in place.</Note>
+      <Note>The current Go suite and vet passed on the reference host during planning, with the slowest reported package taking approximately 7.4 seconds. Explicit 120-second test and 60-second vet budgets allow recompilation headroom. The target gate contains only the whole suite and vet; task commands are intermediate checks.</Note>
+      <Note>Current assertions are pre-write baseline evidence only. Target and final checks belong after source and durable writes; no GRACE lifecycle command is nested inside MustPassCommand.</Note>
+    </ExecutionNotes>
+  </C-PREFERENCES-SYNC-FULL-SCREEN>
+</GraceChangePlan>

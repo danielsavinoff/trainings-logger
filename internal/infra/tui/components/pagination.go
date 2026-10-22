@@ -11,8 +11,18 @@ func NewPaginator() paginator.Model {
 	p.Type = paginator.Dots
 	p.ActiveDot = lipgloss.NewStyle().Foreground(ActivePanelColor).Render("● ")
 	p.InactiveDot = lipgloss.NewStyle().Foreground(BaseStyle.GetBorderTopForeground()).Render("○ ")
-	p.KeyMap.PrevPage = key.NewBinding(key.WithKeys("left", "h", "pgup", "b"))
-	p.KeyMap.NextPage = key.NewBinding(key.WithKeys("right", "l", "pgdown", "f", "space"))
+	p.KeyMap.PrevPage = key.NewBinding(key.WithKeys(
+		"left",
+		"h",
+		"pgup",
+		"b",
+	))
+	p.KeyMap.NextPage = key.NewBinding(key.WithKeys(
+		"right",
+		"pgdown",
+		"f",
+		"space",
+	))
 
 	return p
 }

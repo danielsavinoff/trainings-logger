@@ -8,7 +8,6 @@ import (
 	"github.com/danielsavinoff/trainings-logger/internal/infra/tui/components"
 )
 
-// Item bounds exclude borders, padding, column headings, pagination and help.
 func (m RecordsModel) itemBounds(p panel) image.Rectangle {
 	x := components.PanelSpacing.GetPaddingLeft() + components.BaseStyle.GetBorderLeftSize() + components.BaseStyle.GetPaddingLeft()
 	y := components.PanelSpacing.GetPaddingTop() + components.BaseStyle.GetBorderTopSize() + components.BaseStyle.GetPaddingTop() + 1

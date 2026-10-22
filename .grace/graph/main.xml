@@ -4,7 +4,7 @@
       <Name>Records screen and help routing</Name>
       <Type>runtime</Type>
       <Path>internal/infra/tui/views</Path>
-      <Purpose>Retain workout browsing state, route records/dialog/help input, render the active screen, and display compact help/quit hints with errors.</Purpose>
+      <Purpose>Retain workout browsing state, route records/dialog/help and questionnaire input, render the active screen in the alternate terminal screen, and display compact help/load/save/quit hints and asynchronous transfer outcomes.</Purpose>
       <Files>
         <File>internal/infra/tui/views/records.go</File>
         <File>internal/infra/tui/views/records_update.go</File>
@@ -12,10 +12,11 @@
         <File>internal/infra/tui/views/records_layout.go</File>
         <File>internal/infra/tui/views/records_keys.go</File>
         <File>internal/infra/tui/views/records_help.go</File>
+        <File>internal/infra/tui/views/records_transfer.go</File>
       </Files>
-      <Links><M-TUI-HELP /></Links>
-      <Boundary>Ownership is limited to these six governed files. Existing data, persistence, dialog, and navigation helpers in the package remain outside this initial markup coverage.</Boundary>
-      <Behavior>? opens help outside dialogs; any key returns to records without running its records action. The borderless ? / q hints use the inactive-border color. gg selects the first row in the active panel, while G selects its last row; this applies to exercises and sets. Home and End remain supported.</Behavior>
+      <Links><M-TUI-HELP /><M-TUI-QUESTIONNAIRE /><M-APP-REMOTE-STATE /></Links>
+      <Boundary>Ownership is limited to these seven governed files. Existing data, persistence, dialog, and navigation helpers in the package remain outside this initial markup coverage.</Boundary>
+      <Behavior>r opens optional setup without resetting stored data. Missing preferences open setup automatically; saved preferences open records. ? opens help outside dialogs; any key returns to records without running its records action. s saves a Dropbox snapshot and l restores it, with progress and error status in the borderless inactive-color footer. Transfer ownership rejects stale messages and overlapping actions; restore blocks unsafe editing and refreshes records while retaining selected IDs where available. Right arrow, Page Down, f, and Space retain next-page navigation. gg selects the first row in the active panel, while G selects its last row; this applies to exercises and sets. Home and End remain supported.</Behavior>
     </M-TUI-RECORDS>
     <M-TUI-HELP>
       <Name>Records keyboard help</Name>
@@ -23,7 +24,7 @@
       <Path>internal/infra/tui/views/help.go</Path>
       <Purpose>Render titled shortcut groups in responsive columns with aligned descriptions and active-color keys, without an extra page heading.</Purpose>
       <Files><File>internal/infra/tui/views/help.go</File></Files>
-      <Behavior>Arrange groups side by side when space allows and stack them on narrow terminals. Document home/gg for the first row and end/G for the last row. Any key returns to records; scrolling and display do not access persistence.</Behavior>
+      <Behavior>Arrange groups side by side when space allows and stack them on narrow terminals. Document home/gg for the first row and end/G for the last row. Document r for reset setup and l/s for direct load/save; p is removed and l no longer pages right. Any key returns to records; scrolling and display do not access persistence.</Behavior>
     </M-TUI-HELP>
     <M-TUI-STARTER>
       <Name>Application input wrapper</Name>
@@ -34,5 +35,152 @@
       <Links><M-TUI-RECORDS /></Links>
       <Behavior>Ctrl+C and Ctrl+Z emit quit outside help. In help every key, including both control shortcuts, is delegated so it returns to records rather than quitting.</Behavior>
     </M-TUI-STARTER>
+    <M-TUI-QUESTIONNAIRE>
+      <Name>First-start and reset questionnaire</Name>
+      <Type>runtime</Type>
+      <Path>internal/infra/tui/views/questionnaire.go</Path>
+      <Purpose>Collect optional weight-unit and Dropbox identity answers before opening records, with staged persistence and main-view full-screen styling.</Purpose>
+      <Files><File>internal/infra/tui/views/questionnaire.go</File></Files>
+      <Links><M-TUI-RECORDS /><M-APP-QUESTIONNAIRE /><M-DOMAIN-USER-PREFERENCES /><M-INFRA-DROPBOX-AUTH /></Links>
+      <Behavior>Missing preferences trigger setup; r reopens it without deleting anything. Numeric input selects kg/lb then Dropbox; empty Enter skips. Answers are saved together only after completion, and skipping everything performs no writes. Esc cancels pending work and restores records. Browser authorization and code exchange run asynchronously, stale messages are ignored, and failures allow retry. ctrl+r replaces the authorization session with a fresh attempt; ctrl+o opens a bounded full-screen scrollable URL view with j/k and Escape to return. A full-screen active border uses main-view outer spacing and internal padding, clipping body content before drawing the frame and positioning the native input cursor within terminal bounds.</Behavior>
+    </M-TUI-QUESTIONNAIRE>
+    <M-APP-QUESTIONNAIRE>
+      <Name>Questionnaire completion and authorization port</Name>
+      <Type>application</Type>
+      <Path>internal/app</Path>
+      <Purpose>Define optional authorized-account answers and persist explicit preferences, identity, and encrypted credentials atomically.</Purpose>
+      <Files>
+        <File>internal/app/command/complete_questionnaire.go</File>
+        <File>internal/app/ports/identity_linker.go</File>
+        <File>internal/infra/tui/app.go</File>
+        <File>cmd/cli/bootstrap.go</File>
+      </Files>
+      <Links><M-DOMAIN-USER-PREFERENCES /><M-DOMAIN-IDENTITY /><M-INFRA-PERSISTENCE-SQLITE /><M-INFRA-DROPBOX-AUTH /></Links>
+      <Behavior>Validate models through constructors and matching identity IDs. An empty completion returns before opening a transaction; explicit answers save through one transaction and roll back together on failure. Bootstrap wires real Dropbox linking using DROPBOX_APP_KEY and a private key in the user configuration directory.</Behavior>
+    </M-APP-QUESTIONNAIRE>
+    <M-INFRA-DROPBOX-AUTH>
+      <Name>Dropbox authorization and credential encryption</Name>
+      <Type>infrastructure</Type>
+      <Path>internal/infra/dropbox</Path>
+      <Purpose>Authorize a real Dropbox account with S256 PKCE and protect access and refresh tokens before persistence.</Purpose>
+      <Files>
+        <File>internal/infra/dropbox/linker.go</File>
+        <File>internal/infra/dropbox/browser.go</File>
+        <File>internal/infra/dropbox/credentials.go</File>
+      </Files>
+      <Links><M-APP-QUESTIONNAIRE /><M-DOMAIN-IDENTITY /></Links>
+      <Behavior>Open a browser authorization URL with offline access, account_info.read, files.content.read, and files.content.write scopes, and explicit reapproval, omit redirect_uri and client secret, and exchange the pasted authorization code with its verifier. Requests are bounded and cancellation-aware; browser-launch failure exposes the URL and HTTP errors are sanitized. DROPBOX_BROWSER optionally chooses a browser using literal process arguments. The reported Safari consent-page failure remains unconfirmed and is not attributed to its /1 URL prefix. Use the verified token-response account ID. AES-GCM ciphertext binds each token to its account and role; a private 32-byte local key is created only after successful exchange.</Behavior>
+    </M-INFRA-DROPBOX-AUTH>
+    <M-DOMAIN-IDENTITY>
+      <Name>Remote provider identity</Name>
+      <Type>domain</Type>
+      <Path>internal/domain/user/identity</Path>
+      <Purpose>Represent Dropbox identity and opaque encrypted credential values with repository ports.</Purpose>
+      <Files>
+        <File>internal/domain/user/identity/identity.go</File>
+        <File>internal/domain/user/identity/provider.go</File>
+        <File>internal/domain/user/identity/errors.go</File>
+        <File>internal/domain/user/identity/identity_repository.go</File>
+        <File>internal/domain/user/identity/identity_credentials.go</File>
+        <File>internal/domain/user/identity/identity_credentials_repository.go</File>
+      </Files>
+      <Behavior>Identity IDs are strings, the provider enum is Dropbox, and credentials contain encrypted token fields and timestamps. Ports use model-specific IdentityRepository and IdentityCredentialsRepository names in corresponding source files. The credentials port supports deterministic latest-account lookup.</Behavior>
+    </M-DOMAIN-IDENTITY>
+    <M-DOMAIN-USER-PREFERENCES>
+      <Name>User preferences</Name>
+      <Type>domain</Type>
+      <Path>internal/domain/user/preferences</Path>
+      <Purpose>Represent persisted weight unit selection through its repository.</Purpose>
+      <Files>
+        <File>internal/domain/user/preferences/preferences.go</File>
+        <File>internal/domain/user/preferences/preferences_repository.go</File>
+        <File>internal/domain/user/preferences/preferences_test.go</File>
+        <File>internal/app/command/update_preferences.go</File>
+        <File>internal/app/query/get_preferences.go</File>
+      </Files>
+      <Behavior>Preference updates use the application transaction runner and keep weight unit selection persisted. Reads return an existence flag and a validated in-memory kg default without creating a row; only explicit saves create preferences.</Behavior>
+    </M-DOMAIN-USER-PREFERENCES>
+    <M-APP-REMOTE-STATE>
+      <Name>Validated workout backup application</Name>
+      <Type>application</Type>
+      <Path>internal/app</Path>
+      <Purpose>Validate versioned workout snapshots and orchestrate local export, Dropbox save, and atomic local restore.</Purpose>
+      <Files>
+        <File>internal/app/ports/remote_state.go</File>
+        <File>internal/app/ports/remote_state_repository.go</File>
+        <File>internal/app/command/remote_state.go</File>
+      </Files>
+      <Links><M-DOMAIN-EXERCISE /><M-DOMAIN-SET /><M-DOMAIN-USER-PREFERENCES /><M-INFRA-DROPBOX-STATE /><M-INFRA-PERSISTENCE-SQLITE /></Links>
+      <Behavior>Schema version 1 contains exercises, sets, and optional preferences, excluding local accounts and credentials. Reconstruct models through constructors and reject invalid versions, duplicate IDs/names, missing exercise references, invalid timestamps, and weights outside SQLite limits. Save exports a consistent local snapshot before network upload. Load downloads and validates before replacing local workout tables in one transaction.</Behavior>
+    </M-APP-REMOTE-STATE>
+    <M-INFRA-DROPBOX-STATE>
+      <Name>Dropbox workout snapshot adapter</Name>
+      <Type>infrastructure</Type>
+      <Path>internal/infra/dropbox/state_store.go</Path>
+      <Purpose>Upload and download /trainlog.json with locally encrypted credentials, public-client token refresh, and bounded payloads.</Purpose>
+      <Files><File>internal/infra/dropbox/state_store.go</File></Files>
+      <Links><M-INFRA-DROPBOX-AUTH /><M-DOMAIN-IDENTITY /><M-APP-REMOTE-STATE /></Links>
+      <Behavior>Select the latest credential update deterministically, verify the Dropbox account, and decrypt tokens inside this adapter. Refresh expired access tokens using the app key and refresh token, saving encrypted replacements before transfer; retry one provider-reported expired-token response. Upload overwrites the fixed backup path and sends application/octet-stream; download sends no Content-Type or request body and strictly decodes and validates a snapshot with a 16 MiB limit. Bounded HTTP requests report missing accounts/backups, permissions, and network errors without exposing response bodies or credentials. Required-scope HTTP 400/401 failures tolerate provider app-ID wording and single/double quoted scope names. JSON missing_scope tags and documented legacy endpoint-authorization failures also name the required file permission with App Console submission and relinking instructions. Unclassified HTTP 400 failures retain only a bounded hexadecimal Dropbox request ID.</Behavior>
+    </M-INFRA-DROPBOX-STATE>
+    <M-INFRA-PERSISTENCE-SQLITE>
+      <Name>SQLite workout and identity persistence</Name>
+      <Type>infrastructure</Type>
+      <Path>internal/infra/persistence/sqlite</Path>
+      <Purpose>Persist workouts, preferences, identities, and encrypted credentials; export consistent snapshots and atomically restore workout state.</Purpose>
+      <Files>
+        <File>internal/infra/persistence/sqlite/identity_repository.go</File>
+        <File>internal/infra/persistence/sqlite/identity_credentials_repository.go</File>
+        <File>internal/infra/persistence/sqlite/identity_repository_test.go</File>
+        <File>internal/infra/persistence/sqlite/exercise_repository.go</File>
+        <File>internal/infra/persistence/sqlite/set_repository.go</File>
+        <File>internal/infra/persistence/sqlite/preferences_repository.go</File>
+        <File>internal/infra/persistence/sqlite/preferences_repository_test.go</File>
+        <File>internal/infra/persistence/sqlite/remote_state_repository.go</File>
+        <File>internal/infra/persistence/sqlite/remote_state_repository_test.go</File>
+        <File>migrations/sqlite/20261004160000_identity_sync.up.sql</File>
+        <File>migrations/sqlite/20261004160000_identity_sync.down.sql</File>
+      </Files>
+      <Behavior>Credential rows cascade with identities, and stored token values remain opaque. Identity and credential operations use the transaction-context executor. Missing preference reads return defaults and false without writing. Snapshot export uses a transaction and preserves missing preferences; validated restore replaces exercise/set/preference rows atomically while retaining identities and credentials. Latest credential selection orders by update timestamp and identity ID.</Behavior>
+    </M-INFRA-PERSISTENCE-SQLITE>
+    <M-DOMAIN-EXERCISE>
+      <Name>Exercise domain model</Name>
+      <Type>domain</Type>
+      <Path>internal/domain/exercise</Path>
+      <Purpose>Construct validated exercises with non-empty identifiers, names, and bounded body-weight shares.</Purpose>
+      <Files>
+        <File>internal/domain/exercise/exercise.go</File>
+        <File>internal/domain/exercise/errors.go</File>
+        <File>internal/domain/exercise/exercise_repository.go</File>
+        <File>internal/domain/exercise/exercise_test.go</File>
+      </Files>
+      <Behavior>NewExercise validates all exercise invariants; persistence reads reconstruct models through that constructor.</Behavior>
+    </M-DOMAIN-EXERCISE>
+    <M-DOMAIN-SET>
+      <Name>Workout set domain model</Name>
+      <Type>domain</Type>
+      <Path>internal/domain/exercise/set</Path>
+      <Purpose>Construct validated sets and exercise weights with required IDs and valid weight/rest values.</Purpose>
+      <Files>
+        <File>internal/domain/exercise/set/set.go</File>
+        <File>internal/domain/exercise/set/exercise_weight.go</File>
+        <File>internal/domain/exercise/set/errors.go</File>
+        <File>internal/domain/exercise/set/set_repository.go</File>
+        <File>internal/domain/exercise/set/set_test.go</File>
+      </Files>
+      <Behavior>NewSet and NewExerciseWeight enforce invariants; SQLite reads use constructors.</Behavior>
+    </M-DOMAIN-SET>
+    <M-DOMAIN-SHARED-WEIGHT>
+      <Name>Shared weight values and units</Name>
+      <Type>domain</Type>
+      <Path>internal/domain/shared</Path>
+      <Purpose>Represent validated weights and weight-unit enum values.</Purpose>
+      <Files>
+        <File>internal/domain/shared/weight.go</File>
+        <File>internal/domain/shared/weight_unit.go</File>
+        <File>internal/domain/shared/errors.go</File>
+        <File>internal/domain/shared/weight_test.go</File>
+      </Files>
+      <Behavior>NewWeight and NewWeightUnit validate values; unit enums remain in their own source file.</Behavior>
+    </M-DOMAIN-SHARED-WEIGHT>
   </GD-MAIN>
 </GraceGraphDocument>

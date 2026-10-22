@@ -5,7 +5,6 @@ import (
 	tea "charm.land/bubbletea/v2"
 )
 
-// DialogState describes the action requested by the user.
 type DialogState int
 
 const (
@@ -14,7 +13,6 @@ const (
 	DialogClosed
 )
 
-// Dialog is a reusable modal form with normal and insert modes.
 type Dialog struct {
 	State         DialogState
 	keys          dialogKeyMap
@@ -32,10 +30,8 @@ func NewDialog(title string, fields []Field) *Dialog {
 
 func (d *Dialog) Init() tea.Cmd { return d.focus(0) }
 
-// Value returns the current text of a field.
 func (d *Dialog) Value(index int) string { return d.fields[index].input.Value() }
 
-// Invalid keeps the form open and focuses the field that needs correction.
 func (d *Dialog) Invalid(field int, message string) tea.Cmd {
 	d.State = DialogOpen
 	d.err = message

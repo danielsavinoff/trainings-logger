@@ -1,16 +1,16 @@
 // START_MODULE_CONTRACT
-//   PURPOSE: Construct records state and retain help state.
-//   SCOPE: Records model types, initial queries, and construction.
-//   DEPENDS: M-TUI-HELP
+//   PURPOSE: Construct records state and open first-start setup when preferences are absent.
+//   SCOPE: Records model types, initial queries, and help/setup/transfer state.
+//   DEPENDS: M-TUI-HELP, M-TUI-QUESTIONNAIRE, M-DOMAIN-USER-PREFERENCES, M-APP-REMOTE-STATE
 //   LINKS: M-TUI-RECORDS, V-M-TUI-RECORDS
 //   MAP_MODE: SUMMARY
 // END_MODULE_CONTRACT
 //
 // START_MODULE_MAP
-//   RecordsModel - retain records, dialogs, and help state
-//   NewRecordsModel - load preferences and records
+//   RecordsModel - retain records, dialogs, help, setup, and transfer state
+//   NewRecordsModel - load records and use preference presence to select startup setup
 //   newRecordsModel - construct initial browsing state
-//   Init - initialize the records model
+//   Init - focus startup questionnaire input when present
 // END_MODULE_MAP
 
 package views
@@ -58,10 +58,15 @@ type RecordsModel struct {
 	dialog         *recordDialog
 	help           helpModel
 	showingHelp    bool
+	questionnaire  *questionnaireModel
+	transfer       *recordTransfer
+	transferStatus string
 }
 
-// NewRecordsModel loads the initial records and creates the terminal UI.
-func NewRecordsModel(ctx context.Context, app tui.App) (RecordsModel, error) {
+func NewRecordsModel(
+	ctx context.Context,
+	app tui.App,
+) (RecordsModel, error) {
 	store := &recordStore{App: app}
 	prefs, err := store.GetPreferences.Handle(
 		ctx,
@@ -102,6 +107,9 @@ func NewRecordsModel(ctx context.Context, app tui.App) (RecordsModel, error) {
 	}
 
 	m.refreshTimeline()
+	if !prefs.Exists {
+		m.openQuestionnaire()
+	}
 
 	return m, nil
 }
@@ -123,6 +131,10 @@ func newRecordsModel(exercises []exerciseRecord) RecordsModel {
 }
 
 func (m RecordsModel) Init() tea.Cmd {
+	if m.questionnaire != nil {
+		return m.questionnaire.input.Focus()
+	}
+
 	return nil
 }
 

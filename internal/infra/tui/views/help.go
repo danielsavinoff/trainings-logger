@@ -47,6 +47,9 @@ var recordsHelp = []helpGroup{
 			{key: "ge", explanation: "focus exercises"},
 			{key: "gs", explanation: "focus sets"},
 			{key: "enter", explanation: "focus sets from exercises"},
+			{key: "r", explanation: "reset setup"},
+			{key: "l", explanation: "load"},
+			{key: "s", explanation: "save"},
 		},
 	},
 
@@ -54,7 +57,7 @@ var recordsHelp = []helpGroup{
 		title: "Pages",
 		entries: []helpEntry{
 			{key: "←/h/pgup/b", explanation: "previous page"},
-			{key: "→/l/pgdown/f/space", explanation: "next page"},
+			{key: "→/pgdown/f/space", explanation: "next page"},
 			{key: "u/ctrl+u", explanation: "half page up"},
 			{key: "ctrl+d", explanation: "half page down"},
 			{key: "home/gg", explanation: "first row"},
@@ -84,7 +87,10 @@ type helpModel struct {
 	width, height int
 }
 
-func newHelpModel(width, height int) helpModel {
+func newHelpModel(
+	width int,
+	height int,
+) helpModel {
 	m := helpModel{viewport: viewport.New()}
 	m.resize(
 		width,
@@ -93,7 +99,10 @@ func newHelpModel(width, height int) helpModel {
 	return m
 }
 
-func (m *helpModel) resize(width, height int) {
+func (m *helpModel) resize(
+	width int,
+	height int,
+) {
 	m.width, m.height = max(
 		0,
 		width,
@@ -101,14 +110,20 @@ func (m *helpModel) resize(width, height int) {
 		0,
 		height,
 	)
-	m.viewport.SetWidth(m.width)
-	m.viewport.SetHeight(m.height)
+	m.viewport.SetWidth(max(
+		0,
+		m.width-components.PanelSpacing.GetHorizontalFrameSize(),
+	))
+	m.viewport.SetHeight(max(
+		0,
+		m.height-components.PanelSpacing.GetVerticalFrameSize(),
+	))
 	m.viewport.SetContent(m.content())
 }
 
 func (m helpModel) content() string {
 	gap := 4
-	colWidth := (m.width - gap) / 2
+	colWidth := (m.viewport.Width() - gap) / 2
 	if colWidth >= 40 {
 		left := strings.Join(
 			[]string{m.renderGroup(
@@ -146,7 +161,7 @@ func (m helpModel) content() string {
 			groups,
 			m.renderGroup(
 				group,
-				m.width,
+				m.viewport.Width(),
 			),
 		)
 	}
@@ -156,7 +171,10 @@ func (m helpModel) content() string {
 	)
 }
 
-func (m helpModel) renderGroup(group helpGroup, width int) string {
+func (m helpModel) renderGroup(
+	group helpGroup,
+	width int,
+) string {
 	width = max(
 		1,
 		width,
@@ -245,10 +263,10 @@ func (m helpModel) update(msg tea.Msg) helpModel {
 }
 
 func (m helpModel) view() string {
-	if m.width == 0 || m.height == 0 {
+	if m.width <= 4 || m.height <= 2 {
 		return ""
 	}
-	return m.viewport.View()
+	return components.PanelSpacing.Render(m.viewport.View())
 }
 
 // END_BLOCK_HELP_VIEW

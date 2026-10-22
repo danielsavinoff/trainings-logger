@@ -20,14 +20,19 @@ func (s *recordStore) saveExercise(
 	record exerciseRecord,
 	editing bool,
 ) (exerciseRecord, error) {
-	e := exercise.Exercise{
-		ID:              record.id,
-		Name:            record.name,
-		BodyWeightShare: record.bodyWeightShare,
-	}
+	var e exercise.Exercise
 
 	if editing {
-		err := s.UpdateExercise.Handle(
+		validated, err := exercise.NewExercise(
+			record.id,
+			record.name,
+			record.bodyWeightShare,
+		)
+		if err != nil {
+			return record, err
+		}
+		e = validated
+		err = s.UpdateExercise.Handle(
 			context.Background(),
 			command.UpdateExercise{
 				ID:              e.ID,
@@ -42,8 +47,8 @@ func (s *recordStore) saveExercise(
 		result, err := s.CreateExercise.Handle(
 			context.Background(),
 			command.CreateExercise{
-				Name:            e.Name,
-				BodyWeightShare: e.BodyWeightShare,
+				Name:            record.name,
+				BodyWeightShare: record.bodyWeightShare,
 			},
 		)
 		if err != nil {
@@ -117,10 +122,14 @@ func (s *recordStore) saveSet(
 		return record, err
 	}
 
-	saved.ExerciseWeight.Weight = shared.Weight{
-		Value: math.Round(grams),
-		Unit:  shared.WeightUnitG,
+	storedWeight, err := shared.NewWeight(
+		math.Round(grams),
+		shared.WeightUnitG,
+	)
+	if err != nil {
+		return record, err
 	}
+	saved.ExerciseWeight.Weight = storedWeight
 
 	return setRecord(saved, unit)
 }

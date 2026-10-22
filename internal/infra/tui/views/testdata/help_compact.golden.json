@@ -1,6 +1,0 @@
-{
-  "Content": "\u001b[1mNavigation\u001b[m                              \n\u001b[38;2;139;164;212m↑/k\u001b[m      move up                        \n\u001b[38;2;139;164;212m↓/j\u001b[m      move down                      \n\u001b[38;2;139;164;212mge\u001b[m       focus exercises                \n\u001b[38;2;139;164;212mgs\u001b[m       focus sets                     \n\u001b[38;2;139;164;212menter\u001b[m    focus sets from exercises      \n                                        \n\u001b[1mPages\u001b[m                                   \n\u001b[38;2;139;164;212m←/h/pgup/b\u001b[m            previous page     \n\u001b[38;2;139;164;212m→/l/pgdown/f/space\u001b[m    next page         \n\u001b[38;2;139;164;212mu/ctrl+u\u001b[m              half page up      \n\u001b[38;2;139;164;212mctrl+d\u001b[m                half page down    ",
-  "Cursor": null,
-  "AltScreen": true,
-  "MouseMode": 1
-}

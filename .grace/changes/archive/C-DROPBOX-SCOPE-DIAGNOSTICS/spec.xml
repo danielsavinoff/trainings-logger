@@ -1,0 +1,34 @@
+<GraceChangeSpec graceVersion="4.0" status="applied">
+  <C-DROPBOX-SCOPE-DIAGNOSTICS>
+    <Summary>Recognize modern Dropbox missing-scope responses within the approved save/load correction.</Summary>
+    <Problem>The saved token passes a live read-only check/user request, while files/download returns HTTP 400 with a required-scope error. The handler requires an exact legacy sentence prefix and hides the useful explanation behind a request ID.</Problem>
+    <Goals>
+      <Goal>Recognize required-scope errors regardless of provider app-ID wording and report the required endpoint permission.</Goal>
+      <Goal>Keep the provider response body and credentials private.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>Preserve upload/download request contracts, encrypted credentials, PKCE, atomic restore, and existing UI behavior.</Constraint>
+      <Constraint>Automated verification uses simulated responses and temporary databases; live read-only diagnosis is separate from tests.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>Change Dropbox App Console permissions or use the account for an upload.</NonGoal>
+      <NonGoal>Infer the specific upload rejection reason solely from a request ID.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>Documented legacy authorization failures and modern required-scope responses produce App Console submission and relinking guidance for the correct file permission.</Criterion>
+      <Criterion>Tests cover app-ID wording, JSON/plain-text errors, unrelated 400 responses, secrecy, and absence of automatic retries.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-INFRA-DROPBOX-STATE />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>go test ./...</ExpectedCommand>
+      <ExpectedCommand>go vet ./...</ExpectedCommand>
+      <ExpectedEvidence>Deterministic permission-error variants and sanitized fallback evidence without live credentials.</ExpectedEvidence>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>The existing explicit approval of save/load execution and its HTTP permission diagnostics covers this correction to the same handler.</Assumption>
+      <Assumption>The read-only live check found missing file-read scope; App Console permission submission and fresh consent are external steps for the user.</Assumption>
+    </Assumptions>
+  </C-DROPBOX-SCOPE-DIAGNOSTICS>
+</GraceChangeSpec>

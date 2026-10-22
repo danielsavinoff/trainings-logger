@@ -1,0 +1,196 @@
+<GraceChangePlan graceVersion="4.0" status="applied">
+  <C-DROPBOX-CONTENT-REQUEST-FIX>
+    <IntentSummary>Sequentially correct and verify the content request defect under the user's existing save/load execution approval.</IntentSummary>
+    <BaselineAssertions>
+      <MustExist>
+        <Value>internal/infra/dropbox/state_store.go</Value>
+        <Value>internal/infra/dropbox/state_store_test.go</Value>
+      </MustExist>
+      <MustContain>
+        <File>internal/infra/dropbox/state_store.go</File>
+        <Text>func contentError(</Text>
+      </MustContain>
+    </BaselineAssertions>
+    <TargetAssertions>
+      <MustContain>
+        <File>internal/infra/dropbox/state_store_test.go</File>
+        <Text>func TestDropboxContentWireContract(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/dropbox/state_store_test.go</File>
+        <Text>func TestDropboxBadRequestDiagnostics(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/dropbox/state_store.go</File>
+        <Text>if operation == "upload" {</Text>
+      </MustContain>
+      <MustVerify>
+        <Module>M-INFRA-DROPBOX-STATE</Module>
+      </MustVerify>
+      <MustPassCommand>
+        <Command budgetSeconds="120">go test ./...</Command>
+        <Command budgetSeconds="60">go vet ./...</Command>
+      </MustPassCommand>
+    </TargetAssertions>
+    <DurableScope>
+      <GraphAnchors>
+        <M-INFRA-DROPBOX-STATE />
+      </GraphAnchors>
+      <VerificationAnchors>
+        <V-M-INFRA-DROPBOX-STATE />
+      </VerificationAnchors>
+      <GraphDocuments>
+        <GD-MAIN />
+      </GraphDocuments>
+      <VerificationDocuments>
+        <VD-MAIN />
+      </VerificationDocuments>
+    </DurableScope>
+    <ObservedWriteScope>
+      <File>internal/infra/dropbox/state_store.go</File>
+      <File>internal/infra/dropbox/state_store_test.go</File>
+      <File>.grace/graph/main.xml</File>
+      <File>.grace/verification/main.xml</File>
+      <File>.grace/changes/active/C-DROPBOX-CONTENT-REQUEST-FIX/spec.xml</File>
+      <File>.grace/changes/active/C-DROPBOX-CONTENT-REQUEST-FIX/plan.xml</File>
+      <File>.grace/changes/archive/C-DROPBOX-CONTENT-REQUEST-FIX/spec.xml</File>
+      <File>.grace/changes/archive/C-DROPBOX-CONTENT-REQUEST-FIX/plan.xml</File>
+      <File>.grace/changes/active/C-DROPBOX-SAVE-LOAD/plan.xml</File>
+      <File>.grace/changes/active/C-DROPBOX-SAVE-LOAD/spec.xml</File>
+      <File>.grace/changes/active/C-VIM-RECORDS-JUMPS/plan.xml</File>
+      <File>.grace/changes/active/C-VIM-RECORDS-JUMPS/spec.xml</File>
+      <File>.grace/changes/archive/C-DOMAIN-MODEL-CONSTRUCTORS/plan.xml</File>
+      <File>.grace/changes/archive/C-DOMAIN-MODEL-CONSTRUCTORS/spec.xml</File>
+      <File>.grace/changes/archive/C-DROPBOX-SAVE-LOAD/plan.xml</File>
+      <File>.grace/changes/archive/C-DROPBOX-SAVE-LOAD/spec.xml</File>
+      <File>.grace/changes/archive/C-PREFERENCES-SYNC-FULL-SCREEN-RECONCILED/plan.xml</File>
+      <File>.grace/changes/archive/C-PREFERENCES-SYNC-FULL-SCREEN-RECONCILED/spec.xml</File>
+      <File>.grace/changes/archive/C-PREFERENCES-SYNC-FULL-SCREEN/plan.xml</File>
+      <File>.grace/changes/archive/C-PREFERENCES-SYNC-FULL-SCREEN/spec.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-FINAL-SCOPE/plan.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-FINAL-SCOPE/spec.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-RECONCILED/plan.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-RECONCILED/spec.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-SCOPED/plan.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-SCOPED/spec.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC/plan.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC/spec.xml</File>
+      <File>.grace/changes/archive/C-STARTUP-QUESTIONNAIRE/plan.xml</File>
+      <File>.grace/changes/archive/C-STARTUP-QUESTIONNAIRE/spec.xml</File>
+      <File>.grace/changes/archive/C-VIM-RECORDS-JUMPS/plan.xml</File>
+      <File>.grace/changes/archive/C-VIM-RECORDS-JUMPS/spec.xml</File>
+      <File>.grace/graph/index.xml</File>
+      <File>.grace/verification/index.xml</File>
+      <File>AGENTS.md</File>
+      <File>README.md</File>
+      <File>cmd/cli/bootstrap.go</File>
+      <File>cmd/cli/bootstrap_test.go</File>
+      <File>internal/app/command/complete_questionnaire.go</File>
+      <File>internal/app/command/complete_questionnaire_test.go</File>
+      <File>internal/app/command/create_set.go</File>
+      <File>internal/app/command/remote_state.go</File>
+      <File>internal/app/command/remote_state_test.go</File>
+      <File>internal/app/command/update_preferences.go</File>
+      <File>internal/app/ports/identity_linker.go</File>
+      <File>internal/app/ports/remote_state.go</File>
+      <File>internal/app/ports/remote_state_repository.go</File>
+      <File>internal/app/ports/remote_state_test.go</File>
+      <File>internal/app/query/get_preferences.go</File>
+      <File>internal/domain/exercise/errors.go</File>
+      <File>internal/domain/exercise/exercise.go</File>
+      <File>internal/domain/exercise/exercise_repository.go</File>
+      <File>internal/domain/exercise/exercise_test.go</File>
+      <File>internal/domain/exercise/set/errors.go</File>
+      <File>internal/domain/exercise/set/exercise_weight.go</File>
+      <File>internal/domain/exercise/set/set.go</File>
+      <File>internal/domain/exercise/set/set_repository.go</File>
+      <File>internal/domain/exercise/set/set_test.go</File>
+      <File>internal/domain/shared/weight.go</File>
+      <File>internal/domain/shared/weight_test.go</File>
+      <File>internal/domain/shared/weight_unit.go</File>
+      <File>internal/domain/user/identity/errors.go</File>
+      <File>internal/domain/user/identity/identity.go</File>
+      <File>internal/domain/user/identity/identity_credentials.go</File>
+      <File>internal/domain/user/identity/identity_credentials_repository.go</File>
+      <File>internal/domain/user/identity/identity_repository.go</File>
+      <File>internal/domain/user/identity/identity_test.go</File>
+      <File>internal/domain/user/identity/provider.go</File>
+      <File>internal/domain/user/preferences/preferences.go</File>
+      <File>internal/domain/user/preferences/preferences_repository.go</File>
+      <File>internal/domain/user/preferences/preferences_test.go</File>
+      <File>internal/infra/dropbox/browser.go</File>
+      <File>internal/infra/dropbox/browser_test.go</File>
+      <File>internal/infra/dropbox/credentials.go</File>
+      <File>internal/infra/dropbox/credentials_test.go</File>
+      <File>internal/infra/dropbox/linker.go</File>
+      <File>internal/infra/dropbox/linker_test.go</File>
+      <File>internal/infra/persistence/sqlite/exercise_repository.go</File>
+      <File>internal/infra/persistence/sqlite/identity_credentials_repository.go</File>
+      <File>internal/infra/persistence/sqlite/identity_repository.go</File>
+      <File>internal/infra/persistence/sqlite/identity_repository_test.go</File>
+      <File>internal/infra/persistence/sqlite/preferences_repository.go</File>
+      <File>internal/infra/persistence/sqlite/preferences_repository_test.go</File>
+      <File>internal/infra/persistence/sqlite/remote_state_repository.go</File>
+      <File>internal/infra/persistence/sqlite/remote_state_repository_test.go</File>
+      <File>internal/infra/persistence/sqlite/set_repository.go</File>
+      <File>internal/infra/tui/app.go</File>
+      <File>internal/infra/tui/components/pagination.go</File>
+      <File>internal/infra/tui/starter/model_test.go</File>
+      <File>internal/infra/tui/views/help.go</File>
+      <File>internal/infra/tui/views/help_test.go</File>
+      <File>internal/infra/tui/views/questionnaire.go</File>
+      <File>internal/infra/tui/views/questionnaire_test.go</File>
+      <File>internal/infra/tui/views/records.go</File>
+      <File>internal/infra/tui/views/records_help.go</File>
+      <File>internal/infra/tui/views/records_help_test.go</File>
+      <File>internal/infra/tui/views/records_keys.go</File>
+      <File>internal/infra/tui/views/records_navigation_test.go</File>
+      <File>internal/infra/tui/views/records_store.go</File>
+      <File>internal/infra/tui/views/records_test.go</File>
+      <File>internal/infra/tui/views/records_transfer.go</File>
+      <File>internal/infra/tui/views/records_transfer_test.go</File>
+      <File>internal/infra/tui/views/records_update.go</File>
+      <File>internal/infra/tui/views/records_view.go</File>
+      <File>internal/infra/tui/views/testdata/compact.golden.json</File>
+      <File>internal/infra/tui/views/testdata/compact_dialog.golden.json</File>
+      <File>internal/infra/tui/views/testdata/exercise_dialog.golden.json</File>
+      <File>internal/infra/tui/views/testdata/help.golden.json</File>
+      <File>internal/infra/tui/views/testdata/help_compact.golden.json</File>
+      <File>internal/infra/tui/views/testdata/insert.golden.json</File>
+      <File>internal/infra/tui/views/testdata/pagination.golden.json</File>
+      <File>internal/infra/tui/views/testdata/records.golden.json</File>
+      <File>internal/infra/tui/views/testdata/set_dialog.golden.json</File>
+      <File>internal/infra/tui/views/testdata/unicode_input.golden.json</File>
+      <File>internal/infra/tui/views/testdata/wide.golden.json</File>
+      <File>migrations/sqlite/20261004160000_identity_sync.down.sql</File>
+      <File>migrations/sqlite/20261004160000_identity_sync.up.sql</File>
+    </ObservedWriteScope>
+    <ImplementationPlan>
+      <T-001>
+        <Title>Correct HTTP content request contracts and permission diagnostics</Title>
+        <DependsOn />
+        <AcceptanceCriteria>
+          <Criterion>Separate upload/download headers, cover actual HTTP requests with a temporary server, and classify known HTTP 400 scope failures without reflecting response bodies.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./internal/infra/dropbox</Command>
+        </Verification>
+      </T-001>
+      <T-002>
+        <Title>Reconcile durable evidence and archive the verified correction</Title>
+        <DependsOn>T-001</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Update only the declared Dropbox state projection and verification entry; validate the final target and archive under the user's existing completed-work archival instruction.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./...</Command>
+          <Command>go vet ./...</Command>
+        </Verification>
+      </T-002>
+    </ImplementationPlan>
+    <ExecutionNotes>
+      <Note>Existing explicit save/load spec and sequential plan approval persists for this correction to the same HTTP requests. No new account action is performed.</Note>
+      <Note>Observed scope also lists inherited uncommitted work for attribution only; implementation writes are limited to the six correction files.</Note>
+    </ExecutionNotes>
+  </C-DROPBOX-CONTENT-REQUEST-FIX>
+</GraceChangePlan>

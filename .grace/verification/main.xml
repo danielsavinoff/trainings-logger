@@ -4,32 +4,136 @@
       <Command>go test ./internal/infra/tui/views</Command>
       <Scenario>Open help from each panel and return with any key without triggering that key's records action; preserve selection, page, scroll position, and existing errors across resizing.</Scenario>
       <Scenario>Help actions and mouse events do not mutate records or access persistence; dialog insert mode retains ? and q as text.</Scenario>
-      <Scenario>Compact and wide snapshots preserve terminal modes and dialog cursors while showing the shortened footer and additional panel space.</Scenario>
+      <Scenario>Compact and wide snapshots preserve terminal modes and dialog cursors while showing help/load/save/quit hints in the inactive-color footer.</Scenario>
       <Scenario>On either active panel, gg selects the first row and G selects the last row; ge and gs continue to change panel focus.</Scenario>
+      <Scenario>Questionnaire transitions retain alternate-screen mode and records selections, pagination, scroll position, and errors; cancelling or completing skipped setup does not trigger records actions.</Scenario>
+      <Scenario>s/l start asynchronous save/load only from records. Transfers prevent overlap and unsafe edits; successful restore refreshes units/data while retaining selected IDs and terminal dimensions.</Scenario>
+      <TraceAssertion>TestRecordsSaveLoadShortcuts and TestRecordsTransferFailuresAndInputOwnership verify temporary-database restore, progress, resize, selected-set retention, missing preference absence, failure preservation, input isolation, and stale-message rejection.</TraceAssertion>
       <TraceAssertion>TestRecordsHelpStatePreservation compares rendered records and browsing state across help transitions and resizing.</TraceAssertion>
       <TraceAssertion>TestRecordsHelpInputIsolation observes zero transaction calls and unchanged records after help input; TestRecordsHelpQuitAndDialogInput checks quit and text-entry routing.</TraceAssertion>
       <TraceAssertion>TestRecordsVimRowJumpShortcuts verifies active-panel first and last row jumps and preserves Home, End, ge, and gs behavior.</TraceAssertion>
+      <TraceAssertion>TestQuestionnaireStatePreservation verifies r entry, escape/skip return, terminal mode continuity, retained state, and consistent pagination after resizing from either active panel.</TraceAssertion>
       <TestFiles>
         <File>internal/infra/tui/views/records_help_test.go</File>
         <File>internal/infra/tui/views/records_test.go</File>
         <File>internal/infra/tui/views/records_navigation_test.go</File>
+        <File>internal/infra/tui/views/records_transfer_test.go</File>
+        <File>internal/infra/tui/views/questionnaire_test.go</File>
       </TestFiles>
     </V-M-TUI-RECORDS>
     <V-M-TUI-HELP>
       <Command>go test ./internal/infra/tui/views -run '^TestHelp'</Command>
-      <Scenario>Render titled, tab-aligned groups without a separate page title at compact, wide, tiny, and zero sizes; use active-panel color for keys and inactive-border color for the borderless records hints.</Scenario>
+      <Scenario>Render titled, tab-aligned groups without a separate page title using one-row vertical and two-column horizontal padding; use active-panel color for keys and inactive-border color for borderless records hints.</Scenario>
       <Scenario>Place groups side by side when space allows, stack on compact widths, and reach all content by scrolling.</Scenario>
-      <Scenario>Render the first-row home/gg binding and last-row end/G binding in the help page.</Scenario>
+      <Scenario>Render home/gg, end/G, r reset setup, l load, and s save in help; l is absent from next-page bindings and separate Preferences/Sync destinations remain removed.</Scenario>
       <TraceAssertion>TestHelpRendering checks content, display bounds, and hints; TestHelpScrollingAndResize checks content accessibility and scroll behavior.</TraceAssertion>
-      <TraceAssertion>TestHelpRendering checks that home/gg and end/G are documented.</TraceAssertion>
+      <TraceAssertion>TestHelpRendering checks that home/gg, end/G, reset setup, and save/load are documented and obsolete screen/pagination bindings are absent.</TraceAssertion>
       <TestFiles><File>internal/infra/tui/views/help_test.go</File></TestFiles>
     </V-M-TUI-HELP>
     <V-M-TUI-STARTER>
       <Command>go test ./internal/infra/tui/starter</Command>
       <Scenario>Ctrl+C and Ctrl+Z emit quit in records and dialogs; every key delegates from help and returns to records.</Scenario>
-      <Scenario>Exercise records, help, and open-dialog states with the actual model and a temporary SQLite database; q remains text in dialogs.</Scenario>
+      <Scenario>Exercise records, help, open-dialog, and questionnaire states with the actual model and a temporary SQLite database; q remains text in dialogs and setup.</Scenario>
       <TraceAssertion>TestGlobalQuitShortcuts asserts tea.QuitMsg and zero child calls for control shortcuts; TestApplicationQuitContexts checks all shortcuts across real application states.</TraceAssertion>
       <TestFiles><File>internal/infra/tui/starter/model_test.go</File></TestFiles>
     </V-M-TUI-STARTER>
+    <V-M-TUI-QUESTIONNAIRE>
+      <Command>go test ./internal/infra/tui/... ./cmd/cli</Command>
+      <Scenario>A missing preferences row opens unit setup, then provider setup; skipped answers and cancelled setup leave application tables untouched. An explicitly saved preference suppresses later automatic setup.</Scenario>
+      <Scenario>r reopens setup while retaining records selection, pages, offsets, errors, and existing settings. Dialog and help input retain ownership; p no longer opens a screen and s remains a records-only save action.</Scenario>
+      <Scenario>Unit/provider/code steps fill the usable terminal with main-view spacing and a complete border; compact/tiny/zero layouts remain bounded. Native input cursor stays in bounds and code input is masked.</Scenario>
+      <Scenario>Async authorization and saves support invalid input, failure retry, cancellation, and stale-message rejection; successful completion updates visible weights. ctrl+r retries with a fresh session; ctrl+o exposes the complete scrollable URL at compact sizes.</Scenario>
+      <TraceAssertion>TestQuestionnaireFirstStart and TestQuestionnaireResetAndSelectivePersistence use temporary SQLite databases to assert presence-based startup and selective/no-write completion.</TraceAssertion>
+      <TraceAssertion>TestQuestionnaireDropboxLinkingAndSkippedPreferences verifies optional preferences and verified-account persistence; TestQuestionnaireInvalidInputAndAuthorizationFailure checks invalid answers and failed exchange.</TraceAssertion>
+      <TraceAssertion>TestQuestionnaireFullScreenLayout verifies exact dimensions, frame/padding, modes, cursor alignment, long Unicode content, and resizing. TestQuestionnaireStatePreservation and TestQuestionnaireShortcutIsolation verify records and input ownership.</TraceAssertion>
+      <TraceAssertion>TestQuestionnaireAuthorizationRetryAndURL verifies cancellation of old authorization ownership, fresh retries, full-screen compact URL scrolling, and skipped retry completion.</TraceAssertion>
+      <TraceAssertion>TestQuestionnaireSaveFailureCanRetry and TestQuestionnaireStaleMessagesAreIgnored verify retry behavior and cancellation ownership.</TraceAssertion>
+      <TestFiles>
+        <File>internal/infra/tui/views/questionnaire_test.go</File>
+        <File>cmd/cli/bootstrap_test.go</File>
+      </TestFiles>
+    </V-M-TUI-QUESTIONNAIRE>
+    <V-M-APP-QUESTIONNAIRE>
+      <Command>go test ./internal/app/command ./cmd/cli</Command>
+      <Scenario>An empty completion does not start a transaction. Explicit answers validate through constructors and save together; credential failure rolls back preferences and identity.</Scenario>
+      <TraceAssertion>TestCompleteQuestionnaireSkippedHasNoTransaction and TestCompleteQuestionnaireAtomicRollback verify zero-write skipping and atomic rollback. Startup integration tests verify successful selective persistence.</TraceAssertion>
+      <TestFiles>
+        <File>internal/app/command/complete_questionnaire_test.go</File>
+        <File>cmd/cli/bootstrap_test.go</File>
+      </TestFiles>
+    </V-M-APP-QUESTIONNAIRE>
+    <V-M-INFRA-DROPBOX-AUTH>
+      <Command>go test ./internal/infra/dropbox</Command>
+      <Scenario>Injected browser and HTTP adapters verify authorization-code PKCE parameters, offline/file scopes and explicit reapproval, code/verifier exchange, verified account ID, encrypted credentials, and private key creation without live sign-in.</Scenario>
+      <Scenario>Invalid/rejected token responses, missing configuration, cancellation, and browser fallback stay usable and expose no token plaintext; authenticated encryption rejects tampering and wrong account/role bindings.</Scenario>
+      <TraceAssertion>TestDropboxPKCEAndEncryptedCredentials checks challenge correspondence and encrypted round trips. TestDropboxSignInFailuresAndBrowserFallback checks sanitized failures and no premature key writes. TestBrowserOverrideUsesLiteralArguments checks platform launch arguments and literal browser overrides; credential tests check random nonces, authenticated binding, and file permissions.</TraceAssertion>
+      <TestFiles>
+        <File>internal/infra/dropbox/linker_test.go</File>
+        <File>internal/infra/dropbox/credentials_test.go</File>
+        <File>internal/infra/dropbox/browser_test.go</File>
+      </TestFiles>
+    </V-M-INFRA-DROPBOX-AUTH>
+    <V-M-DOMAIN-IDENTITY>
+      <Command>go test ./internal/infra/persistence/sqlite</Command>
+      <Scenario>Dropbox identities and opaque encrypted credentials round trip; unsupported providers and missing identity references fail.</Scenario>
+      <TraceAssertion>TestIdentityRepository exercises identity and credentials persistence and provider/reference validation. TestDropboxStateStoreRoundTripAndRefresh also exercises latest linked-account selection.</TraceAssertion>
+      <TestFiles><File>internal/infra/persistence/sqlite/identity_repository_test.go</File></TestFiles>
+    </V-M-DOMAIN-IDENTITY>
+    <V-M-DOMAIN-USER-PREFERENCES>
+      <Command>go test ./internal/infra/persistence/sqlite ./internal/infra/tui/views ./cmd/cli</Command>
+      <Scenario>Absent preferences return a validated kg default without creating a row. Explicit unit completion persists kg/lb and updates visible sets; skipping on reset retains existing preferences.</Scenario>
+      <TraceAssertion>TestPreferencesReadDoesNotCreateRow verifies repeated write-free reads and explicit-save presence. TestQuestionnaireResetAndSelectivePersistence verifies startup/reset persistence; TestQuestionnaireSaveFailureCanRetry verifies visible conversion only after a successful save.</TraceAssertion>
+      <TestFiles>
+        <File>internal/infra/persistence/sqlite/preferences_repository_test.go</File>
+        <File>internal/infra/tui/views/questionnaire_test.go</File>
+        <File>cmd/cli/bootstrap_test.go</File>
+      </TestFiles>
+    </V-M-DOMAIN-USER-PREFERENCES>
+    <V-M-APP-REMOTE-STATE>
+      <Command>go test ./internal/app/ports ./internal/app/command</Command>
+      <Scenario>Versioned snapshots contain exercises, sets, and optional preferences, excluding local account credentials. Constructors and cross-record validation reject malformed restore data before writes.</Scenario>
+      <TraceAssertion>TestRemoteSnapshotRejectsInvalidBackups rejects unknown versions, duplicate IDs/names, missing exercise references, zero timestamps, invalid units, NaN, and storage overflow. TestRemoteStateHandlerValidatesBeforeRestore ensures failed/invalid downloads cannot call local replace.</TraceAssertion>
+      <TestFiles>
+        <File>internal/app/ports/remote_state_test.go</File>
+        <File>internal/app/command/remote_state_test.go</File>
+      </TestFiles>
+    </V-M-APP-REMOTE-STATE>
+    <V-M-INFRA-DROPBOX-STATE>
+      <Command>go test ./internal/infra/dropbox</Command>
+      <Scenario>Injected HTTP transports exercise the actual Dropbox refresh/upload/download endpoints, fixed backup path, overwrite semantics, encrypted token persistence, and absence of credential fields in uploaded data. A local HTTP server enforces upload Content-Type and download's absent Content-Type and empty body on serialized requests.</Scenario>
+      <Scenario>Missing accounts/backups, denied scopes, malformed snapshots, provider errors, oversized data, cancellation, and invalid refresh responses fail without plaintext leakage or unsafe transfer.</Scenario>
+      <TraceAssertion>TestDropboxStateStoreRoundTripAndRefresh verifies latest-account selection, public-client refresh parameters, encrypted updated credentials, content request headers, and snapshot round trip. TestDropboxContentWireContract reproduces rejection of the old download header and verifies corrected upload/download HTTP contracts. TestDropboxBadRequestDiagnostics checks plain-text and JSON scope failures, safe request IDs, and response-body secrecy. TestDropboxScopeErrorVariants covers app-ID wording, legacy endpoint denials, JSON tag-only errors, required permission guidance, unrelated bad requests, and response-body secrecy. TestDropboxStateFailuresAndExpiredRetry checks sanitized errors and a single expired-token retry. TestDropboxTransferLimitsAndRefreshFailures verifies 16 MiB bounds, in-flight cancellation, and unchanged credentials after invalid refresh.</TraceAssertion>
+      <TestFiles><File>internal/infra/dropbox/state_store_test.go</File></TestFiles>
+    </V-M-INFRA-DROPBOX-STATE>
+    <V-M-INFRA-PERSISTENCE-SQLITE>
+      <Command>go test ./internal/infra/persistence/sqlite</Command>
+      <TraceAssertion>TestRemoteStateAtomicRestore injects a set-insert failure after deletes to prove rollback; successful restore replaces workout data and preserves local identities/credentials. TestRemoteStateBootstrapWithoutLinkedAccount verifies real handler wiring without network or default preference writes.</TraceAssertion>
+      <Scenario>SQLite migration creates identity tables and cascade relationship; repository tests verify encrypted credential round trips and write-free preference defaults. Questionnaire integration verifies transaction-context persistence and atomic rollback. Backup export preserves preference absence and atomic restore retains local identities.</Scenario>
+      <TestFiles>
+        <File>internal/infra/persistence/sqlite/identity_repository_test.go</File>
+        <File>internal/infra/persistence/sqlite/preferences_repository_test.go</File>
+        <File>internal/infra/persistence/sqlite/remote_state_repository_test.go</File>
+        <File>internal/app/command/complete_questionnaire_test.go</File>
+        <File>cmd/cli/bootstrap_test.go</File>
+      </TestFiles>
+    </V-M-INFRA-PERSISTENCE-SQLITE>
+    <V-M-DOMAIN-EXERCISE>
+      <Command>go test ./internal/domain/exercise</Command>
+      <Scenario>Exercise construction rejects empty IDs and names and out-of-range body-weight shares.</Scenario>
+      <TraceAssertion>TestNewExerciseValidatesIDAndFields checks each constructor validation.</TraceAssertion>
+      <TestFiles><File>internal/domain/exercise/exercise_test.go</File></TestFiles>
+    </V-M-DOMAIN-EXERCISE>
+    <V-M-DOMAIN-SET>
+      <Command>go test ./internal/domain/exercise/set</Command>
+      <Scenario>Set construction rejects empty set and exercise IDs and validates weight and rest values.</Scenario>
+      <TraceAssertion>TestNewSetValidatesIDsAndValues checks set constructor validation.</TraceAssertion>
+      <TestFiles><File>internal/domain/exercise/set/set_test.go</File></TestFiles>
+    </V-M-DOMAIN-SET>
+    <V-M-DOMAIN-SHARED-WEIGHT>
+      <Command>go test ./internal/domain/shared</Command>
+      <Scenario>Weight and weight-unit constructors reject unsupported or empty unit values.</Scenario>
+      <TraceAssertion>TestNewWeightAndWeightUnitValidateValues exercises unit validation.</TraceAssertion>
+      <TestFiles><File>internal/domain/shared/weight_test.go</File></TestFiles>
+    </V-M-DOMAIN-SHARED-WEIGHT>
   </VD-MAIN>
 </GraceVerificationDocument>

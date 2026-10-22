@@ -19,7 +19,6 @@ func Open(ctx context.Context) (*sql.DB, error) {
 	return OpenFile(ctx, filepath.Join(dir, "trainlog", "trainlog.db"))
 }
 
-// OpenFile opens SQLite and applies pending embedded migrations.
 func OpenFile(ctx context.Context, path string) (*sql.DB, error) {
 	path, err := filepath.Abs(path)
 	if err != nil {

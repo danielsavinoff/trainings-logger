@@ -1,0 +1,311 @@
+<GraceChangePlan graceVersion="4.0" status="applied">
+  <C-STARTUP-QUESTIONNAIRE>
+    <IntentSummary>Implement the user-approved first-start/reset questionnaire, write-free defaults, real PKCE Dropbox linking, removal of separate Preferences/Sync views, and model-specific repository names. Preserve prior archived work and execute sequentially.</IntentSummary>
+    <BaselineAssertions>
+      <MustExist>
+        <Value>internal/domain/user/identity/identity_repository.go</Value>
+        <Value>internal/domain/user/identity/identity_credentials_repository.go</Value>
+        <Value>internal/infra/persistence/sqlite/preferences_repository.go</Value>
+        <Value>internal/infra/tui/views/preferences.go</Value>
+        <Value>internal/infra/tui/views/sync.go</Value>
+        <Value>cmd/cli/bootstrap.go</Value>
+        <Value>.grace/changes/archive/C-PREFERENCES-SYNC-FULL-SCREEN-RECONCILED/spec.xml</Value>
+      </MustExist>
+      <MustContain>
+        <File>internal/domain/user/identity/identity_repository.go</File>
+        <Text>type Repository interface</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/preferences.go</File>
+        <Text>style.Width(panelWidth).Height(panelHeight)</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/changes/archive/C-PREFERENCES-SYNC-FULL-SCREEN-RECONCILED/spec.xml</File>
+        <Text>status="applied"</Text>
+      </MustContain>
+    </BaselineAssertions>
+    <TargetAssertions>
+      <MustNotExist>
+        <Value>internal/infra/tui/views/preferences.go</Value>
+        <Value>internal/infra/tui/views/sync.go</Value>
+        <Value>internal/infra/tui/views/preferences_test.go</Value>
+        <Value>internal/infra/tui/views/sync_test.go</Value>
+      </MustNotExist>
+      <MustContain>
+        <File>internal/domain/user/identity/identity_repository.go</File>
+        <Text>type IdentityRepository interface</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/user/identity/identity_credentials_repository.go</File>
+        <Text>type IdentityCredentialsRepository interface</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/persistence/sqlite/identity_credentials_repository.go</File>
+        <Text>type IdentityCredentialsRepository struct</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/app/query/get_preferences.go</File>
+        <Text>Exists bool</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/app/command/complete_questionnaire.go</File>
+        <Text>func NewCompleteQuestionnaireHandler(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/questionnaire_test.go</File>
+        <Text>func TestQuestionnaireFullScreenLayout(</Text>
+      </MustContain>
+      <MustContain>
+        <File>cmd/cli/bootstrap_test.go</File>
+        <Text>func TestQuestionnaireFirstStart(</Text>
+      </MustContain>
+      <MustContain>
+        <File>cmd/cli/bootstrap_test.go</File>
+        <Text>func TestQuestionnaireResetAndSelectivePersistence(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/dropbox/linker_test.go</File>
+        <Text>func TestDropboxPKCEAndEncryptedCredentials(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/app/command/complete_questionnaire_test.go</File>
+        <Text>func TestCompleteQuestionnaireAtomicRollback(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/help.go</File>
+        <Text>{key: "r", explanation: "reset setup"}</Text>
+      </MustContain>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-TUI-QUESTIONNAIRE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-APP-QUESTIONNAIRE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-INFRA-DROPBOX-AUTH</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-TUI-QUESTIONNAIRE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-APP-QUESTIONNAIRE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-INFRA-DROPBOX-AUTH</Anchor>
+      </MustOwn>
+      <MustVerify>
+        <Module>M-TUI-QUESTIONNAIRE</Module>
+        <Module>M-APP-QUESTIONNAIRE</Module>
+        <Module>M-INFRA-DROPBOX-AUTH</Module>
+        <Module>M-TUI-RECORDS</Module>
+        <Module>M-DOMAIN-IDENTITY</Module>
+        <Module>M-DOMAIN-USER-PREFERENCES</Module>
+        <Module>M-INFRA-PERSISTENCE-SQLITE</Module>
+      </MustVerify>
+      <MustPassCommand>
+        <Command budgetSeconds="120">go test ./...</Command>
+        <Command budgetSeconds="60">go vet ./...</Command>
+      </MustPassCommand>
+    </TargetAssertions>
+    <DurableScope>
+      <GraphAnchors>
+        <M-TUI-RECORDS />
+        <M-TUI-HELP />
+        <M-TUI-STARTER />
+        <M-TUI-PREFERENCES-SYNC />
+        <M-TUI-QUESTIONNAIRE />
+        <M-DOMAIN-IDENTITY />
+        <M-DOMAIN-USER-PREFERENCES />
+        <M-INFRA-PERSISTENCE-SQLITE />
+        <M-APP-QUESTIONNAIRE />
+        <M-INFRA-DROPBOX-AUTH />
+      </GraphAnchors>
+      <VerificationAnchors>
+        <V-M-TUI-RECORDS />
+        <V-M-TUI-HELP />
+        <V-M-TUI-STARTER />
+        <V-M-TUI-PREFERENCES-SYNC />
+        <V-M-TUI-QUESTIONNAIRE />
+        <V-M-DOMAIN-IDENTITY />
+        <V-M-DOMAIN-USER-PREFERENCES />
+        <V-M-INFRA-PERSISTENCE-SQLITE />
+        <V-M-APP-QUESTIONNAIRE />
+        <V-M-INFRA-DROPBOX-AUTH />
+      </VerificationAnchors>
+      <GraphDocuments>
+        <GD-MAIN />
+      </GraphDocuments>
+      <VerificationDocuments>
+        <VD-MAIN />
+      </VerificationDocuments>
+    </DurableScope>
+    <ObservedWriteScope>
+      <File>.grace/changes/active/C-STARTUP-QUESTIONNAIRE/plan.xml</File>
+      <File>.grace/changes/active/C-STARTUP-QUESTIONNAIRE/spec.xml</File>
+      <File>.grace/changes/archive/C-DOMAIN-MODEL-CONSTRUCTORS/plan.xml</File>
+      <File>.grace/changes/archive/C-DOMAIN-MODEL-CONSTRUCTORS/spec.xml</File>
+      <File>.grace/changes/archive/C-PREFERENCES-SYNC-FULL-SCREEN-RECONCILED/plan.xml</File>
+      <File>.grace/changes/archive/C-PREFERENCES-SYNC-FULL-SCREEN-RECONCILED/spec.xml</File>
+      <File>.grace/changes/archive/C-PREFERENCES-SYNC-FULL-SCREEN/plan.xml</File>
+      <File>.grace/changes/archive/C-PREFERENCES-SYNC-FULL-SCREEN/spec.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-FINAL-SCOPE/plan.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-FINAL-SCOPE/spec.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-RECONCILED/plan.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-RECONCILED/spec.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-SCOPED/plan.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-SCOPED/spec.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC/plan.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC/spec.xml</File>
+      <File>.grace/changes/archive/C-STARTUP-QUESTIONNAIRE/plan.xml</File>
+      <File>.grace/changes/archive/C-STARTUP-QUESTIONNAIRE/spec.xml</File>
+      <File>.grace/changes/archive/C-VIM-RECORDS-JUMPS/plan.xml</File>
+      <File>.grace/changes/archive/C-VIM-RECORDS-JUMPS/spec.xml</File>
+      <File>.grace/graph/index.xml</File>
+      <File>.grace/graph/main.xml</File>
+      <File>.grace/verification/index.xml</File>
+      <File>.grace/verification/main.xml</File>
+      <File>AGENTS.md</File>
+      <File>cmd/cli/bootstrap.go</File>
+      <File>cmd/cli/bootstrap_test.go</File>
+      <File>internal/app/command/complete_questionnaire.go</File>
+      <File>internal/app/command/complete_questionnaire_test.go</File>
+      <File>internal/app/command/create_set.go</File>
+      <File>internal/app/command/update_preferences.go</File>
+      <File>internal/app/ports/identity_linker.go</File>
+      <File>internal/app/ports/remote_state.go</File>
+      <File>internal/app/query/get_preferences.go</File>
+      <File>internal/domain/exercise/errors.go</File>
+      <File>internal/domain/exercise/exercise.go</File>
+      <File>internal/domain/exercise/exercise_repository.go</File>
+      <File>internal/domain/exercise/exercise_test.go</File>
+      <File>internal/domain/exercise/set/errors.go</File>
+      <File>internal/domain/exercise/set/exercise_weight.go</File>
+      <File>internal/domain/exercise/set/set.go</File>
+      <File>internal/domain/exercise/set/set_repository.go</File>
+      <File>internal/domain/exercise/set/set_test.go</File>
+      <File>internal/domain/shared/weight.go</File>
+      <File>internal/domain/shared/weight_test.go</File>
+      <File>internal/domain/shared/weight_unit.go</File>
+      <File>internal/domain/user/identity/errors.go</File>
+      <File>internal/domain/user/identity/identity.go</File>
+      <File>internal/domain/user/identity/identity_credentials.go</File>
+      <File>internal/domain/user/identity/identity_credentials_repository.go</File>
+      <File>internal/domain/user/identity/identity_repository.go</File>
+      <File>internal/domain/user/identity/identity_test.go</File>
+      <File>internal/domain/user/identity/provider.go</File>
+      <File>internal/domain/user/preferences/preferences.go</File>
+      <File>internal/domain/user/preferences/preferences_repository.go</File>
+      <File>internal/domain/user/preferences/preferences_test.go</File>
+      <File>internal/infra/dropbox/credentials.go</File>
+      <File>internal/infra/dropbox/credentials_test.go</File>
+      <File>internal/infra/dropbox/linker.go</File>
+      <File>internal/infra/dropbox/linker_test.go</File>
+      <File>internal/infra/persistence/sqlite/exercise_repository.go</File>
+      <File>internal/infra/persistence/sqlite/identity_credentials_repository.go</File>
+      <File>internal/infra/persistence/sqlite/identity_repository.go</File>
+      <File>internal/infra/persistence/sqlite/identity_repository_test.go</File>
+      <File>internal/infra/persistence/sqlite/preferences_repository.go</File>
+      <File>internal/infra/persistence/sqlite/preferences_repository_test.go</File>
+      <File>internal/infra/persistence/sqlite/set_repository.go</File>
+      <File>internal/infra/tui/app.go</File>
+      <File>internal/infra/tui/starter/model_test.go</File>
+      <File>internal/infra/tui/views/help.go</File>
+      <File>internal/infra/tui/views/help_test.go</File>
+      <File>internal/infra/tui/views/preferences.go</File>
+      <File>internal/infra/tui/views/preferences_test.go</File>
+      <File>internal/infra/tui/views/questionnaire.go</File>
+      <File>internal/infra/tui/views/questionnaire_test.go</File>
+      <File>internal/infra/tui/views/records.go</File>
+      <File>internal/infra/tui/views/records_help.go</File>
+      <File>internal/infra/tui/views/records_layout.go</File>
+      <File>internal/infra/tui/views/records_navigation_test.go</File>
+      <File>internal/infra/tui/views/records_store.go</File>
+      <File>internal/infra/tui/views/records_update.go</File>
+      <File>internal/infra/tui/views/records_view.go</File>
+      <File>internal/infra/tui/views/sync.go</File>
+      <File>internal/infra/tui/views/sync_test.go</File>
+      <File>internal/infra/tui/views/testdata/compact.golden.json</File>
+      <File>internal/infra/tui/views/testdata/compact_dialog.golden.json</File>
+      <File>internal/infra/tui/views/testdata/exercise_dialog.golden.json</File>
+      <File>internal/infra/tui/views/testdata/help.golden.json</File>
+      <File>internal/infra/tui/views/testdata/help_compact.golden.json</File>
+      <File>internal/infra/tui/views/testdata/insert.golden.json</File>
+      <File>internal/infra/tui/views/testdata/pagination.golden.json</File>
+      <File>internal/infra/tui/views/testdata/records.golden.json</File>
+      <File>internal/infra/tui/views/testdata/set_dialog.golden.json</File>
+      <File>internal/infra/tui/views/testdata/unicode_input.golden.json</File>
+      <File>internal/infra/tui/views/testdata/wide.golden.json</File>
+      <File>migrations/sqlite/20261004160000_identity_sync.down.sql</File>
+      <File>migrations/sqlite/20261004160000_identity_sync.up.sql</File>
+    </ObservedWriteScope>
+    <ImplementationPlan>
+      <T-001>
+        <Title>Rename repositories and make preference reads write-free</Title>
+        <DependsOn />
+        <AcceptanceCriteria>
+          <Criterion>Use descriptive identity and credential repository names in matching files, constructors, callers, and compile-time interface checks. Split SQLite credentials into its own repository and route all queries/writes through the transaction-context executor.</Criterion>
+          <Criterion>Return a valid kg default plus a presence flag when preferences are absent, without saving. Expose presence through GetPreferencesResult and adapt CreateSet to consume the default without creating preferences.</Criterion>
+          <Criterion>Test absent/present preference reads and credential operations in transactions using temporary databases; retain existing domain and persistence coverage.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./internal/domain/... ./internal/infra/persistence/sqlite ./internal/app/...</Command>
+        </Verification>
+      </T-001>
+      <T-002>
+        <Title>Implement real Dropbox authorization and atomic questionnaire completion</Title>
+        <DependsOn>T-001</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Add an application identity-linking port with authorization URL and code-exchange capability. Implement Dropbox authorization-code/S256 PKCE and offline token exchange without redirect_uri, using an injected browser launcher and HTTP client.</Criterion>
+          <Criterion>Configure the public Dropbox app key via DROPBOX_APP_KEY. Request minimal account_info.read scope, use the verified token response account ID, enforce token/expiry validity, and report generic sanitized HTTP errors.</Criterion>
+          <Criterion>Encrypt access and refresh tokens with AES-GCM and a lazily created private local key file; no key or application rows are written on an all-skipped flow. Support cancellation, bounded HTTP requests, and browser-open fallback.</Criterion>
+          <Criterion>Add CompleteQuestionnaire accepting optional unit and optional authorized identity/credentials. Validate through domain constructors; return without a transaction when both are omitted, and otherwise persist selected answers atomically. Wire the handler and real linker into bootstrap.</Criterion>
+          <Criterion>Test PKCE payloads, exchange failures, encrypted round trips/tamper rejection, no-write skipping, and transaction rollback without contacting a live account.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./internal/infra/dropbox ./internal/app/command ./cmd/cli</Command>
+        </Verification>
+      </T-002>
+      <T-003>
+        <Title>Replace secondary screens with the full-screen startup and reset questionnaire</Title>
+        <DependsOn>T-002</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Open unit setup only when GetPreferences reports no row; preserve ordinary record-model test construction. Add r from records to reopen a fresh questionnaire without deleting settings or browsing state.</Criterion>
+          <Criterion>Use a focused text input with numeric choices 1. kg / 2. lb and 1. Dropbox, explicit skip hints, and an additional code-entry step for real authorization. Stage answers and write only at completion; Escape cancels, and global quit remains available.</Criterion>
+          <Criterion>Keep browser authorization and code exchange asynchronous and cancellation-aware, discard stale messages after reset/cancel, and retain a usable questionnaire on invalid input or save errors. Apply an explicitly saved weight unit to visible sets after successful persistence.</Criterion>
+          <Criterion>Render a full-screen active-color frame with main-view border/padding and an in-bounds native input cursor; handle resizing, compact/tiny output, and long status/authorization text.</Criterion>
+          <Criterion>Remove Preferences and Sync source/test files, their routing/App bindings, and p/s help entries; document r as reset setup. Preserve ge/gs and dialog/help input isolation.</Criterion>
+          <Criterion>Add TUI layout/navigation tests and temporary-database startup/reset/partial/skip/link/cancel/error integration coverage. Review intended help golden updates, then validate without snapshot regeneration.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./internal/infra/tui/... ./cmd/cli</Command>
+        </Verification>
+      </T-003>
+      <T-004>
+        <Title>Update GRACE projections and validate the integrated change</Title>
+        <DependsOn>T-003</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Retire M-TUI-PREFERENCES-SYNC and its verification anchor, route M-TUI-QUESTIONNAIRE, M-APP-QUESTIONNAIRE, and M-INFRA-DROPBOX-AUTH, and update affected graph/verification entries and indexes centrally.</Criterion>
+          <Criterion>Synchronize source semantic contracts/maps/blocks for governed edits, preserve unrelated projection entries and workspace edits, and run full tests, vet, formatting checks, selected target, and final assertions.</Criterion>
+          <Criterion>Archive this completed work after passing fresh final evidence under the user instruction to archive every GRACE work; do not modify approved assertions, tasks, or scopes in place.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./...</Command>
+          <Command>go vet ./...</Command>
+        </Verification>
+      </T-004>
+    </ImplementationPlan>
+    <ExecutionNotes>
+      <Note>The user explicitly authorized archiving every existing GRACE work, approving this specification and plan, and beginning execution. The previous full-screen recovery bundle passed its final test/vet/lint gate and was marked applied and archived before this bundle was created.</Note>
+      <Note>Execute sequentially. ObservedWriteScope includes the pre-existing dirty workspace files from already archived work so final attribution remains complete. Those inherited paths are preservation scope, not authorization to change unrelated behavior; new writes are limited to the task areas above.</Note>
+      <Note>Reference-host warm-cache whole-suite test and vet gates passed in approximately 0.3 and 0.14 seconds. Explicit budgets of 120 and 60 seconds allow compilation headroom. OAuth tests use injected clients/browsers, temporary key files, and temporary SQLite databases.</Note>
+      <Note>Dropbox OAuth protocol details were verified against official Dropbox documentation: https://www.dropbox.com/developers/reference/oauth-guide and its authorization/token endpoint documentation. Do not perform live user sign-in during tests.</Note>
+      <Note>Current and selected baseline checks are pre-edit evidence only. Task checks and selected target/final checks run after writes. MustPassCommand contains leaf project commands only. Approval to archive is already explicit in the latest user request.</Note>
+    </ExecutionNotes>
+  </C-STARTUP-QUESTIONNAIRE>
+</GraceChangePlan>

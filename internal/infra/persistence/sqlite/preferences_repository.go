@@ -22,12 +22,24 @@ func (r *PreferencesRepository) Save(
 	ctx context.Context,
 	p preferences.Preferences,
 ) error {
+	validated, err := preferences.NewPreferences(p.WeightUnit)
+	if err != nil {
+		return err
+	}
+
 	const query = `
 		INSERT INTO preferences (id, weight_unit) VALUES (1, ?)
 		ON CONFLICT(id) DO UPDATE SET weight_unit = excluded.weight_unit
 	`
 
-	_, err := persistence.ExecutorFromContext(ctx, r.db).ExecContext(ctx, query, p.WeightUnit)
+	_, err = persistence.ExecutorFromContext(
+		ctx,
+		r.db,
+	).ExecContext(
+		ctx,
+		query,
+		validated.WeightUnit,
+	)
 
 	return err
 }
@@ -37,14 +49,27 @@ func (r *PreferencesRepository) Find(
 ) (preferences.Preferences, error) {
 	const query = "SELECT weight_unit FROM preferences WHERE id = 1"
 
-	var p preferences.Preferences
-	err := persistence.ExecutorFromContext(ctx, r.db).
-		QueryRowContext(ctx, query).
-		Scan(&p.WeightUnit)
-	if errors.Is(err, sql.ErrNoRows) {
-		p.WeightUnit = shared.WeightUnitKg
-		err = r.Save(ctx, p)
+	var unit string
+	err := persistence.ExecutorFromContext(
+		ctx,
+		r.db,
+	).
+		QueryRowContext(
+			ctx,
+			query,
+		).
+		Scan(&unit)
+
+	if errors.Is(
+		err,
+		sql.ErrNoRows,
+	) {
+		return preferences.Preferences{}, preferences.ErrPreferencesNotFound
 	}
 
-	return p, err
+	if err != nil {
+		return preferences.Preferences{}, err
+	}
+
+	return preferences.NewPreferences(shared.WeightUnit(unit))
 }

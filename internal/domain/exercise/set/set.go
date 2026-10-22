@@ -1,6 +1,7 @@
 package set
 
 import (
+	"strings"
 	"time"
 
 	"github.com/danielsavinoff/trainings-logger/internal/domain/shared"
@@ -16,14 +17,19 @@ type Set struct {
 }
 
 func NewSet(
-	id, exerciseID string,
+	id string,
+	exerciseID string,
 	repetitions uint8,
 	value float64,
 	unit shared.WeightUnit,
 	restInSeconds int,
 	createdAt *time.Time,
 ) (Set, error) {
-	if exerciseID == "" {
+	if strings.TrimSpace(id) == "" {
+		return Set{}, ErrEmptySetID
+	}
+
+	if strings.TrimSpace(exerciseID) == "" {
 		return Set{}, ErrExerciseOfSetNotFound
 	}
 
@@ -31,7 +37,10 @@ func NewSet(
 		return Set{}, ErrInvalidRestInSeconds
 	}
 
-	weight, err := NewExerciseWeight(value, unit)
+	weight, err := NewExerciseWeight(
+		value,
+		unit,
+	)
 	if err != nil {
 		return Set{}, err
 	}

@@ -24,7 +24,6 @@ func (d *Dialog) Resize(width, height int) {
 		input := &d.fields[i].input
 		position := input.Position()
 
-		// Reset the horizontal viewport before recalculating it for the new size.
 		input.SetWidth(0)
 		input.SetCursor(position)
 		input.SetWidth(max(1, inputWidth))

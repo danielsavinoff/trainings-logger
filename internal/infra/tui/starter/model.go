@@ -14,7 +14,6 @@
 //   View - render child
 // END_MODULE_MAP
 
-// Package starter composes the TUI and handles application-wide input.
 package starter
 
 import (
@@ -33,7 +32,6 @@ type Model struct {
 	child tea.Model
 }
 
-// NewModel loads the records view and wraps it in the application model.
 func NewModel(ctx context.Context, app tui.App) (Model, error) {
 	child, err := views.NewRecordsModel(ctx, app)
 	if err != nil {

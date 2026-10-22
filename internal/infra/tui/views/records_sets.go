@@ -82,7 +82,6 @@ func (m *RecordsModel) loadSelectedSets(ctx context.Context) error {
 		records = append(records, record)
 	}
 
-	// Keep newest dates first and chronological sets within each day.
 	for i := len(records) - 1; i >= 0; i-- {
 		s := records[i]
 		m.appendSet(index, s, s.createdAt.Local())

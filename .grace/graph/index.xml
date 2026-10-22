@@ -6,6 +6,17 @@
         <M-TUI-RECORDS />
         <M-TUI-HELP />
         <M-TUI-STARTER />
+        <M-TUI-QUESTIONNAIRE />
+        <M-APP-QUESTIONNAIRE />
+        <M-INFRA-DROPBOX-AUTH />
+        <M-DOMAIN-IDENTITY />
+        <M-DOMAIN-USER-PREFERENCES />
+        <M-APP-REMOTE-STATE />
+        <M-INFRA-DROPBOX-STATE />
+        <M-INFRA-PERSISTENCE-SQLITE />
+        <M-DOMAIN-EXERCISE />
+        <M-DOMAIN-SET />
+        <M-DOMAIN-SHARED-WEIGHT />
       </Owns>
     </GD-MAIN>
   </GraphDocuments>

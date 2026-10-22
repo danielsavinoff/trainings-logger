@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"math"
+	"time"
 
 	"github.com/danielsavinoff/trainings-logger/internal/domain/exercise/set"
 	"github.com/danielsavinoff/trainings-logger/internal/domain/shared"
@@ -61,26 +62,37 @@ func (r *SetRepository) FindByID(
 		WHERE id = ?
 	`
 
-	var result set.Set
+	var storedID string
+	var exerciseID string
+	var repetitions uint8
+	var restInSeconds int
+	var createdAt time.Time
 	var grams int64
-	err := persistence.ExecutorFromContext(ctx, r.db).QueryRowContext(ctx, query, id).Scan(
-		&result.ID,
-		&result.ExerciseID,
+	err := persistence.ExecutorFromContext(ctx, r.db).QueryRowContext(
+		ctx,
+		query,
+		id,
+	).Scan(
+		&storedID,
+		&exerciseID,
 		&grams,
-		&result.Repetitions,
-		&result.RestInSeconds,
-		&result.CreatedAt,
+		&repetitions,
+		&restInSeconds,
+		&createdAt,
 	)
 	if err != nil {
 		return set.Set{}, err
 	}
 
-	result.ExerciseWeight.Weight = shared.Weight{
-		Value: float64(grams),
-		Unit:  shared.WeightUnitG,
-	}
-
-	return result, nil
+	return set.NewSet(
+		storedID,
+		exerciseID,
+		repetitions,
+		float64(grams),
+		shared.WeightUnitG,
+		restInSeconds,
+		&createdAt,
+	)
 }
 
 func (r *SetRepository) FindAllByExerciseId(
@@ -94,7 +106,11 @@ func (r *SetRepository) FindAllByExerciseId(
 		ORDER BY created_at DESC, rowid DESC
 	`
 
-	rows, err := persistence.ExecutorFromContext(ctx, r.db).QueryContext(ctx, query, exerciseID)
+	rows, err := persistence.ExecutorFromContext(ctx, r.db).QueryContext(
+		ctx,
+		query,
+		exerciseID,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -102,23 +118,35 @@ func (r *SetRepository) FindAllByExerciseId(
 
 	var result []set.Set
 	for rows.Next() {
-		var s set.Set
+		var id string
+		var storedExerciseID string
+		var repetitions uint8
+		var restInSeconds int
+		var createdAt time.Time
 		var grams int64
 		err := rows.Scan(
-			&s.ID,
-			&s.ExerciseID,
+			&id,
+			&storedExerciseID,
 			&grams,
-			&s.Repetitions,
-			&s.RestInSeconds,
-			&s.CreatedAt,
+			&repetitions,
+			&restInSeconds,
+			&createdAt,
 		)
 		if err != nil {
 			return nil, err
 		}
 
-		s.ExerciseWeight.Weight = shared.Weight{
-			Value: float64(grams),
-			Unit:  shared.WeightUnitG,
+		s, err := set.NewSet(
+			id,
+			storedExerciseID,
+			repetitions,
+			float64(grams),
+			shared.WeightUnitG,
+			restInSeconds,
+			&createdAt,
+		)
+		if err != nil {
+			return nil, err
 		}
 		result = append(result, s)
 	}

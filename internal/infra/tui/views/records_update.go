@@ -1,7 +1,7 @@
 // START_MODULE_CONTRACT
-//   PURPOSE: Route records, dialog, and help input.
-//   SCOPE: Preserve browsing state while help owns input.
-//   DEPENDS: M-TUI-HELP
+//   PURPOSE: Route records, dialog, help, questionnaire, and asynchronous transfers.
+//   SCOPE: Preserve input ownership; r reopens setup, s saves, and l loads.
+//   DEPENDS: M-TUI-HELP, M-TUI-QUESTIONNAIRE, M-APP-REMOTE-STATE
 //   LINKS: M-TUI-RECORDS, V-M-TUI-RECORDS
 //   MAP_MODE: SUMMARY
 // END_MODULE_CONTRACT
@@ -29,6 +29,9 @@ func (m *RecordsModel) focusPanel(next panel) {
 
 func (m RecordsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
+	if result, ok := msg.(recordTransferMsg); ok {
+		return m.finishTransfer(result), nil
+	}
 
 	if size, ok := msg.(tea.WindowSizeMsg); ok {
 		m.width, m.height = size.Width, size.Height
@@ -49,6 +52,9 @@ func (m RecordsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.help = m.help.update(msg)
 		return m, nil
 	}
+	if m.questionnaire != nil {
+		return m.updateQuestionnaire(msg)
+	}
 
 	if press, ok := msg.(tea.KeyPressMsg); ok && key.Matches(
 		press,
@@ -62,18 +68,32 @@ func (m RecordsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.showingHelp = true
 		return m, nil
 	}
+	if m.transfer != nil && m.transfer.load {
+		if press, ok := msg.(tea.KeyPressMsg); ok && key.Matches(
+			press,
+			m.keys.Quit,
+		) {
+			return m, tea.Quit
+		}
+		return m, nil
+	}
 
 	if wheel, ok := msg.(tea.MouseWheelMsg); ok {
 		return m.scrollPanel(wheel)
 	}
 
-	// Mouse movement and clicks must not scroll the table's internal viewport.
 	if _, ok := msg.(tea.MouseMsg); ok {
 		return m, nil
 	}
 
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
+		if m.transfer != nil {
+			switch msg.String() {
+			case "n", "e", "d", "r":
+				return m, nil
+			}
+		}
 		if m.goPending {
 			m.goPending = false
 
@@ -102,6 +122,15 @@ func (m RecordsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.goPending = true
 
 			return m, nil
+		}
+		if msg.String() == "r" {
+			cmd := m.openQuestionnaire()
+
+			return m, cmd
+		}
+		if msg.String() == "s" || msg.String() == "l" {
+			cmd := m.startTransfer(msg.String() == "l")
+			return m, cmd
 		}
 
 		switch {

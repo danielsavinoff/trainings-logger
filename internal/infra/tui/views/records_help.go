@@ -1,6 +1,6 @@
 // START_MODULE_CONTRACT
-//   PURPOSE: Render compact records footer and errors.
-//   SCOPE: Wrap help/quit hints and preserve visible status text.
+//   PURPOSE: Render compact records hints and action outcomes.
+//   SCOPE: Wrap help/load/save/quit hints, transfer progress, and error text.
 //   DEPENDS: none
 //   LINKS: M-TUI-RECORDS, V-M-TUI-RECORDS
 //   MAP_MODE: SUMMARY
@@ -24,7 +24,7 @@ func (m RecordsModel) helpView() string {
 		1,
 		m.width,
 	)
-	center := lipgloss.NewStyle().Width(width).Align(lipgloss.Center)
+	left := lipgloss.NewStyle().Width(width).Align(lipgloss.Left)
 	wrap := func(text string) string {
 		return ansi.Hardwrap(
 			ansi.Wrap(
@@ -36,15 +36,18 @@ func (m RecordsModel) helpView() string {
 			false,
 		)
 	}
-	hints := "? - help    q - quit"
+	hints := "? - help  l - load  s - save  q - quit"
 	if lipgloss.Width(hints) > width {
-		hints = "? - help\nq - quit"
+		hints = "? - help\nl - load\ns - save\nq - quit"
 	}
 	status := ""
-	if m.err != "" {
-		status = center.Render(wrap(m.err)) + "\n"
+	if m.transferStatus != "" {
+		status = left.Render(wrap(m.transferStatus)) + "\n"
 	}
-	return status + center.Render(lipgloss.NewStyle().Foreground(components.BaseStyle.GetBorderTopForeground()).Render(wrap(hints)))
+	if m.err != "" {
+		status += left.Render(wrap(m.err)) + "\n"
+	}
+	return status + left.Render(lipgloss.NewStyle().Foreground(components.BaseStyle.GetBorderTopForeground()).Render(wrap(hints)))
 }
 
 // END_BLOCK_RECORDS_FOOTER

@@ -1,0 +1,53 @@
+<GraceChangeSpec graceVersion="4.0" status="applied">
+  <C-DROPBOX-SAVE-LOAD>
+    <Summary>Investigate the reported Safari Dropbox consent failure, make authorization recoverable, and add real Dropbox save/load actions directly to records using s and l.</Summary>
+    <Problem>Safari fails after consent at Dropbox's authorize_submit page. The application correctly starts the documented PKCE code flow, but cannot observe browser-side errors or conveniently restart authorization. Its token requests only account access, there is no Dropbox snapshot adapter, and l currently pages right.</Problem>
+    <Goals>
+      <Goal>Narrow down the Safari failure using its full error text and verified Dropbox documentation; correct any demonstrated application defect without claiming to repair an unconfirmed browser or Dropbox failure.</Goal>
+      <Goal>Make sign-in recoverable through a fresh authorization attempt, an accessible manual authorization URL, and an optional browser override.</Goal>
+      <Goal>Add s to save local exercises, sets, and optional preferences to Dropbox, and l to load that saved snapshot into the local application.</Goal>
+      <Goal>Document save/load in records hints and help without restoring Preferences or Sync screens.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>Keep S256 PKCE, offline access, verified account IDs, masked code input, encrypted credentials, staged questionnaire completion, cancellation, and zero writes for fully skipped setup.</Constraint>
+      <Constraint>Request account_info.read, files.content.read, and files.content.write. Explain configuration of these permissions and reauthorization for accounts linked before file scopes were requested.</Constraint>
+      <Constraint>The authorize_submit URL belongs to Dropbox's consent page; its /1 prefix alone is not evidence of an obsolete application endpoint. Do not replace the supported manual-code flow with a mandatory callback configuration without evidence that this addresses the reported error.</Constraint>
+      <Constraint>Provide a fresh sign-in retry from the code step and keep the complete authorization URL accessible on compact screens. Allow DROPBOX_BROWSER to choose a browser, launched with structured arguments and no shell evaluation. Preserve the default browser when no override is set.</Constraint>
+      <Constraint>s and l act only from records. Preserve gs/ge focus, dialog text, help-owned input, and setup input. Reserve l for load and retain right-arrow, Page Down, f, and Space for next-page navigation.</Constraint>
+      <Constraint>Use a versioned JSON snapshot at /trainlog.json within the linked app's Dropbox access boundary. Save replaces this remote snapshot. Load replaces local exercises, sets, and preferences with the snapshot atomically; preserve local identities and credentials.</Constraint>
+      <Constraint>Represent missing preferences explicitly, so saving defaults does not insert a preferences row and loading a snapshot without preferences restores their absence. Validate every loaded model through domain constructors, IDs, unique names, references, weights, timestamps, and supported schema version before applying any local writes.</Constraint>
+      <Constraint>Use the most recently linked Dropbox account deterministically. Decrypt credentials only inside the adapter, refresh expired access tokens through the public-client refresh flow, and encrypt updated tokens before persistence. Never put identities, keys, or credentials in the remote snapshot.</Constraint>
+      <Constraint>Run transfers asynchronously with bounded requests and payload sizes. Display progress, success, missing-account/backup, permission, and network failures without blocking terminal input or exposing sensitive response bodies. Avoid overlapping transfers and unsafe edits while a restore is in progress.</Constraint>
+      <Constraint>On failure, retain local data and browsing state. On successful load, refresh records and units from persistence and retain selected IDs where available, clamping pagination after changed data.</Constraint>
+      <Constraint>Do not run a live account authorization, upload, download, or modify the real user database during development verification. Preserve inherited uncommitted changes and descriptive repository naming.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>Additional providers, automatic/background synchronization, conflict merging, or separate settings/sync screens.</NonGoal>
+      <NonGoal>Guaranteeing that a code change fixes Safari connectivity or a Dropbox consent-page failure without reproduction evidence.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>The full Safari error is recorded when supplied, and findings distinguish demonstrated application defects from external browser/provider behavior. Authorization URLs and token payloads match the official Dropbox contract.</Criterion>
+      <Criterion>Authorization requests file read/write permissions, supports fresh retries and an optional browser override, and exposes a usable full URL when the browser cannot finish sign-in.</Criterion>
+      <Criterion>s exports all exercises and sets plus optional preferences to /trainlog.json using real Dropbox upload. l downloads, validates, and restores this snapshot atomically while preserving local identity credentials.</Criterion>
+      <Criterion>Save/load work after token expiry through refresh, and handle missing accounts, missing snapshots, denied scopes, malformed data, transport errors, and persistence failures without partial restores or secret leakage.</Criterion>
+      <Criterion>l triggers load rather than pagination; gs still focuses sets. Dialog/help/setup input cannot trigger transfers. Records and help show l - load and s - save.</Criterion>
+      <Criterion>Temporary SQLite tests cover complete round trips, absent preference preservation, validation rejection, transaction rollback, and successful UI refresh. Injected HTTP/browser tests cover upload/download/refresh and authorization retry without real user data.</Criterion>
+      <Criterion>Full Go tests, vet, normal snapshot verification, and selected GRACE final assertions pass after approved implementation.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-INFRA-DROPBOX-AUTH /><M-INFRA-DROPBOX-STATE /><M-APP-REMOTE-STATE /><M-TUI-QUESTIONNAIRE />
+      <M-TUI-RECORDS /><M-TUI-HELP /><M-APP-QUESTIONNAIRE /><M-DOMAIN-IDENTITY /><M-DOMAIN-USER-PREFERENCES /><M-INFRA-PERSISTENCE-SQLITE />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>go test ./...</ExpectedCommand>
+      <ExpectedCommand>go vet ./...</ExpectedCommand>
+      <ExpectedEvidence>Injected browser/HTTP tests verify PKCE scopes, retry, safe browser arguments, refresh, upload/download, and sanitized errors.</ExpectedEvidence>
+      <ExpectedEvidence>Temporary database tests verify snapshots, optional preferences, validation, and atomic restores. TUI tests verify shortcut isolation, retained navigation, progress, and successful refresh; intended snapshots are reviewed.</ExpectedEvidence>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>The requested save/load actions mean Dropbox backup and full restore. Restore replaces local workout data rather than merging conflicts.</Assumption>
+      <Assumption>Dropbox consent failure root cause remains unconfirmed until the full Safari error or reproduction evidence is available.</Assumption>
+      <Assumption>The user explicitly approved this specification, the sequential execution outline, and execution on 2026-10-10. Prior authorization to archive completed GRACE work remains in effect.</Assumption>
+    </Assumptions>
+  </C-DROPBOX-SAVE-LOAD>
+</GraceChangeSpec>

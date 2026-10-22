@@ -9,13 +9,13 @@ type Weight struct {
 	Unit  WeightUnit `json:"unit"`
 }
 
-func NewWeight(value float64, unit WeightUnit) (Weight, error) {
-	if unit == "" {
-		return Weight{}, ErrEmptyWeightUnit
-	}
-
-	if unit != WeightUnitG && unit != WeightUnitKg && unit != WeightUnitLb {
-		return Weight{}, ErrInvalidWeightUnit
+func NewWeight(
+	value float64,
+	unit WeightUnit,
+) (Weight, error) {
+	validatedUnit, err := NewWeightUnit(string(unit))
+	if err != nil {
+		return Weight{}, err
 	}
 
 	if math.IsNaN(value) || math.IsInf(value, 0) || value < 0 {
@@ -24,7 +24,7 @@ func NewWeight(value float64, unit WeightUnit) (Weight, error) {
 
 	return Weight{
 		Value: value,
-		Unit:  unit,
+		Unit:  validatedUnit,
 	}, nil
 }
 
@@ -51,15 +51,20 @@ func (w Weight) To(unit WeightUnit) (Weight, error) {
 	}
 
 	switch unit {
-	case WeightUnitG:
-		return Weight{Value: grams, Unit: unit}, nil
-
-	case WeightUnitKg:
-		return Weight{Value: grams / 1000, Unit: unit}, nil
-
-	case WeightUnitLb:
-		return Weight{Value: grams / 453.59237, Unit: unit}, nil
-
+	case WeightUnitG, WeightUnitKg, WeightUnitLb:
+		var value float64
+		switch unit {
+		case WeightUnitG:
+			value = grams
+		case WeightUnitKg:
+			value = grams / 1000
+		case WeightUnitLb:
+			value = grams / 453.59237
+		}
+		return NewWeight(
+			value,
+			unit,
+		)
 	default:
 		return Weight{}, ErrInvalidWeightUnit
 	}

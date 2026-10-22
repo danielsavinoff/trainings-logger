@@ -1,0 +1,87 @@
+<GraceChangeSpec graceVersion="4.0" status="applied">
+  <C-PREFERENCES-SYNC-FULL-SCREEN-RECONCILED>
+    <Summary>Complete the approved full-screen Preferences and Sync change while retaining the already implemented constructor, settings, and remote-state requirements in one sequential recovery bundle.</Summary>
+    <Problem>Preferences and Sync currently return views without alternate-screen mode and render content-sized frames, so entering them does not preserve the main view's full-screen presentation.</Problem>
+    <Goals>
+      <Goal>Keep Preferences and Sync in the alternate terminal screen throughout navigation from and back to the main view.</Goal>
+      <Goal>Expand each secondary screen's single panel to the available terminal width and height, accounting for the main view's outer spacing and any return hint.</Goal>
+      <Goal>Resize both screens to fit the current terminal dimensions while retaining their existing content and actions.</Goal>
+      <Goal>Inset the help view using the records panels' existing padding and left-align the records footer hints.</Goal>
+      <Goal>Open a Preferences view with p and a Sync view with s while preserving the existing gs focus-sets sequence.</Goal>
+      <Goal>Allow users to select and persist the existing g, kg, and lb weight units from Preferences.</Goal>
+      <Goal>Define a Dropbox-capable identity domain and persist identities and encrypted credential fields in SQLite.</Goal>
+      <Goal>Define application ports for storing the local application state remotely and loading it from remote storage; expose those actions in the Sync view.</Goal>
+      <Goal>Require domain models to use validated New-prefixed constructors in their model files and keep each enum in its own file.</Goal>
+      <Goal>Define domain errors only in errors.go files and remove redundant Valid methods in favor of constructor validation.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>Reuse the main view's normal border, active-panel color, panel padding, and one-row vertical and two-column horizontal outer spacing where dimensions allow.</Constraint>
+      <Constraint>Preserve p and s entry shortcuts, g/k/l preference selection and persistence, Sync store/load dispatch and status messages, and q/esc return navigation.</Constraint>
+      <Constraint>Returning to records retains the existing active panel, selections, pagination, and scroll state, subject to existing resizing and preference-update behavior.</Constraint>
+      <Constraint>Keep output within terminal bounds on compact and tiny sizes; render gracefully when there is insufficient room for a complete frame.</Constraint>
+      <Constraint>Preserve existing workspace changes and execute the approved full-screen work sequentially in this recovery bundle, which supersedes both overlapping source bundles without marking unfinished work applied.</Constraint>
+      <Constraint>Follow repository Go formatting and semantic markup conventions; update durable graph and verification state only through the approved change lifecycle.</Constraint>
+      <Constraint>Use the existing records panel spacing of one row vertically and two columns horizontally as the help view's outer padding, adapting to small terminal sizes.</Constraint>
+      <Constraint>Do not intercept p or s inside dialogs or while help owns input; preserve records navigation including ge and gs.</Constraint>
+      <Constraint>Use string IDs consistent with current domain entities and follow the embedded SQLite migration mechanism.</Constraint>
+      <Constraint>The transferable application state contains exercises, sets, and preferences. Identity credentials remain local and are excluded from remote state.</Constraint>
+      <Constraint>The identity credential fields store opaque encrypted values; encryption and token acquisition are outside this change.</Constraint>
+      <Constraint>When no remote adapter is configured, the Sync view reports that remote operations are unavailable and does not alter local state.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>Add a new Settings destination or rename the existing Preferences and Sync screens.</NonGoal>
+      <NonGoal>Add preferences, implement a remote provider, or change persistence, domain models, schema, or synchronization behavior.</NonGoal>
+      <NonGoal>Redesign the exercises and sets view, help screen, dialogs, or keyboard interaction model.</NonGoal>
+      <NonGoal>Implement Dropbox OAuth, API transport, token encryption or decryption, or a concrete remote-state adapter.</NonGoal>
+      <NonGoal>Change workout record behavior, database contents beyond additive identity tables, or existing dialog interactions.</NonGoal>
+      <NonGoal>Add identity management or account-connection flows to the TUI.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>Opening either Preferences with p or Sync with s returns a view with alternate-screen mode enabled; returning with q or esc keeps the main view in alternate-screen mode.</Criterion>
+      <Criterion>At ordinary terminal sizes, including 100 columns by 40 rows, each secondary screen has one panel whose border expands across the usable width and height with the main view's outer spacing, instead of fitting only its text.</Criterion>
+      <Criterion>Both panels use the main view's normal border, active-panel color, and internal padding. Existing screen titles, actions, status messages, and a return hint remain visible when sufficient space exists.</Criterion>
+      <Criterion>Window-size events recompute the layout for both screens. Output never exceeds the supplied width or height at wide, compact, and tiny terminal sizes.</Criterion>
+      <Criterion>Preference selection still persists and updates displayed weight units; Sync store/load actions and unavailable/error/success messages retain their existing behavior.</Criterion>
+      <Criterion>Navigation tests demonstrate that entering and leaving either screen preserves the existing records browsing state and shortcuts.</Criterion>
+      <Criterion>The help view has the same responsive outer inset as records panels, and the records footer hints are left-aligned rather than centered.</Criterion>
+      <Criterion>Pressing p outside a dialog/help opens Preferences; its g, kg, and lb choices persist and are reflected by records operations.</Criterion>
+      <Criterion>Pressing s outside a dialog/help opens Sync, while gs continues to focus the sets panel. The help view documents p and s.</Criterion>
+      <Criterion>The Sync view offers remote store and load actions through application ports. Without a configured adapter it clearly reports unavailable and leaves local data unchanged.</Criterion>
+      <Criterion>The identity domain has a string ID and a provider enum containing Dropbox. SQLite migrations create identities and identity_credentials, with identity_id, access_token_encrypted, refresh_token_encrypted, access_token_expires_at, and updated_at credential fields and an identity relationship.</Criterion>
+      <Criterion>Tests cover responsive help padding, left-aligned hints, preferences selection and persistence, p/s routing with gs preservation, identity repository persistence, and Sync unavailable behavior.</Criterion>
+      <Criterion>GRACE graph and verification projections describe the added UI, identity, and remote-state boundaries; project tests and static checks pass.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-TUI-PREFERENCES-SYNC />
+      <M-TUI-RECORDS />
+      <M-TUI-RECORDS />
+      <M-TUI-HELP />
+      <M-TUI-STARTER />
+      <M-DOMAIN-IDENTITY />
+      <M-DOMAIN-USER-PREFERENCES />
+      <M-APP-REMOTE-STATE />
+      <M-INFRA-PERSISTENCE-SQLITE />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>go test ./internal/infra/tui/views ./internal/infra/tui/starter</ExpectedCommand>
+      <ExpectedCommand>go test ./...</ExpectedCommand>
+      <ExpectedCommand>go vet ./...</ExpectedCommand>
+      <ExpectedEvidence>Rendering assertions check alternate-screen mode on entry and return, panel width and height, consistent border and spacing, and bounds after resizing at wide, compact, and tiny sizes.</ExpectedEvidence>
+      <ExpectedEvidence>Interaction coverage checks preference persistence, Sync action dispatch and status rendering, q/esc return navigation, and retained records state.</ExpectedEvidence>
+      <ExpectedEvidence>Existing tests pass without setting UPDATE_GOLDEN=1 during validation. Any intentionally changed snapshots receive explicit review.</ExpectedEvidence>
+      <ExpectedEvidence>GRACE validation checks the specification against the current baseline before implementation; target and final evidence are defined later in the approved plan.</ExpectedEvidence>
+      <ExpectedEvidence>Interaction and rendering tests cover help spacing and hint alignment, Preferences/Sync navigation, preserved shortcuts, and weight preference persistence.</ExpectedEvidence>
+      <ExpectedEvidence>Domain and SQLite tests verify identity/provider and credential round trips, migration constraints, and remote-state port behavior without a Dropbox network dependency.</ExpectedEvidence>
+      <ExpectedEvidence>Final GRACE assertions validate the updated graph and verification projections, with normal tests run without snapshot regeneration.</ExpectedEvidence>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>The user confirmed that settings means the existing Sync screen, opened with s.</Assumption>
+      <Assumption>Full screen means a single expanded panel for each destination, matching the main view's terminal presentation and spacing.</Assumption>
+      <Assumption>The current supported weight units g, kg, and lb are the choices shown in Preferences.</Assumption>
+      <Assumption>Each identity has at most one credentials row; credentials use identity_id as their foreign key and cascade deletion with their identity.</Assumption>
+      <Assumption>Dropbox OAuth, encryption mechanisms, and a concrete remote adapter will be handled in a later change. This change defines ports and views but does not perform network synchronization.</Assumption>
+      <Assumption>p and s are available from the records view outside dialogs and help; the existing gs chord retains priority as focus-sets.</Assumption>
+      <Assumption>This approved replacement carries forward C-SETTINGS-REMOTE-SYNC requirements and accounts for source and destination paths for superseded bundle moves.</Assumption>
+    </Assumptions>
+  </C-PREFERENCES-SYNC-FULL-SCREEN-RECONCILED>
+</GraceChangeSpec>

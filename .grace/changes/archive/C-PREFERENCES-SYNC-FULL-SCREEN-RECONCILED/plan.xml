@@ -1,0 +1,729 @@
+<GraceChangePlan graceVersion="4.0" status="applied">
+  <C-PREFERENCES-SYNC-FULL-SCREEN-RECONCILED>
+    <IntentSummary>Execute the approved full-screen UI work sequentially, carrying forward verified constructor/settings implementation and all attributable observed writes so no active predecessor baseline blocks the new rendering.</IntentSummary>
+    <BaselineAssertions>
+      <MustExist>
+        <Value>internal/infra/tui/views/preferences.go</Value>
+        <Value>internal/infra/tui/views/sync.go</Value>
+        <Value>internal/infra/tui/views/records_view.go</Value>
+        <Value>internal/infra/tui/views/preferences_test.go</Value>
+        <Value>internal/infra/tui/views/sync_test.go</Value>
+        <Value>internal/infra/tui/views/records_navigation_test.go</Value>
+        <Value>internal/infra/tui/components/styles.go</Value>
+        <Value>.grace/graph/main.xml</Value>
+        <Value>.grace/verification/main.xml</Value>
+      </MustExist>
+      <MustContain>
+        <File>internal/infra/tui/views/preferences.go</File>
+        <Text>func (m RecordsModel) secondaryFrame(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/sync.go</File>
+        <Text>return m.secondaryFrame(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/records_view.go</File>
+        <Text>return tea.NewView(m.preferencesView())</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/records_navigation_test.go</File>
+        <Text>func TestPreferencesAndSyncNavigation(</Text>
+      </MustContain>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-TUI-RECORDS</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-TUI-PREFERENCES-SYNC</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-TUI-RECORDS</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-TUI-PREFERENCES-SYNC</Anchor>
+      </MustOwn>
+      <MustExist>
+        <Value>internal/domain/user/identity/identity.go</Value>
+        <Value>internal/domain/user/identity/identity_repository.go</Value>
+        <Value>internal/infra/persistence/sqlite/identity_repository.go</Value>
+        <Value>internal/infra/tui/views/preferences.go</Value>
+        <Value>internal/infra/tui/views/sync.go</Value>
+        <Value>migrations/sqlite/20261004160000_identity_sync.up.sql</Value>
+        <Value>migrations/sqlite/20261004160000_identity_sync.down.sql</Value>
+        <Value>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-RECONCILED/spec.xml</Value>
+        <Value>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-RECONCILED/plan.xml</Value>
+        <Value>internal/domain/exercise/exercise_test.go</Value>
+        <Value>internal/domain/exercise/set/set_test.go</Value>
+        <Value>internal/domain/shared/weight_test.go</Value>
+        <Value>internal/domain/user/identity/errors.go</Value>
+        <Value>internal/domain/user/identity/identity_test.go</Value>
+        <Value>internal/domain/user/identity/provider.go</Value>
+        <Value>internal/domain/user/preferences/preferences_test.go</Value>
+        <Value>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-FINAL-SCOPE/spec.xml</Value>
+        <Value>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-FINAL-SCOPE/plan.xml</Value>
+      </MustExist>
+      <MustContain>
+        <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-SCOPED/spec.xml</File>
+        <Text>&lt;Replacement&gt;C-SETTINGS-REMOTE-SYNC-FINAL-SCOPE&lt;/Replacement&gt;</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-RECONCILED/spec.xml</File>
+        <Text>&lt;Replacement&gt;C-SETTINGS-REMOTE-SYNC-SCOPED&lt;/Replacement&gt;</Text>
+      </MustContain>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-TUI-RECORDS</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-TUI-HELP</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-TUI-STARTER</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-TUI-PREFERENCES-SYNC</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-DOMAIN-IDENTITY</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-DOMAIN-USER-PREFERENCES</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-APP-REMOTE-STATE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-INFRA-PERSISTENCE-SQLITE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-TUI-RECORDS</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-TUI-HELP</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-TUI-PREFERENCES-SYNC</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-DOMAIN-IDENTITY</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-APP-REMOTE-STATE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-INFRA-PERSISTENCE-SQLITE</Anchor>
+      </MustOwn>
+      <MustVerify>
+        <Module>M-TUI-RECORDS</Module>
+        <Module>M-TUI-HELP</Module>
+        <Module>M-TUI-PREFERENCES-SYNC</Module>
+        <Module>M-DOMAIN-IDENTITY</Module>
+        <Module>M-APP-REMOTE-STATE</Module>
+        <Module>M-INFRA-PERSISTENCE-SQLITE</Module>
+      </MustVerify>
+      <MustContain>
+        <File>internal/infra/tui/views/records_navigation_test.go</File>
+        <Text>TestPreferencesAndSyncNavigation</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/persistence/sqlite/identity_repository_test.go</File>
+        <Text>TestIdentityRepository</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/help_test.go</File>
+        <Text>home/gg</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/graph/main.xml</File>
+        <Text>Preferences and Sync views</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/verification/main.xml</File>
+        <Text>TestPreferencesAndSyncNavigation</Text>
+      </MustContain>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-DOMAIN-EXERCISE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-DOMAIN-SET</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-DOMAIN-SHARED-WEIGHT</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-DOMAIN-EXERCISE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-DOMAIN-SET</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-DOMAIN-SHARED-WEIGHT</Anchor>
+      </MustOwn>
+      <MustContain>
+        <File>AGENTS.md</File>
+        <Text>Initialize every domain model through a constructor function</Text>
+      </MustContain>
+      <MustContain>
+        <File>AGENTS.md</File>
+        <Text>keep each enum in its own source file</Text>
+      </MustContain>
+      <MustContain>
+        <File>AGENTS.md</File>
+        <Text>Define domain errors only in package's errors.go file.</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/exercise/exercise.go</File>
+        <Text>func NewExercise(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/exercise/set/set.go</File>
+        <Text>func NewSet(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/shared/weight.go</File>
+        <Text>func NewWeight(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/shared/weight_unit.go</File>
+        <Text>func NewWeightUnit(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/user/identity/identity.go</File>
+        <Text>func NewIdentity(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/user/identity/identity_credentials.go</File>
+        <Text>func NewIdentityCredentials(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/user/identity/provider.go</File>
+        <Text>func NewProvider(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/user/preferences/preferences.go</File>
+        <Text>func NewPreferences(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/exercise/exercise_test.go</File>
+        <Text>TestNewExerciseValidatesIDAndFields</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/exercise/set/set_test.go</File>
+        <Text>TestNewSetValidatesIDsAndValues</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/shared/weight_test.go</File>
+        <Text>TestNewWeightAndWeightUnitValidateValues</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/user/identity/identity_test.go</File>
+        <Text>TestNewIdentityAndCredentialsValidateValues</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/user/preferences/preferences_test.go</File>
+        <Text>TestNewPreferencesValidatesWeightUnit</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-FINAL-SCOPE/spec.xml</File>
+        <Text>&lt;Replacement&gt;C-DOMAIN-MODEL-CONSTRUCTORS&lt;/Replacement&gt;</Text>
+      </MustContain>
+      <MustVerify>
+        <Module>M-DOMAIN-EXERCISE</Module>
+      </MustVerify>
+      <MustVerify>
+        <Module>M-DOMAIN-SET</Module>
+      </MustVerify>
+      <MustVerify>
+        <Module>M-DOMAIN-SHARED-WEIGHT</Module>
+      </MustVerify>
+    </BaselineAssertions>
+    <TargetAssertions>
+      <MustExist>
+        <Value>internal/infra/tui/views/preferences.go</Value>
+        <Value>internal/infra/tui/views/sync.go</Value>
+        <Value>internal/infra/tui/views/records_view.go</Value>
+      </MustExist>
+      <MustContain>
+        <File>internal/infra/tui/views/preferences_test.go</File>
+        <Text>func TestPreferencesFullScreenLayout(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/sync_test.go</File>
+        <Text>func TestSyncFullScreenLayout(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/records_navigation_test.go</File>
+        <Text>func TestSecondaryScreenStatePreservation(</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/graph/main.xml</File>
+        <Text>Preferences and Sync remain in the alternate terminal screen</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/verification/main.xml</File>
+        <Text>TestPreferencesFullScreenLayout</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/verification/main.xml</File>
+        <Text>TestSyncFullScreenLayout</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/verification/main.xml</File>
+        <Text>TestSecondaryScreenStatePreservation</Text>
+      </MustContain>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-TUI-RECORDS</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-TUI-PREFERENCES-SYNC</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-TUI-RECORDS</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-TUI-PREFERENCES-SYNC</Anchor>
+      </MustOwn>
+      <MustVerify>
+        <Module>M-TUI-RECORDS</Module>
+        <Module>M-TUI-PREFERENCES-SYNC</Module>
+      </MustVerify>
+      <MustPassCommand>
+        <Command budgetSeconds="120">go test ./...</Command>
+        <Command budgetSeconds="60">go vet ./...</Command>
+      </MustPassCommand>
+      <MustExist>
+        <Value>internal/domain/user/identity/identity.go</Value>
+        <Value>internal/domain/user/identity/identity_repository.go</Value>
+        <Value>internal/infra/persistence/sqlite/identity_repository.go</Value>
+        <Value>internal/infra/tui/views/preferences.go</Value>
+        <Value>internal/infra/tui/views/sync.go</Value>
+        <Value>migrations/sqlite/20261004160000_identity_sync.up.sql</Value>
+        <Value>migrations/sqlite/20261004160000_identity_sync.down.sql</Value>
+        <Value>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-RECONCILED/spec.xml</Value>
+        <Value>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-RECONCILED/plan.xml</Value>
+        <Value>internal/domain/exercise/exercise_test.go</Value>
+        <Value>internal/domain/exercise/set/set_test.go</Value>
+        <Value>internal/domain/shared/weight_test.go</Value>
+        <Value>internal/domain/user/identity/errors.go</Value>
+        <Value>internal/domain/user/identity/identity_test.go</Value>
+        <Value>internal/domain/user/identity/provider.go</Value>
+        <Value>internal/domain/user/preferences/preferences_test.go</Value>
+        <Value>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-FINAL-SCOPE/spec.xml</Value>
+        <Value>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-FINAL-SCOPE/plan.xml</Value>
+      </MustExist>
+      <MustContain>
+        <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-SCOPED/spec.xml</File>
+        <Text>&lt;Replacement&gt;C-SETTINGS-REMOTE-SYNC-FINAL-SCOPE&lt;/Replacement&gt;</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-RECONCILED/spec.xml</File>
+        <Text>&lt;Replacement&gt;C-SETTINGS-REMOTE-SYNC-SCOPED&lt;/Replacement&gt;</Text>
+      </MustContain>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-TUI-RECORDS</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-TUI-HELP</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-TUI-STARTER</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-TUI-PREFERENCES-SYNC</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-DOMAIN-IDENTITY</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-DOMAIN-USER-PREFERENCES</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-APP-REMOTE-STATE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-INFRA-PERSISTENCE-SQLITE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-TUI-RECORDS</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-TUI-HELP</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-TUI-PREFERENCES-SYNC</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-DOMAIN-IDENTITY</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-APP-REMOTE-STATE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-INFRA-PERSISTENCE-SQLITE</Anchor>
+      </MustOwn>
+      <MustVerify>
+        <Module>M-TUI-RECORDS</Module>
+        <Module>M-TUI-HELP</Module>
+        <Module>M-TUI-PREFERENCES-SYNC</Module>
+        <Module>M-DOMAIN-IDENTITY</Module>
+        <Module>M-APP-REMOTE-STATE</Module>
+        <Module>M-INFRA-PERSISTENCE-SQLITE</Module>
+      </MustVerify>
+      <MustContain>
+        <File>internal/infra/tui/views/records_navigation_test.go</File>
+        <Text>TestPreferencesAndSyncNavigation</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/persistence/sqlite/identity_repository_test.go</File>
+        <Text>TestIdentityRepository</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/help_test.go</File>
+        <Text>home/gg</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/graph/main.xml</File>
+        <Text>Preferences and Sync views</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/verification/main.xml</File>
+        <Text>TestPreferencesAndSyncNavigation</Text>
+      </MustContain>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-DOMAIN-EXERCISE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-DOMAIN-SET</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-DOMAIN-SHARED-WEIGHT</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-DOMAIN-EXERCISE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-DOMAIN-SET</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-DOMAIN-SHARED-WEIGHT</Anchor>
+      </MustOwn>
+      <MustContain>
+        <File>AGENTS.md</File>
+        <Text>Initialize every domain model through a constructor function</Text>
+      </MustContain>
+      <MustContain>
+        <File>AGENTS.md</File>
+        <Text>keep each enum in its own source file</Text>
+      </MustContain>
+      <MustContain>
+        <File>AGENTS.md</File>
+        <Text>Define domain errors only in package's errors.go file.</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/exercise/exercise.go</File>
+        <Text>func NewExercise(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/exercise/set/set.go</File>
+        <Text>func NewSet(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/shared/weight.go</File>
+        <Text>func NewWeight(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/shared/weight_unit.go</File>
+        <Text>func NewWeightUnit(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/user/identity/identity.go</File>
+        <Text>func NewIdentity(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/user/identity/identity_credentials.go</File>
+        <Text>func NewIdentityCredentials(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/user/identity/provider.go</File>
+        <Text>func NewProvider(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/user/preferences/preferences.go</File>
+        <Text>func NewPreferences(</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/exercise/exercise_test.go</File>
+        <Text>TestNewExerciseValidatesIDAndFields</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/exercise/set/set_test.go</File>
+        <Text>TestNewSetValidatesIDsAndValues</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/shared/weight_test.go</File>
+        <Text>TestNewWeightAndWeightUnitValidateValues</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/user/identity/identity_test.go</File>
+        <Text>TestNewIdentityAndCredentialsValidateValues</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/user/preferences/preferences_test.go</File>
+        <Text>TestNewPreferencesValidatesWeightUnit</Text>
+      </MustContain>
+      <MustContain>
+        <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-FINAL-SCOPE/spec.xml</File>
+        <Text>&lt;Replacement&gt;C-DOMAIN-MODEL-CONSTRUCTORS&lt;/Replacement&gt;</Text>
+      </MustContain>
+      <MustVerify>
+        <Module>M-DOMAIN-EXERCISE</Module>
+      </MustVerify>
+      <MustVerify>
+        <Module>M-DOMAIN-SET</Module>
+      </MustVerify>
+      <MustVerify>
+        <Module>M-DOMAIN-SHARED-WEIGHT</Module>
+      </MustVerify>
+    </TargetAssertions>
+    <DurableScope>
+      <GraphAnchors>
+        <M-TUI-RECORDS />
+        <M-TUI-PREFERENCES-SYNC />
+        <M-TUI-HELP />
+        <M-TUI-STARTER />
+        <M-DOMAIN-IDENTITY />
+        <M-DOMAIN-USER-PREFERENCES />
+        <M-APP-REMOTE-STATE />
+        <M-INFRA-PERSISTENCE-SQLITE />
+        <M-DOMAIN-EXERCISE />
+        <M-DOMAIN-SET />
+        <M-DOMAIN-SHARED-WEIGHT />
+      </GraphAnchors>
+      <VerificationAnchors>
+        <V-M-TUI-RECORDS />
+        <V-M-TUI-PREFERENCES-SYNC />
+        <V-M-TUI-HELP />
+        <V-M-DOMAIN-IDENTITY />
+        <V-M-APP-REMOTE-STATE />
+        <V-M-INFRA-PERSISTENCE-SQLITE />
+        <V-M-DOMAIN-EXERCISE />
+        <V-M-DOMAIN-SET />
+        <V-M-DOMAIN-SHARED-WEIGHT />
+      </VerificationAnchors>
+      <GraphDocuments>
+        <GD-MAIN />
+      </GraphDocuments>
+      <VerificationDocuments>
+        <VD-MAIN />
+      </VerificationDocuments>
+    </DurableScope>
+    <ObservedWriteScope>
+      <File>internal/infra/tui/views/records_view.go</File>
+      <File>internal/infra/tui/views/preferences.go</File>
+      <File>internal/infra/tui/views/sync.go</File>
+      <File>internal/infra/tui/views/preferences_test.go</File>
+      <File>internal/infra/tui/views/sync_test.go</File>
+      <File>internal/infra/tui/views/records_navigation_test.go</File>
+      <File>.grace/graph/main.xml</File>
+      <File>.grace/verification/main.xml</File>
+      <File>.grace/changes/active/C-PREFERENCES-SYNC-FULL-SCREEN/spec.xml</File>
+      <File>.grace/changes/active/C-PREFERENCES-SYNC-FULL-SCREEN/plan.xml</File>
+      <File>.grace/changes/archive/C-PREFERENCES-SYNC-FULL-SCREEN/spec.xml</File>
+      <File>.grace/changes/archive/C-PREFERENCES-SYNC-FULL-SCREEN/plan.xml</File>
+      <File>.grace/changes/active/C-VIM-RECORDS-JUMPS/spec.xml</File>
+      <File>.grace/changes/active/C-VIM-RECORDS-JUMPS/plan.xml</File>
+      <File>.grace/changes/archive/C-VIM-RECORDS-JUMPS/spec.xml</File>
+      <File>.grace/changes/archive/C-VIM-RECORDS-JUMPS/plan.xml</File>
+      <File>.grace/changes/active/C-SETTINGS-REMOTE-SYNC/spec.xml</File>
+      <File>.grace/changes/active/C-SETTINGS-REMOTE-SYNC/plan.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC/spec.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC/plan.xml</File>
+      <File>.grace/changes/active/C-SETTINGS-REMOTE-SYNC-RECONCILED/spec.xml</File>
+      <File>.grace/changes/active/C-SETTINGS-REMOTE-SYNC-RECONCILED/plan.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-RECONCILED/spec.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-RECONCILED/plan.xml</File>
+      <File>migrations/sqlite/20261004160000_identity_sync.up.sql</File>
+      <File>migrations/sqlite/20261004160000_identity_sync.down.sql</File>
+      <File>internal/domain/user/identity/identity.go</File>
+      <File>internal/domain/user/identity/identity_repository.go</File>
+      <File>internal/domain/user/identity/identity_credentials.go</File>
+      <File>internal/domain/user/identity/identity_credentials_repository.go</File>
+      <File>internal/domain/user/preferences/preferences.go</File>
+      <File>internal/domain/user/preferences/preferences_repository.go</File>
+      <File>internal/app/ports/remote_state.go</File>
+      <File>internal/app/command/update_preferences.go</File>
+      <File>internal/infra/persistence/sqlite/identity_repository.go</File>
+      <File>internal/infra/persistence/sqlite/identity_credentials_repository.go</File>
+      <File>internal/infra/persistence/sqlite/identity_repository_test.go</File>
+      <File>internal/infra/tui/app.go</File>
+      <File>internal/infra/tui/starter/model.go</File>
+      <File>internal/infra/tui/starter/model_test.go</File>
+      <File>internal/infra/tui/views/records.go</File>
+      <File>internal/infra/tui/views/records_keys.go</File>
+      <File>internal/infra/tui/views/records_update.go</File>
+      <File>internal/infra/tui/views/records_help.go</File>
+      <File>internal/infra/tui/views/help.go</File>
+      <File>internal/infra/tui/views/help_test.go</File>
+      <File>cmd/cli/bootstrap.go</File>
+      <File>.grace/graph/index.xml</File>
+      <File>.grace/verification/index.xml</File>
+      <File>internal/infra/tui/views/testdata/compact.golden.json</File>
+      <File>internal/infra/tui/views/testdata/compact_dialog.golden.json</File>
+      <File>internal/infra/tui/views/testdata/exercise_dialog.golden.json</File>
+      <File>internal/infra/tui/views/testdata/help.golden.json</File>
+      <File>internal/infra/tui/views/testdata/help_compact.golden.json</File>
+      <File>internal/infra/tui/views/testdata/insert.golden.json</File>
+      <File>internal/infra/tui/views/testdata/pagination.golden.json</File>
+      <File>internal/infra/tui/views/testdata/records.golden.json</File>
+      <File>internal/infra/tui/views/testdata/set_dialog.golden.json</File>
+      <File>internal/infra/tui/views/testdata/unicode_input.golden.json</File>
+      <File>internal/infra/tui/views/testdata/wide.golden.json</File>
+      <File>.grace/changes/active/C-SETTINGS-REMOTE-SYNC-SCOPED/spec.xml</File>
+      <File>.grace/changes/active/C-SETTINGS-REMOTE-SYNC-SCOPED/plan.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-SCOPED/spec.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-SCOPED/plan.xml</File>
+      <File>AGENTS.md</File>
+      <File>internal/domain/exercise/errors.go</File>
+      <File>internal/domain/exercise/exercise.go</File>
+      <File>internal/domain/exercise/exercise_repository.go</File>
+      <File>internal/domain/exercise/exercise_test.go</File>
+      <File>internal/domain/exercise/set/errors.go</File>
+      <File>internal/domain/exercise/set/exercise_weight.go</File>
+      <File>internal/domain/exercise/set/set.go</File>
+      <File>internal/domain/exercise/set/set_repository.go</File>
+      <File>internal/domain/exercise/set/set_test.go</File>
+      <File>internal/domain/shared/weight.go</File>
+      <File>internal/domain/shared/weight_test.go</File>
+      <File>internal/domain/shared/weight_unit.go</File>
+      <File>internal/domain/user/identity/errors.go</File>
+      <File>internal/domain/user/identity/identity_test.go</File>
+      <File>internal/domain/user/identity/provider.go</File>
+      <File>internal/domain/user/preferences/preferences_test.go</File>
+      <File>internal/infra/persistence/sqlite/exercise_repository.go</File>
+      <File>internal/infra/persistence/sqlite/preferences_repository.go</File>
+      <File>internal/infra/persistence/sqlite/set_repository.go</File>
+      <File>internal/infra/tui/views/records_store.go</File>
+      <File>.grace/changes/active/C-SETTINGS-REMOTE-SYNC-FINAL-SCOPE/spec.xml</File>
+      <File>.grace/changes/active/C-SETTINGS-REMOTE-SYNC-FINAL-SCOPE/plan.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-FINAL-SCOPE/spec.xml</File>
+      <File>.grace/changes/archive/C-SETTINGS-REMOTE-SYNC-FINAL-SCOPE/plan.xml</File>
+      <File>.grace/changes/active/C-DOMAIN-MODEL-CONSTRUCTORS/spec.xml</File>
+      <File>.grace/changes/active/C-DOMAIN-MODEL-CONSTRUCTORS/plan.xml</File>
+      <File>.grace/changes/archive/C-DOMAIN-MODEL-CONSTRUCTORS/spec.xml</File>
+      <File>.grace/changes/archive/C-DOMAIN-MODEL-CONSTRUCTORS/plan.xml</File>
+      <File>.grace/changes/active/C-PREFERENCES-SYNC-FULL-SCREEN-RECONCILED/spec.xml</File>
+      <File>.grace/changes/active/C-PREFERENCES-SYNC-FULL-SCREEN-RECONCILED/plan.xml</File>
+      <File>.grace/changes/archive/C-PREFERENCES-SYNC-FULL-SCREEN-RECONCILED/spec.xml</File>
+      <File>.grace/changes/archive/C-PREFERENCES-SYNC-FULL-SCREEN-RECONCILED/plan.xml</File>
+    </ObservedWriteScope>
+    <ImplementationPlan>
+      <T-001>
+        <Title>Verify the retained constructor and settings implementation</Title>
+        <DependsOn />
+        <AcceptanceCriteria>
+          <Criterion>Confirm all carried-forward constructor, domain boundary, identity persistence, help, preferences, and Sync target assertions and leaf command evidence already pass. Preserve their implementation and existing workspace edits.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./...</Command>
+          <Command>go vet ./...</Command>
+        </Verification>
+      </T-001>
+      <T-002>
+        <Title>Render Preferences and Sync as full-screen destinations</Title>
+        <DependsOn>T-001</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>In records_view.go, enable alternate-screen mode for both secondary views, preserving the main view's terminal configuration where appropriate.</Criterion>
+          <Criterion>In the shared secondaryFrame helper, derive the usable panel dimensions from the current terminal size minus outer spacing and the border/padding frame, and explicitly expand the panel in both dimensions.</Criterion>
+          <Criterion>Reuse BaseStyle and PanelSpacing, with the active-panel border color and one-row vertical and two-column horizontal outer spacing when space permits.</Criterion>
+          <Criterion>Keep each existing title, action list, status message, and return hint; account for their space before rendering, constrain long text and tiny terminal output to bounds, and recompute dimensions on resize.</Criterion>
+          <Criterion>Keep preference persistence, weight conversion, remote dispatch, and keyboard handlers unchanged. Preserve existing edits and synchronize file-local module contracts, maps, and block anchors for edited governed files.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./internal/infra/tui/views ./internal/infra/tui/starter</Command>
+        </Verification>
+      </T-002>
+      <T-003>
+        <Title>Verify full-screen dimensions, terminal modes, and retained interactions</Title>
+        <DependsOn>T-002</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Add TestPreferencesFullScreenLayout and TestSyncFullScreenLayout in their existing test files. Assert alternate-screen mode and exact expanded border extents and outer spacing at 100x40, rather than checking only that output is smaller than the terminal.</Criterion>
+          <Criterion>Exercise wide, compact, and tiny sizes, including zero dimensions, and resize while each screen is active. Assert output bounds, useful content where space allows, and long/error status bounds.</Criterion>
+          <Criterion>Add TestSecondaryScreenStatePreservation in records_navigation_test.go. From both active panels, verify p/s entry and q/esc return, alternate-screen mode across transitions, and retained selections, page, and scroll state without unintended record actions.</Criterion>
+          <Criterion>Retain coverage for preference persistence and visible weight conversion, Sync store/load dispatch and unavailable/error/success status messages, and the existing ge/gs shortcuts.</Criterion>
+          <Criterion>Use repository-compliant Go formatting and meaningful rendering or interaction assertions. Do not regenerate existing records/help/dialog snapshots, because their intended rendering is outside this change.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./internal/infra/tui/views ./internal/infra/tui/starter</Command>
+        </Verification>
+      </T-003>
+      <T-004>
+        <Title>Apply scoped GRACE updates and verify the integrated change</Title>
+        <DependsOn>T-003</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Update only M-TUI-RECORDS and M-TUI-PREFERENCES-SYNC in graph/main.xml to describe alternate-screen routing and responsive expanded frames. Include the sentence fragment required by TargetAssertions.</Criterion>
+          <Criterion>Update only V-M-TUI-RECORDS and V-M-TUI-PREFERENCES-SYNC in verification/main.xml with the layout, terminal-mode, resize, and state-preservation scenarios and named test evidence.</Criterion>
+          <Criterion>Retain existing graph and verification ownership; no index or context writes are required. Preserve all unrelated projection entries.</Criterion>
+          <Criterion>Pass the full test suite and vet without UPDATE_GOLDEN=1, and use selected target and final GRACE checks externally through grace-execute before applying and archiving this bundle.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go test ./...</Command>
+          <Command>go vet ./...</Command>
+        </Verification>
+      </T-004>
+    </ImplementationPlan>
+    <ExecutionNotes>
+      <Note>The user approved the full-screen specification and plan, invoked grace-execute, and reiterated the instruction to make the actual UI full screen. This replacement retains the approved requirements and reconciles overlapping lifecycle scopes; it does not add product requirements.</Note>
+      <Note>Execute sequentially. Both source bundles are superseded and archived with explicit replacement references, rather than marking the constructor prerequisite applied before full-screen implementation. Approved source assertions, scopes, and tasks remain unchanged in their archived plans.</Note>
+      <Note>Constructor/settings target assertions and their full test and vet commands passed before reconciliation. T-001 verifies that retained implementation; T-002 through T-004 implement, test, and durably describe only the full-screen change.</Note>
+      <Note>Existing observed changes are covered by the inherited scope. Preserve unrelated user edits. Only the two full-screen graph modules and verification entries require further durable updates; the wider inherited durable scope accounts for already verified predecessor projection changes.</Note>
+      <Note>Reference-host warm-cache tests and vet passed in approximately 0.3 and 0.15 seconds. Explicit 120-second test and 60-second vet budgets retain recompilation headroom. Final gate commands contain leaf project evidence only.</Note>
+      <Note>Current and selected baseline assertions are pre-write gates. Run selected target and final checks after source and durable writes, and obtain explicit apply confirmation before marking this replacement applied and archiving it.</Note>
+    </ExecutionNotes>
+  </C-PREFERENCES-SYNC-FULL-SCREEN-RECONCILED>
+</GraceChangePlan>
