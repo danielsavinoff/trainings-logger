@@ -1,6 +1,6 @@
 // START_MODULE_CONTRACT
 //   PURPOSE: Authorize a real Dropbox account with desktop PKCE.
-//   SCOPE: Authorization URLs, browser launch, code exchange, and protected credentials.
+//   SCOPE: Authorization URLs, browser launch, code exchange, and local credentials.
 //   DEPENDS: M-DOMAIN-IDENTITY, M-APP-QUESTIONNAIRE
 //   LINKS: M-INFRA-DROPBOX-AUTH, V-M-INFRA-DROPBOX-AUTH
 //   MAP_MODE: SUMMARY
@@ -10,7 +10,7 @@
 //   Linker - hold Dropbox configuration and external adapters
 //   NewLinker - configure real Dropbox endpoints and browser launcher
 //   Begin - create a fresh PKCE authorization session
-//   exchange - exchange an authorization code and encrypt returned tokens
+//   exchange - exchange an authorization code for account credentials
 // END_MODULE_MAP
 
 package dropbox
@@ -36,19 +36,14 @@ import (
 // START_BLOCK_DROPBOX_AUTHORIZATION
 type Linker struct {
 	appKey      string
-	keyPath     string
 	tokenURL    string
 	client      *http.Client
 	openBrowser func(context.Context, string) error
 }
 
-func NewLinker(
-	appKey string,
-	keyPath string,
-) *Linker {
+func NewLinker(appKey string) *Linker {
 	return &Linker{
 		appKey:   strings.TrimSpace(appKey),
-		keyPath:  keyPath,
 		tokenURL: "https://api.dropboxapi.com/oauth2/token",
 		client: &http.Client{
 			Timeout: 30 * time.Second,
@@ -190,31 +185,11 @@ func (l *Linker) exchange(
 		return ports.LinkedIdentity{}, err
 	}
 
-	key, err := credentialCipher(l.keyPath)
-	if err != nil {
-		return ports.LinkedIdentity{}, err
-	}
-	access, err := encryptToken(
-		key,
-		result.AccessToken,
-		"dropbox/access/"+account.ID,
-	)
-	if err != nil {
-		return ports.LinkedIdentity{}, err
-	}
-	refresh, err := encryptToken(
-		key,
-		result.RefreshToken,
-		"dropbox/refresh/"+account.ID,
-	)
-	if err != nil {
-		return ports.LinkedIdentity{}, err
-	}
 	updated := time.Now().UTC()
 	credentials, err := identity.NewIdentityCredentials(
 		account.ID,
-		access,
-		refresh,
+		result.AccessToken,
+		result.RefreshToken,
 		updated.Add(time.Duration(seconds)*time.Second),
 		updated,
 	)

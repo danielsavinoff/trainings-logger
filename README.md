@@ -24,14 +24,12 @@ go run ./cmd/cli
 
 Sign-in opens the browser and asks you to paste the authorization code back into
 the terminal. The application uses PKCE and needs no app secret or redirect URI.
-Access and refresh tokens are encrypted locally using a private key file beside
-the database in the operating system's `trainlog` configuration directory.
-
-If the account was linked before file permissions were added, press `r` and link
-Dropbox again to approve the expanded permissions.
+Access and refresh tokens stay in the local SQLite database `data.db` in the operating
+system's `trainingslogger` configuration directory. The application restricts database
+files to the current user.
 
 From records, `s` saves exercises, sets, and optional preferences to
-`/trainlog.json` in the app's Dropbox folder. `l` restores that backup, replacing
+`/trainings-logger/data.json` in the app's Dropbox folder. `l` restores that backup, replacing
 local exercises, sets, and preferences. Identity credentials stay local. Saving
 again overwrites the remote backup; this is manual backup and restore.
 

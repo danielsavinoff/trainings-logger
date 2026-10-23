@@ -21,8 +21,8 @@ func (r *IdentityCredentialsRepository) Save(
 ) error {
 	validated, err := identity.NewIdentityCredentials(
 		value.IdentityID,
-		value.AccessTokenEncrypted,
-		value.RefreshTokenEncrypted,
+		value.AccessToken,
+		value.RefreshToken,
 		value.AccessTokenExpiresAt,
 		value.UpdatedAt,
 	)
@@ -36,14 +36,14 @@ func (r *IdentityCredentialsRepository) Save(
 	).ExecContext(
 		ctx,
 		`INSERT INTO identity_credentials
-		(identity_id, access_token_encrypted, refresh_token_encrypted, access_token_expires_at, updated_at)
+		(identity_id, access_token, refresh_token, access_token_expires_at, updated_at)
 		VALUES (?, ?, ?, ?, ?) ON CONFLICT(identity_id) DO UPDATE SET
-		access_token_encrypted = excluded.access_token_encrypted,
-		refresh_token_encrypted = excluded.refresh_token_encrypted,
+		access_token = excluded.access_token,
+		refresh_token = excluded.refresh_token,
 		access_token_expires_at = excluded.access_token_expires_at, updated_at = excluded.updated_at`,
 		validated.IdentityID,
-		validated.AccessTokenEncrypted,
-		validated.RefreshTokenEncrypted,
+		validated.AccessToken,
+		validated.RefreshToken,
 		validated.AccessTokenExpiresAt.UTC().Format(time.RFC3339Nano),
 		validated.UpdatedAt.UTC().Format(time.RFC3339Nano),
 	)
@@ -55,8 +55,8 @@ func (r *IdentityCredentialsRepository) FindByID(
 	id string,
 ) (identity.IdentityCredentials, error) {
 	var identityID string
-	var accessTokenEncrypted string
-	var refreshTokenEncrypted string
+	var accessToken string
+	var refreshToken string
 	var expiry string
 	var updated string
 	err := persistence.ExecutorFromContext(
@@ -64,13 +64,13 @@ func (r *IdentityCredentialsRepository) FindByID(
 		r.db,
 	).QueryRowContext(
 		ctx,
-		`SELECT identity_id, access_token_encrypted, refresh_token_encrypted,
+		`SELECT identity_id, access_token, refresh_token,
 		access_token_expires_at, updated_at FROM identity_credentials WHERE identity_id = ?`,
 		id,
 	).Scan(
 		&identityID,
-		&accessTokenEncrypted,
-		&refreshTokenEncrypted,
+		&accessToken,
+		&refreshToken,
 		&expiry,
 		&updated,
 	)
@@ -95,8 +95,8 @@ func (r *IdentityCredentialsRepository) FindByID(
 
 	return identity.NewIdentityCredentials(
 		identityID,
-		accessTokenEncrypted,
-		refreshTokenEncrypted,
+		accessToken,
+		refreshToken,
 		expiresAt,
 		updatedAt,
 	)

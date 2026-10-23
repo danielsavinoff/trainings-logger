@@ -9,6 +9,6 @@
     <User>Individuals tracking their workouts in a terminal.</User>
   </Users>
   <Constraints>
-    <Constraint>Persist workout data locally in SQLite at os.UserConfigDir()/trainlog/trainlog.db. Preserve existing exercise and set validation, weight-unit handling, and transactional writes. Additional product or compliance constraints have not been specified.</Constraint>
+    <Constraint>Persist workout data locally in SQLite at os.UserConfigDir()/trainingslogger/data.db. Preserve existing exercise and set validation, weight-unit handling, and transactional writes. Additional product or compliance constraints have not been specified.</Constraint>
   </Constraints>
 </GraceRequirements>

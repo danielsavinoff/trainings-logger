@@ -3,6 +3,7 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -16,7 +17,31 @@ func Open(ctx context.Context) (*sql.DB, error) {
 		return nil, err
 	}
 
-	return OpenFile(ctx, filepath.Join(dir, "trainlog", "trainlog.db"))
+	directory := filepath.Join(
+		dir,
+		"trainingslogger",
+	)
+	if err := os.MkdirAll(
+		directory,
+		0700,
+	); err != nil {
+		return nil, err
+	}
+
+	if err := os.Chmod(
+		directory,
+		0700,
+	); err != nil {
+		return nil, err
+	}
+
+	return OpenFile(
+		ctx,
+		filepath.Join(
+			directory,
+			"data.db",
+		),
+	)
 }
 
 func OpenFile(ctx context.Context, path string) (*sql.DB, error) {
@@ -25,8 +50,36 @@ func OpenFile(ctx context.Context, path string) (*sql.DB, error) {
 		return nil, err
 	}
 
-	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
+	if err := os.MkdirAll(
+		filepath.Dir(path),
+		0700,
+	); err != nil {
 		return nil, err
+	}
+
+	file, err := os.OpenFile(
+		path,
+		os.O_RDWR|os.O_CREATE,
+		0600,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := file.Close(); err != nil {
+		return nil, err
+	}
+
+	for _, filename := range []string{path, path + "-wal", path + "-shm"} {
+		if err := os.Chmod(
+			filename,
+			0600,
+		); err != nil && !errors.Is(
+			err,
+			os.ErrNotExist,
+		) {
+			return nil, err
+		}
 	}
 
 	dsn := (&url.URL{Scheme: "file", Path: filepath.ToSlash(path)}).String() +

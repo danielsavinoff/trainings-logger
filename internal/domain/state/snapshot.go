@@ -1,21 +1,18 @@
 // START_MODULE_CONTRACT
-//   PURPOSE: Define validated, versioned workout backups without local credentials.
-//   SCOPE: Snapshot validation and remote transfer ports.
+//   PURPOSE: Represent validated, versioned workout snapshots without local credentials.
+//   SCOPE: Snapshot construction and cross-model invariants, independent of storage.
 //   DEPENDS: M-DOMAIN-EXERCISE, M-DOMAIN-SET, M-DOMAIN-USER-PREFERENCES
-//   LINKS: M-APP-REMOTE-STATE, V-M-APP-REMOTE-STATE
+//   LINKS: M-DOMAIN-STATE, V-M-DOMAIN-STATE
 //   MAP_MODE: SUMMARY
 // END_MODULE_CONTRACT
 // START_MODULE_MAP
-//   RemoteStateSnapshot - carry versioned workouts and optional preferences
-//   NewRemoteStateSnapshot - validate and reconstruct a complete backup
-//   RemoteStateStore - upload and download snapshots
+//   Snapshot - carry versioned workouts and optional preferences
+//   NewSnapshot - validate and reconstruct a complete snapshot
 // END_MODULE_MAP
 
-package ports
+package state
 
 import (
-	"context"
-	"errors"
 	"math"
 
 	"github.com/danielsavinoff/trainings-logger/internal/domain/exercise"
@@ -23,26 +20,26 @@ import (
 	"github.com/danielsavinoff/trainings-logger/internal/domain/user/preferences"
 )
 
-// START_BLOCK_REMOTE_SNAPSHOT
-const RemoteStateVersion = 1
-
-type RemoteStateSnapshot struct {
-	Version     int                      `json:"version"`
+// START_BLOCK_SNAPSHOT
+type Snapshot struct {
+	Version     Version                  `json:"version"`
 	Exercises   []exercise.Exercise      `json:"exercises"`
 	Sets        []set.Set                `json:"sets"`
 	Preferences *preferences.Preferences `json:"preferences"`
 }
 
-func NewRemoteStateSnapshot(
-	version int,
+func NewSnapshot(
+	version Version,
 	exercises []exercise.Exercise,
 	sets []set.Set,
 	prefs *preferences.Preferences,
-) (RemoteStateSnapshot, error) {
-	if version != RemoteStateVersion {
-		return RemoteStateSnapshot{}, errors.New("unsupported backup version")
+) (Snapshot, error) {
+	validatedVersion, err := NewVersion(int(version))
+	if err != nil {
+		return Snapshot{}, err
 	}
-	result := RemoteStateSnapshot{Version: version}
+
+	result := Snapshot{Version: validatedVersion}
 	ids := make(map[string]bool)
 	names := make(map[string]bool)
 	for _, item := range exercises {
@@ -52,19 +49,22 @@ func NewRemoteStateSnapshot(
 			item.BodyWeightShare,
 		)
 		if err != nil || ids[item.ID] || names[item.Name] || math.IsNaN(float64(item.BodyWeightShare)) {
-			return RemoteStateSnapshot{}, errors.New("backup contains invalid or duplicate exercises")
+			return Snapshot{}, ErrInvalidExercises
 		}
+
 		ids[item.ID], names[item.Name] = true, true
 		result.Exercises = append(
 			result.Exercises,
 			validated,
 		)
 	}
+
 	setIDs := make(map[string]bool)
 	for _, item := range sets {
 		if !ids[item.ExerciseID] || setIDs[item.ID] || item.CreatedAt.IsZero() || item.CreatedAt.Year() < 1 || item.CreatedAt.Year() > 9999 {
-			return RemoteStateSnapshot{}, errors.New("backup contains invalid set references, IDs, or timestamps")
+			return Snapshot{}, ErrInvalidSetReferences
 		}
+
 		validated, err := set.NewSet(
 			item.ID,
 			item.ExerciseID,
@@ -75,40 +75,26 @@ func NewRemoteStateSnapshot(
 			&item.CreatedAt,
 		)
 		if err != nil {
-			return RemoteStateSnapshot{}, errors.New("backup contains invalid workout sets")
+			return Snapshot{}, ErrInvalidSets
 		}
-		grams, err := validated.ExerciseWeight.Weight.Grams()
-		if err != nil || math.IsInf(
-			grams,
-			0,
-		) || math.Round(grams) >= math.Exp2(63) {
-			return RemoteStateSnapshot{}, errors.New("backup weight exceeds local storage limits")
-		}
+
 		setIDs[item.ID] = true
 		result.Sets = append(
 			result.Sets,
 			validated,
 		)
 	}
+
 	if prefs != nil {
 		validated, err := preferences.NewPreferences(prefs.WeightUnit)
 		if err != nil {
-			return RemoteStateSnapshot{}, errors.New("backup contains invalid preferences")
+			return Snapshot{}, ErrInvalidPreferences
 		}
+
 		result.Preferences = &validated
 	}
 
 	return result, nil
 }
 
-type RemoteStateStore interface {
-	Store(
-		context.Context,
-		RemoteStateSnapshot,
-	) error
-	Load(
-		context.Context,
-	) (RemoteStateSnapshot, error)
-}
-
-// END_BLOCK_REMOTE_SNAPSHOT
+// END_BLOCK_SNAPSHOT

@@ -12,6 +12,7 @@
         <V-M-DOMAIN-IDENTITY />
         <V-M-DOMAIN-USER-PREFERENCES />
         <V-M-APP-REMOTE-STATE />
+        <V-M-DOMAIN-STATE />
         <V-M-INFRA-DROPBOX-STATE />
         <V-M-INFRA-PERSISTENCE-SQLITE />
         <V-M-DOMAIN-EXERCISE />

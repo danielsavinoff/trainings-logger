@@ -48,7 +48,7 @@
       <Name>Questionnaire completion and authorization port</Name>
       <Type>application</Type>
       <Path>internal/app</Path>
-      <Purpose>Define optional authorized-account answers and persist explicit preferences, identity, and encrypted credentials atomically.</Purpose>
+      <Purpose>Define optional authorized-account answers and persist explicit preferences, identity, and credentials atomically.</Purpose>
       <Files>
         <File>internal/app/command/complete_questionnaire.go</File>
         <File>internal/app/ports/identity_linker.go</File>
@@ -56,26 +56,25 @@
         <File>cmd/cli/bootstrap.go</File>
       </Files>
       <Links><M-DOMAIN-USER-PREFERENCES /><M-DOMAIN-IDENTITY /><M-INFRA-PERSISTENCE-SQLITE /><M-INFRA-DROPBOX-AUTH /></Links>
-      <Behavior>Validate models through constructors and matching identity IDs. An empty completion returns before opening a transaction; explicit answers save through one transaction and roll back together on failure. Bootstrap wires real Dropbox linking using DROPBOX_APP_KEY and a private key in the user configuration directory.</Behavior>
+      <Behavior>Validate models through constructors and matching identity IDs. An empty completion returns before opening a transaction; explicit answers save through one transaction and roll back together on failure. Bootstrap wires real Dropbox linking using DROPBOX_APP_KEY. Access and refresh tokens are persisted in the local SQLite database.</Behavior>
     </M-APP-QUESTIONNAIRE>
     <M-INFRA-DROPBOX-AUTH>
-      <Name>Dropbox authorization and credential encryption</Name>
+      <Name>Dropbox authorization</Name>
       <Type>infrastructure</Type>
       <Path>internal/infra/dropbox</Path>
-      <Purpose>Authorize a real Dropbox account with S256 PKCE and protect access and refresh tokens before persistence.</Purpose>
+      <Purpose>Authorize a real Dropbox account with S256 PKCE and return validated identity and credential models for local persistence.</Purpose>
       <Files>
         <File>internal/infra/dropbox/linker.go</File>
         <File>internal/infra/dropbox/browser.go</File>
-        <File>internal/infra/dropbox/credentials.go</File>
       </Files>
       <Links><M-APP-QUESTIONNAIRE /><M-DOMAIN-IDENTITY /></Links>
-      <Behavior>Open a browser authorization URL with offline access, account_info.read, files.content.read, and files.content.write scopes, and explicit reapproval, omit redirect_uri and client secret, and exchange the pasted authorization code with its verifier. Requests are bounded and cancellation-aware; browser-launch failure exposes the URL and HTTP errors are sanitized. DROPBOX_BROWSER optionally chooses a browser using literal process arguments. The reported Safari consent-page failure remains unconfirmed and is not attributed to its /1 URL prefix. Use the verified token-response account ID. AES-GCM ciphertext binds each token to its account and role; a private 32-byte local key is created only after successful exchange.</Behavior>
+      <Behavior>Open a browser authorization URL with offline access, account_info.read, files.content.read, and files.content.write scopes, and explicit reapproval, omit redirect_uri and client secret, and exchange the pasted authorization code with its verifier. Requests are bounded and cancellation-aware; browser-launch failure exposes the URL and HTTP errors are sanitized. DROPBOX_BROWSER optionally chooses a browser using literal process arguments. The reported Safari consent-page failure remains unconfirmed and is not attributed to its /1 URL prefix. Use the verified token-response account ID. Validate the returned access and refresh tokens through the identity credentials constructor.</Behavior>
     </M-INFRA-DROPBOX-AUTH>
     <M-DOMAIN-IDENTITY>
       <Name>Remote provider identity</Name>
       <Type>domain</Type>
       <Path>internal/domain/user/identity</Path>
-      <Purpose>Represent Dropbox identity and opaque encrypted credential values with repository ports.</Purpose>
+      <Purpose>Represent Dropbox identity and local access and refresh token credentials with repository ports.</Purpose>
       <Files>
         <File>internal/domain/user/identity/identity.go</File>
         <File>internal/domain/user/identity/provider.go</File>
@@ -84,7 +83,7 @@
         <File>internal/domain/user/identity/identity_credentials.go</File>
         <File>internal/domain/user/identity/identity_credentials_repository.go</File>
       </Files>
-      <Behavior>Identity IDs are strings, the provider enum is Dropbox, and credentials contain encrypted token fields and timestamps. Ports use model-specific IdentityRepository and IdentityCredentialsRepository names in corresponding source files. The credentials port supports deterministic latest-account lookup.</Behavior>
+      <Behavior>Identity IDs are strings, the provider enum is Dropbox, and credentials contain access and refresh token fields and timestamps. Ports use model-specific IdentityRepository and IdentityCredentialsRepository names in corresponding source files. The credentials port supports deterministic latest-account lookup.</Behavior>
     </M-DOMAIN-IDENTITY>
     <M-DOMAIN-USER-PREFERENCES>
       <Name>User preferences</Name>
@@ -94,7 +93,6 @@
       <Files>
         <File>internal/domain/user/preferences/preferences.go</File>
         <File>internal/domain/user/preferences/preferences_repository.go</File>
-        <File>internal/domain/user/preferences/preferences_test.go</File>
         <File>internal/app/command/update_preferences.go</File>
         <File>internal/app/query/get_preferences.go</File>
       </Files>
@@ -106,41 +104,55 @@
       <Path>internal/app</Path>
       <Purpose>Validate versioned workout snapshots and orchestrate local export, Dropbox save, and atomic local restore.</Purpose>
       <Files>
-        <File>internal/app/ports/remote_state.go</File>
-        <File>internal/app/ports/remote_state_repository.go</File>
-        <File>internal/app/command/remote_state.go</File>
+        <File>internal/app/ports/state_importer.go</File>
+        <File>internal/app/ports/state_exporter.go</File>
+        <File>internal/app/ports/backup_writer.go</File>
+        <File>internal/app/ports/backup_reader.go</File>
+        <File>internal/app/command/save_remote_state.go</File>
+        <File>internal/app/command/load_remote_state.go</File>
       </Files>
-      <Links><M-DOMAIN-EXERCISE /><M-DOMAIN-SET /><M-DOMAIN-USER-PREFERENCES /><M-INFRA-DROPBOX-STATE /><M-INFRA-PERSISTENCE-SQLITE /></Links>
-      <Behavior>Schema version 1 contains exercises, sets, and optional preferences, excluding local accounts and credentials. Reconstruct models through constructors and reject invalid versions, duplicate IDs/names, missing exercise references, invalid timestamps, and weights outside SQLite limits. Save exports a consistent local snapshot before network upload. Load downloads and validates before replacing local workout tables in one transaction.</Behavior>
+      <Links><M-DOMAIN-STATE /><M-INFRA-DROPBOX-STATE /><M-INFRA-PERSISTENCE-SQLITE /></Links>
+      <Behavior>Application ports StateImporter, StateExporter, BackupWriter, and BackupReader exchange state.Snapshot domain values. Save exports a consistent local snapshot before writing a backup. Load reads a backup and validates through state.NewSnapshot before importing local workout tables in one transaction. Storage limits are enforced by the SQLite adapter.</Behavior>
     </M-APP-REMOTE-STATE>
+    <M-DOMAIN-STATE>
+      <Name>Workout state snapshot</Name>
+      <Type>domain</Type>
+      <Path>internal/domain/state</Path>
+      <Purpose>Represent versioned workout snapshots and validate cross-model invariants independently of storage or transfer mechanisms.</Purpose>
+      <Files>
+        <File>internal/domain/state/snapshot.go</File>
+        <File>internal/domain/state/version.go</File>
+        <File>internal/domain/state/errors.go</File>
+      </Files>
+      <Links><M-DOMAIN-EXERCISE /><M-DOMAIN-SET /><M-DOMAIN-USER-PREFERENCES /></Links>
+      <Behavior>NewVersion accepts version 1. NewSnapshot reconstructs exercises, sets, and optional preferences through constructors, rejects duplicate IDs/names, missing exercise references and invalid timestamps, and excludes local identities and credentials. Existing JSON field names and numeric version encoding remain compatible. SQLite weight limits belong to persistence.</Behavior>
+    </M-DOMAIN-STATE>
     <M-INFRA-DROPBOX-STATE>
       <Name>Dropbox workout snapshot adapter</Name>
       <Type>infrastructure</Type>
       <Path>internal/infra/dropbox/state_store.go</Path>
-      <Purpose>Upload and download /trainlog.json with locally encrypted credentials, public-client token refresh, and bounded payloads.</Purpose>
+      <Purpose>Upload and download /trainings-logger/data.json with local credentials, public-client token refresh, and bounded payloads.</Purpose>
       <Files><File>internal/infra/dropbox/state_store.go</File></Files>
       <Links><M-INFRA-DROPBOX-AUTH /><M-DOMAIN-IDENTITY /><M-APP-REMOTE-STATE /></Links>
-      <Behavior>Select the latest credential update deterministically, verify the Dropbox account, and decrypt tokens inside this adapter. Refresh expired access tokens using the app key and refresh token, saving encrypted replacements before transfer; retry one provider-reported expired-token response. Upload overwrites the fixed backup path and sends application/octet-stream; download sends no Content-Type or request body and strictly decodes and validates a snapshot with a 16 MiB limit. Bounded HTTP requests report missing accounts/backups, permissions, and network errors without exposing response bodies or credentials. Required-scope HTTP 400/401 failures tolerate provider app-ID wording and single/double quoted scope names. JSON missing_scope tags and documented legacy endpoint-authorization failures also name the required file permission with App Console submission and relinking instructions. Unclassified HTTP 400 failures retain only a bounded hexadecimal Dropbox request ID.</Behavior>
+      <Behavior>Select the latest credential update deterministically, verify the Dropbox account, and use its local access and refresh tokens. Refresh expired access tokens using the app key and refresh token, saving replacement credentials before transfer; retry one provider-reported expired-token response. Upload overwrites the fixed backup path and sends application/octet-stream; download sends no Content-Type or request body and strictly decodes and validates a snapshot with a 16 MiB limit. Bounded HTTP requests report missing accounts/backups, permissions, and network errors without exposing response bodies or credentials. Required-scope HTTP 400/401 failures tolerate provider app-ID wording and single/double quoted scope names. JSON missing_scope tags and documented legacy endpoint-authorization failures also name the required file permission with App Console submission and relinking instructions. Unclassified HTTP 400 failures retain only a bounded hexadecimal Dropbox request ID.</Behavior>
     </M-INFRA-DROPBOX-STATE>
     <M-INFRA-PERSISTENCE-SQLITE>
       <Name>SQLite workout and identity persistence</Name>
       <Type>infrastructure</Type>
       <Path>internal/infra/persistence/sqlite</Path>
-      <Purpose>Persist workouts, preferences, identities, and encrypted credentials; export consistent snapshots and atomically restore workout state.</Purpose>
+      <Purpose>Persist workouts, preferences, identities, and local credentials in data.db; export consistent snapshots and atomically restore workout state.</Purpose>
       <Files>
         <File>internal/infra/persistence/sqlite/identity_repository.go</File>
         <File>internal/infra/persistence/sqlite/identity_credentials_repository.go</File>
-        <File>internal/infra/persistence/sqlite/identity_repository_test.go</File>
         <File>internal/infra/persistence/sqlite/exercise_repository.go</File>
         <File>internal/infra/persistence/sqlite/set_repository.go</File>
         <File>internal/infra/persistence/sqlite/preferences_repository.go</File>
-        <File>internal/infra/persistence/sqlite/preferences_repository_test.go</File>
-        <File>internal/infra/persistence/sqlite/remote_state_repository.go</File>
-        <File>internal/infra/persistence/sqlite/remote_state_repository_test.go</File>
+        <File>internal/infra/persistence/sqlite/state_importer.go</File>
+        <File>internal/infra/persistence/sqlite/state_exporter.go</File>
         <File>migrations/sqlite/20261004160000_identity_sync.up.sql</File>
         <File>migrations/sqlite/20261004160000_identity_sync.down.sql</File>
       </Files>
-      <Behavior>Credential rows cascade with identities, and stored token values remain opaque. Identity and credential operations use the transaction-context executor. Missing preference reads return defaults and false without writing. Snapshot export uses a transaction and preserves missing preferences; validated restore replaces exercise/set/preference rows atomically while retaining identities and credentials. Latest credential selection orders by update timestamp and identity ID.</Behavior>
+      <Behavior>Credential rows cascade with identities, and access and refresh token fields are stored in the local database. Identity and credential operations use the transaction-context executor. Missing preference reads return defaults and false without writing. Snapshot export uses a transaction and preserves missing preferences; validated restore replaces exercise/set/preference rows atomically while retaining identities and credentials. Latest credential selection orders by update timestamp and identity ID.</Behavior>
     </M-INFRA-PERSISTENCE-SQLITE>
     <M-DOMAIN-EXERCISE>
       <Name>Exercise domain model</Name>
@@ -151,7 +163,6 @@
         <File>internal/domain/exercise/exercise.go</File>
         <File>internal/domain/exercise/errors.go</File>
         <File>internal/domain/exercise/exercise_repository.go</File>
-        <File>internal/domain/exercise/exercise_test.go</File>
       </Files>
       <Behavior>NewExercise validates all exercise invariants; persistence reads reconstruct models through that constructor.</Behavior>
     </M-DOMAIN-EXERCISE>
@@ -165,7 +176,6 @@
         <File>internal/domain/exercise/set/exercise_weight.go</File>
         <File>internal/domain/exercise/set/errors.go</File>
         <File>internal/domain/exercise/set/set_repository.go</File>
-        <File>internal/domain/exercise/set/set_test.go</File>
       </Files>
       <Behavior>NewSet and NewExerciseWeight enforce invariants; SQLite reads use constructors.</Behavior>
     </M-DOMAIN-SET>
@@ -178,7 +188,6 @@
         <File>internal/domain/shared/weight.go</File>
         <File>internal/domain/shared/weight_unit.go</File>
         <File>internal/domain/shared/errors.go</File>
-        <File>internal/domain/shared/weight_test.go</File>
       </Files>
       <Behavior>NewWeight and NewWeightUnit validate values; unit enums remain in their own source file.</Behavior>
     </M-DOMAIN-SHARED-WEIGHT>

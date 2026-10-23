@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"os"
-	"path/filepath"
 
 	"github.com/danielsavinoff/trainings-logger/internal/app/command"
 	"github.com/danielsavinoff/trainings-logger/internal/app/ports"
@@ -29,25 +28,21 @@ func bootstrap(db *sql.DB) tui.App {
 		credentials,
 		transactions,
 	)
-	keyPath := ""
-	if directory, err := os.UserConfigDir(); err == nil {
-		keyPath = filepath.Join(
-			directory,
-			"trainlog",
-			"credentials.key",
-		)
-	}
-	linker := dropbox.NewLinker(
-		os.Getenv("DROPBOX_APP_KEY"),
-		keyPath,
+	linker := dropbox.NewLinker(os.Getenv("DROPBOX_APP_KEY"))
+	stateExporter := sqlite.NewStateExporter(db)
+	stateImporter := sqlite.NewStateImporter(db)
+	backupStore := dropbox.NewStateStore(
+		linker,
+		identities,
+		credentials,
 	)
-	remoteState := command.NewRemoteStateHandler(
-		sqlite.NewRemoteStateRepository(db),
-		dropbox.NewStateStore(
-			linker,
-			identities,
-			credentials,
-		),
+	saveRemoteState := command.NewSaveRemoteStateHandler(
+		stateExporter,
+		backupStore,
+	)
+	loadRemoteState := command.NewLoadRemoteStateHandler(
+		stateImporter,
+		backupStore,
 	)
 
 	return tui.App{
@@ -65,8 +60,8 @@ func bootstrap(db *sql.DB) tui.App {
 		),
 		CompleteQuestionnaire: completeQuestionnaire.Handle,
 		IdentityLinker:        linker,
-		SaveRemoteState:       remoteState.Save,
-		LoadRemoteState:       remoteState.Load,
+		SaveRemoteState:       saveRemoteState.Handle,
+		LoadRemoteState:       loadRemoteState.Handle,
 		CreateExercise: command.NewCreateExerciseHandler(
 			exercises,
 			persistence.NewTransactionRunner[command.CreateExerciseResult](db),

@@ -83,8 +83,8 @@ func (h CompleteQuestionnaireHandler) Handle(
 		value := input.LinkedIdentity.Credentials
 		credentials, err = identity.NewIdentityCredentials(
 			value.IdentityID,
-			value.AccessTokenEncrypted,
-			value.RefreshTokenEncrypted,
+			value.AccessToken,
+			value.RefreshToken,
 			value.AccessTokenExpiresAt,
 			value.UpdatedAt,
 		)

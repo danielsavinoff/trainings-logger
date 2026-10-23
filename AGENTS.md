@@ -94,6 +94,11 @@ These paths describe the observed package layout. The initial GRACE graph and ve
 - In every `.go` source file, including tests, write calls to functions or methods with more than one argument using one argument per line, with a trailing comma after the final argument.
 - Separate distinct logical blocks of Go code with a blank line. Keep statements that form one continuous operation together.
 
+## Use Cases
+
+- Start every use case name with a verb, such as `CreateExercise`, `ListSets`, or `SaveRemoteState`.
+- Keep exactly one use case operation in each source file. Split files containing multiple operations into separate files named after their use cases.
+
 ## Domain Model Construction
 
 - Initialize every domain model through a constructor function whose name starts with `New` and validates all model invariants before returning the model.

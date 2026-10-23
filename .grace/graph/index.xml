@@ -12,6 +12,7 @@
         <M-DOMAIN-IDENTITY />
         <M-DOMAIN-USER-PREFERENCES />
         <M-APP-REMOTE-STATE />
+        <M-DOMAIN-STATE />
         <M-INFRA-DROPBOX-STATE />
         <M-INFRA-PERSISTENCE-SQLITE />
         <M-DOMAIN-EXERCISE />

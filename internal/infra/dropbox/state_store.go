@@ -1,20 +1,20 @@
 // START_MODULE_CONTRACT
 //   PURPOSE: Transfer workout backups through a linked Dropbox account.
-//   SCOPE: Encrypted credential access, token refresh, bounded upload/download, sanitized errors.
-//   DEPENDS: M-DOMAIN-IDENTITY, M-APP-REMOTE-STATE, M-INFRA-DROPBOX-AUTH
+//   SCOPE: Local credential access, token refresh, bounded upload/download, sanitized errors.
+//   DEPENDS: M-DOMAIN-IDENTITY, M-DOMAIN-STATE, M-APP-REMOTE-STATE, M-INFRA-DROPBOX-AUTH
 //   LINKS: M-INFRA-DROPBOX-STATE, V-M-INFRA-DROPBOX-STATE
 //   MAP_MODE: SUMMARY
 // END_MODULE_CONTRACT
 // START_MODULE_MAP
 //   StateStore - retain configured Dropbox and credential ports
 //   NewStateStore - wire the real content API
-//   Store - validate and upload a versioned backup
-//   Load - download, decode, and validate a bounded backup
+//   Write - validate and upload a versioned backup
+//   Read - download, decode, and validate a bounded backup
 //   contentRequest - perform content requests with one expired-token retry
 //   contentError - classify provider errors without exposing response bodies
 //   dropboxRequestID - retain only bounded hexadecimal provider request IDs
 //   accessToken - select the latest linked account and refresh when needed
-//   refresh - exchange and encrypt replacement credentials
+//   refresh - exchange and persist replacement credentials
 // END_MODULE_MAP
 
 package dropbox
@@ -29,16 +29,16 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/danielsavinoff/trainings-logger/internal/app/ports"
+	"github.com/danielsavinoff/trainings-logger/internal/domain/state"
 	"github.com/danielsavinoff/trainings-logger/internal/domain/user/identity"
 )
 
 // START_BLOCK_DROPBOX_SNAPSHOTS
-const backupPath = "/trainlog.json"
+const backupPath = "/trainings-logger/data.json"
 const maxSnapshotBytes = 16 << 20
 
 type StateStore struct {
@@ -56,11 +56,11 @@ func NewStateStore(
 	return &StateStore{linker: linker, accounts: accounts, credentials: credentials, contentURL: "https://content.dropboxapi.com/2/files/"}
 }
 
-func (s *StateStore) Store(
+func (s *StateStore) Write(
 	ctx context.Context,
-	snapshot ports.RemoteStateSnapshot,
+	snapshot state.Snapshot,
 ) error {
-	validated, err := ports.NewRemoteStateSnapshot(
+	validated, err := state.NewSnapshot(
 		snapshot.Version,
 		snapshot.Exercises,
 		snapshot.Sets,
@@ -100,7 +100,7 @@ func (s *StateStore) Store(
 	return nil
 }
 
-func (s *StateStore) Load(ctx context.Context) (ports.RemoteStateSnapshot, error) {
+func (s *StateStore) Read(ctx context.Context) (state.Snapshot, error) {
 	response, err := s.contentRequest(
 		ctx,
 		"download",
@@ -108,7 +108,7 @@ func (s *StateStore) Load(ctx context.Context) (ports.RemoteStateSnapshot, error
 		nil,
 	)
 	if err != nil {
-		return ports.RemoteStateSnapshot{}, err
+		return state.Snapshot{}, err
 	}
 	defer response.Body.Close()
 	data, err := io.ReadAll(io.LimitReader(
@@ -116,21 +116,21 @@ func (s *StateStore) Load(ctx context.Context) (ports.RemoteStateSnapshot, error
 		maxSnapshotBytes+1,
 	))
 	if err != nil {
-		return ports.RemoteStateSnapshot{}, errors.New("Dropbox backup could not be downloaded")
+		return state.Snapshot{}, errors.New("Dropbox backup could not be downloaded")
 	}
 	if len(data) > maxSnapshotBytes {
-		return ports.RemoteStateSnapshot{}, errors.New("Dropbox backup exceeds the 16 MiB transfer limit")
+		return state.Snapshot{}, errors.New("Dropbox backup exceeds the 16 MiB transfer limit")
 	}
-	var snapshot ports.RemoteStateSnapshot
+	var snapshot state.Snapshot
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&snapshot); err != nil {
-		return ports.RemoteStateSnapshot{}, errors.New("Dropbox backup is not a valid workout snapshot")
+		return state.Snapshot{}, errors.New("Dropbox backup is not a valid workout snapshot")
 	}
 	if err := decoder.Decode(new(any)); err != io.EOF {
-		return ports.RemoteStateSnapshot{}, errors.New("Dropbox backup contains trailing data")
+		return state.Snapshot{}, errors.New("Dropbox backup contains trailing data")
 	}
-	return ports.NewRemoteStateSnapshot(
+	return state.NewSnapshot(
 		snapshot.Version,
 		snapshot.Exercises,
 		snapshot.Sets,
@@ -334,46 +334,26 @@ func (s *StateStore) accessToken(
 	if err != nil || account.Provider != identity.ProviderDropbox {
 		return "", errors.New("the linked Dropbox account is unavailable; press r to link again")
 	}
-	if _, err := os.Stat(s.linker.keyPath); err != nil {
-		return "", errors.New("Dropbox credential key is missing; press r to link again")
-	}
-	key, err := credentialCipher(s.linker.keyPath)
-	if err != nil {
-		return "", err
-	}
 	if !forceRefresh && credentials.AccessTokenExpiresAt.After(time.Now().Add(time.Minute)) {
-		return decryptToken(
-			key,
-			credentials.AccessTokenEncrypted,
-			"dropbox/access/"+account.ID,
-		)
+		return credentials.AccessToken, nil
 	}
-	refresh, err := decryptToken(
-		key,
-		credentials.RefreshTokenEncrypted,
-		"dropbox/refresh/"+account.ID,
-	)
-	if err != nil {
-		return "", err
-	}
+
 	return s.refresh(
 		ctx,
 		credentials,
-		refresh,
 	)
 }
 
 func (s *StateStore) refresh(
 	ctx context.Context,
 	previous identity.IdentityCredentials,
-	refreshToken string,
 ) (string, error) {
 	if s.linker.appKey == "" {
 		return "", errors.New("Dropbox app key is not configured")
 	}
 	parameters := url.Values{
 		"grant_type":    {"refresh_token"},
-		"refresh_token": {refreshToken},
+		"refresh_token": {previous.RefreshToken},
 		"client_id":     {s.linker.appKey},
 	}
 	request, err := http.NewRequestWithContext(
@@ -419,33 +399,15 @@ func (s *StateStore) refresh(
 	if err := ctx.Err(); err != nil {
 		return "", err
 	}
-	key, err := credentialCipher(s.linker.keyPath)
-	if err != nil {
-		return "", err
-	}
-	access, err := encryptToken(
-		key,
-		value.AccessToken,
-		"dropbox/access/"+previous.IdentityID,
-	)
-	if err != nil {
-		return "", err
-	}
-	refresh := previous.RefreshTokenEncrypted
+	refresh := previous.RefreshToken
 	if value.RefreshToken != "" {
-		refresh, err = encryptToken(
-			key,
-			value.RefreshToken,
-			"dropbox/refresh/"+previous.IdentityID,
-		)
-		if err != nil {
-			return "", err
-		}
+		refresh = value.RefreshToken
 	}
+
 	now := time.Now().UTC()
 	credentials, err := identity.NewIdentityCredentials(
 		previous.IdentityID,
-		access,
+		value.AccessToken,
 		refresh,
 		now.Add(time.Duration(seconds)*time.Second),
 		now,
@@ -462,6 +424,7 @@ func (s *StateStore) refresh(
 	return value.AccessToken, nil
 }
 
-var _ ports.RemoteStateStore = (*StateStore)(nil)
+var _ ports.BackupWriter = (*StateStore)(nil)
+var _ ports.BackupReader = (*StateStore)(nil)
 
 // END_BLOCK_DROPBOX_TOKEN_REFRESH
