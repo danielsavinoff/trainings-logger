@@ -10,6 +10,10 @@
 Track your workout progress in the CLI while waiting for your agent to finish in another tab.
 </p>
 
+<p align="center">
+  <img src="assets/screenshot.png" alt="Trainings logger terminal interface showing workout sessions, exercises, and sets">
+</p>
+
 ## ✨ Features
 
 - 💾 **Your data is yours.** Stored locally and under your control.
