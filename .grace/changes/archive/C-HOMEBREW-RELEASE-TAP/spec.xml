@@ -1,0 +1,37 @@
+<GraceChangeSpec graceVersion="4.0" status="applied">
+  <C-HOMEBREW-RELEASE-TAP>
+    <Summary>Publish a Homebrew cask for trainings-logger into danielsavinoff/homebrew-tap on stable releases, document installation, validate, commit and push to the main application repository.</Summary>
+    <Goals>
+      <Goal>Connect the existing GoReleaser release pipeline to the user-created public homebrew-tap repository using HOMEBREW_TAP_TOKEN.</Goal>
+      <Goal>Make macOS installation and upgrades available through Homebrew and update README accordingly.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>Use repository main, Casks directory and cask/binary name trainings-logger. Use repository-scoped HOMEBREW_TAP_TOKEN only for tap publication; retain GITHUB_TOKEN for application releases.</Constraint>
+      <Constraint>Read DROPBOX_APP_KEY from repository secrets, matching the user configuration already established; fail early for either missing app key or tap token without printing values.</Constraint>
+      <Constraint>Preserve current six-target builds, linker app-key injection, executable-plus-LICENSE archives and README exclusion. Stable releases update the tap; prereleases skip tap updates.</Constraint>
+      <Constraint>Handle the current unsigned macOS binary with the documented GoReleaser post-install hook, removing only the quarantine attribute from the staged trainings-logger binary, without changing system-wide security settings.</Constraint>
+      <Constraint>Do not run the real app, change user data, retrieve secret values, publish an actual release or push a tag. Validate with placeholder credentials and temporary snapshot artifacts.</Constraint>
+      <Constraint>Preserve unrelated user changes. The user explicitly authorized a commit and push to the application repository when done. Execute sequentially and archive completed GRACE work under existing authorization.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>No new source behavior, Windows/Linux package managers, Apple signing credentials, native installers, automatic self-updates or live tap writes outside the release workflow.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>GoReleaser generates a cask with correct release URLs, checksums, Intel/Apple Silicon assets, trainings-logger binary artifact, scoped install hook, and danielsavinoff/homebrew-tap destination.</Criterion>
+      <Criterion>The GitHub workflow passes secrets.HOMEBREW_TAP_TOKEN and secrets.DROPBOX_APP_KEY, checking both before GoReleaser. No token is printed or embedded into the cask/application.</Criterion>
+      <Criterion>README leads with the macOS Homebrew install/run/upgrade commands and retains concise Linux/Windows download instructions.</Criterion>
+      <Criterion>Temporary GoReleaser snapshots and cask parsing validate packaging without publication. Build/vet/format and final GRACE checks pass. Archive, create a focused commit and push it to origin/main without creating a release tag.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-RELEASE />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>go build ./...</ExpectedCommand>
+      <ExpectedCommand>go vet ./...</ExpectedCommand>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>The user confirms the tap repository and HOMEBREW_TAP_TOKEN secret are ready. Public git inspection confirms main exists. The token value is available only to GitHub Actions and is not needed for local placeholder verification.</Assumption>
+      <Assumption>The first real cask publication occurs on the next stable v* tag after the committed workflow change. The user requested commit/push, not release/tag publication.</Assumption>
+    </Assumptions>
+  </C-HOMEBREW-RELEASE-TAP>
+</GraceChangeSpec>

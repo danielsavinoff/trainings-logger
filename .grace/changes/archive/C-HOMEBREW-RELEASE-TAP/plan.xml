@@ -1,0 +1,103 @@
+<GraceChangePlan graceVersion="4.0" status="applied">
+  <C-HOMEBREW-RELEASE-TAP>
+    <IntentSummary>Sequentially configure Homebrew cask publication and secret handoff, document installation, validate snapshot/cask artifacts, reconcile GRACE, archive then commit and push as requested.</IntentSummary>
+    <BaselineAssertions>
+      <MustContain>
+        <File>.goreleaser.yaml</File>
+        <Text>binary: trainings-logger</Text>
+      </MustContain>
+      <MustContain>
+        <File>.github/workflows/main.yml</File>
+        <Text>vars.DROPBOX_APP_KEY</Text>
+      </MustContain>
+    </BaselineAssertions>
+    <TargetAssertions>
+      <MustContain>
+        <File>.goreleaser.yaml</File>
+        <Text>homebrew_casks:</Text>
+      </MustContain>
+      <MustContain>
+        <File>.goreleaser.yaml</File>
+        <Text>name: homebrew-tap</Text>
+      </MustContain>
+      <MustContain>
+        <File>.goreleaser.yaml</File>
+        <Text>{{ .Env.HOMEBREW_TAP_TOKEN }}</Text>
+      </MustContain>
+      <MustContain>
+        <File>.goreleaser.yaml</File>
+        <Text>skip_upload: auto</Text>
+      </MustContain>
+      <MustContain>
+        <File>.github/workflows/main.yml</File>
+        <Text>secrets.HOMEBREW_TAP_TOKEN</Text>
+      </MustContain>
+      <MustContain>
+        <File>.github/workflows/main.yml</File>
+        <Text>secrets.DROPBOX_APP_KEY</Text>
+      </MustContain>
+      <MustContain>
+        <File>README.md</File>
+        <Text>brew install --cask danielsavinoff/tap/trainings-logger</Text>
+      </MustContain>
+      <MustVerify>
+        <Module>M-RELEASE</Module>
+      </MustVerify>
+      <MustPassCommand>
+        <Command budgetSeconds="60">go build ./...</Command>
+        <Command budgetSeconds="60">go vet ./...</Command>
+      </MustPassCommand>
+    </TargetAssertions>
+    <DurableScope>
+      <GraphAnchors>
+        <M-RELEASE />
+      </GraphAnchors>
+      <VerificationAnchors>
+        <V-M-RELEASE />
+      </VerificationAnchors>
+      <GraphDocuments>
+        <GD-MAIN />
+      </GraphDocuments>
+      <VerificationDocuments>
+        <VD-MAIN />
+      </VerificationDocuments>
+      <ContextArtifact>deployment.xml</ContextArtifact>
+    </DurableScope>
+    <ObservedWriteScope>
+      <File>.goreleaser.yaml</File>
+      <File>.github/workflows/main.yml</File>
+      <File>README.md</File>
+      <File>.grace/context/deployment.xml</File>
+      <File>.grace/graph/main.xml</File>
+      <File>.grace/verification/main.xml</File>
+      <File>.grace/changes/active/C-HOMEBREW-RELEASE-TAP/spec.xml</File>
+      <File>.grace/changes/active/C-HOMEBREW-RELEASE-TAP/plan.xml</File>
+      <File>.grace/changes/archive/C-HOMEBREW-RELEASE-TAP/spec.xml</File>
+      <File>.grace/changes/archive/C-HOMEBREW-RELEASE-TAP/plan.xml</File>
+    </ObservedWriteScope>
+    <ImplementationPlan>
+      <T-001>
+        <Title>Configure the Homebrew cask and release secrets</Title>
+        <DependsOn />
+        <AcceptanceCriteria>
+          <Criterion>Cask metadata, stable publication policy, scoped install hook and separate secret contexts are correct; README documents install and upgrades.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go build ./...</Command>
+          <Command>go vet ./...</Command>
+        </Verification>
+      </T-001>
+      <T-002>
+        <Title>Verify artifacts, reconcile and archive</Title>
+        <DependsOn>T-001</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Placeholder snapshot/cask checks and final build/vet/lint pass; archive completed change, then commit and push the authorized application-repository changes without a release tag.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go build ./...</Command>
+          <Command>go vet ./...</Command>
+        </Verification>
+      </T-002>
+    </ImplementationPlan>
+  </C-HOMEBREW-RELEASE-TAP>
+</GraceChangePlan>

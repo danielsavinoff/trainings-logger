@@ -12,7 +12,8 @@ jobs:
   release:
     runs-on: ubuntu-latest
     env:
-      DROPBOX_APP_KEY: ${{ vars.DROPBOX_APP_KEY }}
+      DROPBOX_APP_KEY: ${{ secrets.DROPBOX_APP_KEY }}
+      HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -24,10 +25,15 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Check Dropbox app key
+      - name: Check release configuration
         run: |
           if [ -z "$DROPBOX_APP_KEY" ]; then
-            echo "::error::Set the DROPBOX_APP_KEY repository variable."
+            echo "::error::Set the DROPBOX_APP_KEY repository secret."
+            exit 1
+          fi
+
+          if [ -z "$HOMEBREW_TAP_TOKEN" ]; then
+            echo "::error::Set the HOMEBREW_TAP_TOKEN repository secret."
             exit 1
           fi
 

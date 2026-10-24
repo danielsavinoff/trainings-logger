@@ -14,10 +14,29 @@ Track your workout progress in the CLI while waiting for your agent to finish in
 
 ## 📦 Installation
 
+### macOS
+
+Install with [Homebrew](https://brew.sh):
+
+```sh
+brew install --cask danielsavinoff/tap/trainings-logger
+trainings-logger
+```
+
+To update:
+
+```sh
+brew upgrade --cask trainings-logger
+```
+
+The Homebrew package is updated automatically with each stable release.
+
+### Linux and Windows
+
 Download the archive for your operating system and architecture from
 [Releases](https://github.com/danielsavinoff/trainings-logger/releases), then extract it.
 
-On macOS or Linux, run:
+On Linux, run:
 
 ```sh
 chmod +x trainings-logger

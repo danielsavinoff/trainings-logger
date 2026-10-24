@@ -16,3 +16,22 @@ builds:
 archives:
   - files:
       - LICENSE
+
+homebrew_casks:
+  - name: trainings-logger
+    binaries:
+      - trainings-logger
+    homepage: https://github.com/danielsavinoff/trainings-logger
+    description: Track your workouts in the terminal
+    skip_upload: auto
+    hooks:
+      post:
+        install_steps: |
+          on_macos do
+            run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{ .StagedPath }}/trainings-logger"]
+          end
+    repository:
+      owner: danielsavinoff
+      name: homebrew-tap
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
