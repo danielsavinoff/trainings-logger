@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"os"
 
 	"github.com/danielsavinoff/trainings-logger/internal/app/command"
 	"github.com/danielsavinoff/trainings-logger/internal/app/ports"
@@ -30,7 +29,7 @@ func bootstrap(db *sql.DB) tui.App {
 		credentials,
 		transactions,
 	)
-	linker := dropbox.NewLinker(os.Getenv("DROPBOX_APP_KEY"))
+	linker := dropbox.NewLinker(dropboxAppKey)
 	stateExporter := sqlite.NewStateExporter(db)
 	stateImporter := sqlite.NewStateImporter(db)
 	backupStore := dropbox.NewStateStore(

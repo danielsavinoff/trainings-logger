@@ -96,8 +96,9 @@
         <M-DOMAIN-IDENTITY />
         <M-INFRA-PERSISTENCE-SQLITE />
         <M-INFRA-DROPBOX-AUTH />
+        <M-CLI-BUILD-CONFIG />
       </Links>
-      <Behavior>Validate models through constructors and matching identity IDs. An empty completion returns before opening a transaction; explicit answers save through one transaction and roll back together on failure. Bootstrap wires real Dropbox linking using DROPBOX_APP_KEY. Access and refresh tokens are persisted in the local SQLite database.</Behavior>
+      <Behavior>Validate models through constructors and matching identity IDs. An empty completion returns before opening a transaction; explicit answers save through one transaction and roll back together on failure. Bootstrap wires real Dropbox linking using the configured key: a nonempty runtime DROPBOX_APP_KEY overrides the release-embedded default. Access and refresh tokens are persisted in the local SQLite database.</Behavior>
     </M-APP-QUESTIONNAIRE>
     <M-INFRA-DROPBOX-AUTH>
       <Name>Dropbox authorization</Name>
@@ -353,5 +354,32 @@
       </Files>
       <Behavior>BaseStyle and PanelSpacing use zero vertical/one horizontal padding. Records/catalog, help and setup share those styles. Dialogs retain centered overlays with shared inner padding, consecutive wide field rows, compact label/input rows, and no extra blank help rows. Field sizing and native cursor offsets derive from the shared frame; tiny forms and cursors stay bounded.</Behavior>
     </M-TUI-COMPONENTS>
+    <M-CLI-BUILD-CONFIG>
+      <Name>CLI build configuration</Name>
+      <Type>infrastructure</Type>
+      <Path>cmd/cli/config.go</Path>
+      <Purpose>Resolve the public Dropbox app key from a runtime override or build-time default.</Purpose>
+      <Files>
+        <File>cmd/cli/config.go</File>
+      </Files>
+      <Links>
+        <M-INFRA-DROPBOX-AUTH />
+      </Links>
+      <Behavior>A package-main string dropboxAppKey is settable with Go -X linker flags. configuredDropboxAppKey returns a trimmed nonempty runtime DROPBOX_APP_KEY first, otherwise the embedded default. Unconfigured source builds keep an empty default and optional Dropbox setup. No user credentials or app secret are embedded.</Behavior>
+    </M-CLI-BUILD-CONFIG>
+    <M-RELEASE>
+      <Name>Tagged CLI releases</Name>
+      <Type>infrastructure</Type>
+      <Path>.github/workflows/main.yml</Path>
+      <Purpose>Build and publish CLI release artifacts with the public Dropbox app key supplied at build time.</Purpose>
+      <Files>
+        <File>.github/workflows/main.yml</File>
+        <File>.goreleaser.yaml</File>
+      </Files>
+      <Links>
+        <M-CLI-BUILD-CONFIG />
+      </Links>
+      <Behavior>On v* tags, GitHub Actions checks out the repository, selects Go from go.mod, exposes vars.DROPBOX_APP_KEY as a job environment variable, and rejects a missing key before running GoReleaser. GoReleaser injects it using -X main.dropboxAppKey and builds linux/darwin/windows for amd64/arm64. Existing GITHUB_TOKEN and contents:write permissions publish release artifacts. The repository variable is public configuration; no access/refresh tokens or app secret are embedded.</Behavior>
+    </M-RELEASE>
   </GD-MAIN>
 </GraceGraphDocument>

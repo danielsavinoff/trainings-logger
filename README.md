@@ -52,12 +52,29 @@ App folder access is sufficient. In its Permissions tab enable and submit:
 - `files.content.read`
 - `files.content.write`
 
-Set the app's **App key** before launching:
+Release binaries include the public Dropbox **App key**. For development, pass
+your app key through Go's linker flags:
 
 ```sh
 export DROPBOX_APP_KEY="your_app_key"
-go run ./cmd/cli
+go run -ldflags="-X main.dropboxAppKey=$DROPBOX_APP_KEY" ./cmd/cli
 ```
+
+To configure releases, open the GitHub repository's **Settings → Secrets and
+variables → Actions → Variables** and add `DROPBOX_APP_KEY` with your app key.
+The tag-triggered release workflow passes it to GoReleaser, which embeds it with
+Go's `-X main.dropboxAppKey` linker flag. The workflow fails if the variable is
+missing. Only the public app key is included; users authorize their own accounts.
+
+For a local build with an embedded key:
+
+```sh
+go build -ldflags="-X main.dropboxAppKey=$DROPBOX_APP_KEY" -o cli ./cmd/cli
+```
+
+The shell expands `DROPBOX_APP_KEY` when building or running with `go run`.
+The executable uses the embedded value; it does not read this environment
+variable at runtime. Builds without the linker flag leave Dropbox unconfigured.
 
 Sign-in opens the browser and asks you to paste the authorization code back into
 the terminal. The application uses PKCE and needs no app secret or redirect URI.

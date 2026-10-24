@@ -24,6 +24,8 @@
         <M-DOMAIN-SET />
         <M-DOMAIN-SHARED-WEIGHT />
         <M-TUI-COMPONENTS />
+        <M-CLI-BUILD-CONFIG />
+        <M-RELEASE />
       </Owns>
     </GD-MAIN>
   </GraphDocuments>

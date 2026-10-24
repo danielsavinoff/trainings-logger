@@ -24,6 +24,8 @@
         <V-M-DOMAIN-SET />
         <V-M-DOMAIN-SHARED-WEIGHT />
         <V-M-TUI-COMPONENTS />
+        <V-M-CLI-BUILD-CONFIG />
+        <V-M-RELEASE />
       </Owns>
     </VD-MAIN>
   </VerificationDocuments>

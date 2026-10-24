@@ -122,5 +122,15 @@
       <TraceAssertion>Static checks cover shared styles and modal layout; runtime scenarios use temporary verification harnesses, with no automated test files committed.</TraceAssertion>
       <Scenario>Verify shared padding is zero vertical/one horizontal. Render wide and compact dialog fields on consecutive rows, compare actual caret positions with displayed text including Unicode and long input, preserve insert/navigation/save/cancel behavior, and check bounds at normal/tiny/zero dimensions. Help starts at the records outer padding; setup borders and contents align with catalog/main frames, including code entry and scrollable authorization URL.</Scenario>
     </V-M-TUI-COMPONENTS>
+    <V-M-CLI-BUILD-CONFIG>
+      <Command>go vet ./cmd/cli</Command>
+      <TraceAssertion>Compilation/static evidence is supplemented by temporary configuration probes and configuration checks; no committed automated tests or release publication are performed.</TraceAssertion>
+      <Scenario>Use temporary copies of config.go with a probe entrypoint; compile using -X main.dropboxAppKey=placeholder and verify unset/empty/whitespace environment uses the embedded default, a nonempty trimmed runtime variable overrides it, and a normal build without linker flags defaults to empty. Build the real CLI with the same placeholder linker flags without running it or opening the user database.</Scenario>
+    </V-M-CLI-BUILD-CONFIG>
+    <V-M-RELEASE>
+      <Command>go build ./...</Command>
+      <TraceAssertion>Compilation/static evidence is supplemented by temporary configuration probes and configuration checks; no committed automated tests or release publication are performed.</TraceAssertion>
+      <Scenario>Parse workflow and GoReleaser YAML; check vars.DROPBOX_APP_KEY is inherited by the release step, missing-key validation fails before release, and ldflags interpolate the key into main.dropboxAppKey for every existing build target. Validate with placeholder values locally. Publishing is verified by the actual tag-triggered GitHub workflow; local checks do not claim a hosted release run.</Scenario>
+    </V-M-RELEASE>
   </VD-MAIN>
 </GraceVerificationDocument>
