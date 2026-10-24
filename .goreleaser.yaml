@@ -1,0 +1,12 @@
+version: 2
+
+builds:
+  - main: ./cmd/cli
+    binary: cli
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
