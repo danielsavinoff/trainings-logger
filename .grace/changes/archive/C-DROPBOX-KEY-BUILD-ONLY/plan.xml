@@ -1,0 +1,79 @@
+<GraceChangePlan graceVersion="4.0" status="applied">
+  <C-DROPBOX-KEY-BUILD-ONLY>
+    <IntentSummary>Remove runtime app-key resolution, document linker flags for go run, verify build-only behavior and archive sequentially.</IntentSummary>
+    <BaselineAssertions>
+      <MustContain>
+        <File>cmd/cli/config.go</File>
+        <Text>func configuredDropboxAppKey() string</Text>
+      </MustContain>
+      <MustContain>
+        <File>cmd/cli/bootstrap.go</File>
+        <Text>dropbox.NewLinker(configuredDropboxAppKey())</Text>
+      </MustContain>
+    </BaselineAssertions>
+    <TargetAssertions>
+      <MustContain>
+        <File>cmd/cli/config.go</File>
+        <Text>var dropboxAppKey string</Text>
+      </MustContain>
+      <MustContain>
+        <File>cmd/cli/bootstrap.go</File>
+        <Text>dropbox.NewLinker(dropboxAppKey)</Text>
+      </MustContain>
+      <MustContain>
+        <File>README.md</File>
+        <Text>go run -ldflags="-X main.dropboxAppKey=$DROPBOX_APP_KEY" ./cmd/cli</Text>
+      </MustContain>
+      <MustVerify>
+        <Module>M-CLI-BUILD-CONFIG</Module>
+        <Module>M-APP-QUESTIONNAIRE</Module>
+      </MustVerify>
+      <MustPassCommand>
+        <Command budgetSeconds="60">go build ./...</Command>
+        <Command budgetSeconds="60">go vet ./...</Command>
+      </MustPassCommand>
+    </TargetAssertions>
+    <DurableScope>
+      <GraphAnchors>
+        <M-CLI-BUILD-CONFIG />
+        <M-APP-QUESTIONNAIRE />
+      </GraphAnchors>
+      <VerificationAnchors>
+        <V-M-CLI-BUILD-CONFIG />
+        <V-M-APP-QUESTIONNAIRE />
+      </VerificationAnchors>
+      <GraphDocuments>
+        <GD-MAIN />
+      </GraphDocuments>
+      <VerificationDocuments>
+        <VD-MAIN />
+      </VerificationDocuments>
+      <ContextArtifact>deployment.xml</ContextArtifact>
+    </DurableScope>
+    <ObservedWriteScope>
+      <File>cmd/cli/bootstrap.go</File>
+      <File>cmd/cli/config.go</File>
+      <File>README.md</File>
+      <File>.grace/context/deployment.xml</File>
+      <File>.grace/graph/main.xml</File>
+      <File>.grace/verification/main.xml</File>
+      <File>.grace/changes/active/C-DROPBOX-KEY-BUILD-ONLY/spec.xml</File>
+      <File>.grace/changes/active/C-DROPBOX-KEY-BUILD-ONLY/plan.xml</File>
+      <File>.grace/changes/archive/C-DROPBOX-KEY-BUILD-ONLY/spec.xml</File>
+      <File>.grace/changes/archive/C-DROPBOX-KEY-BUILD-ONLY/plan.xml</File>
+    </ObservedWriteScope>
+    <ImplementationPlan>
+      <T-001>
+        <Title>Use the linker variable directly and reconcile configuration docs</Title>
+        <DependsOn />
+        <AcceptanceCriteria>
+          <Criterion>No runtime lookup/helper remains; go run/build probes verify linker injection and ignored runtime overrides; build/vet and final lint pass before authorized archive.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go build ./...</Command>
+          <Command>go vet ./...</Command>
+        </Verification>
+      </T-001>
+    </ImplementationPlan>
+  </C-DROPBOX-KEY-BUILD-ONLY>
+</GraceChangePlan>

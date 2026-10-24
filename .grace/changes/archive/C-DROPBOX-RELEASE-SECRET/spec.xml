@@ -1,0 +1,28 @@
+<GraceChangeSpec graceVersion="4.0" status="applied">
+  <C-DROPBOX-RELEASE-SECRET>
+    <Summary>Read the Dropbox app key from the existing GitHub repository secret rather than the repository variable, matching the user configuration.</Summary>
+    <Goals>
+      <Goal>Fix the missing-key release failure with secrets.DROPBOX_APP_KEY.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>Preserve the missing-key guard, build-time-only linker injection, release targets and trigger. Never retrieve or print the secret value.</Constraint>
+      <Constraint>Preserve current staged/unstaged changes and archive completed work as previously requested.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>No application source changes, release publication, tag changes or repository setting changes.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>Release job env maps DROPBOX_APP_KEY to secrets.DROPBOX_APP_KEY; the guard names the repository secret. README and current GRACE release/deployment documentation match the Secrets tab.</Criterion>
+      <Criterion>YAML parsing and placeholder checks verify the secret mapping, missing-key failure and present-key success without reading real credentials. GRACE lint and diff checks pass before archive.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-RELEASE />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>git diff --check</ExpectedCommand>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>The user has already added a repository secret named DROPBOX_APP_KEY. The failure is caused by the current workflow reading vars instead of secrets.</Assumption>
+    </Assumptions>
+  </C-DROPBOX-RELEASE-SECRET>
+</GraceChangeSpec>

@@ -1,0 +1,33 @@
+<GraceChangeSpec graceVersion="4.0" status="applied">
+  <C-DROPBOX-KEY-BUILD-ONLY>
+    <Summary>Use only the linker-provided Dropbox app key for go run, local builds and releases; remove the runtime environment lookup and its resolver.</Summary>
+    <Goals>
+      <Goal>Simplify Dropbox configuration to the existing package-main string variable set through -X.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>Keep the public app key variable, existing workflow environment handoff and GoReleaser linker flags. No runtime environment override remains.</Constraint>
+      <Constraint>Keep unconfigured builds optional for Dropbox and preserve OAuth, credentials, database and release behavior. Do not launch the real application or publish releases.</Constraint>
+      <Constraint>Preserve all existing staging and user edits, run sequentially, and do not add committed test files.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>No CI, OAuth, database or release-trigger changes.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>Bootstrap passes dropboxAppKey directly to NewLinker. config.go contains the variable and semantic contract without imports, os.Getenv or the resolver helper.</Criterion>
+      <Criterion>README documents go run and go build with -ldflags using shell expansion of DROPBOX_APP_KEY at build time; it does not promise runtime overrides.</Criterion>
+      <Criterion>Current deployment, graph and verification documents reflect build-time-only configuration. Temporary probes show go run and go build inject the variable, runtime environment values do not override it, and no linker value yields empty configuration.</Criterion>
+      <Criterion>Build/vet, formatting and final GRACE checks pass before archiving under the existing user instruction.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-CLI-BUILD-CONFIG />
+      <M-APP-QUESTIONNAIRE />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>go build ./...</ExpectedCommand>
+      <ExpectedCommand>go vet ./...</ExpectedCommand>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>The user explicitly proposes removing os.Getenv because go run supports linker flags. The prior archive instruction persists.</Assumption>
+    </Assumptions>
+  </C-DROPBOX-KEY-BUILD-ONLY>
+</GraceChangeSpec>

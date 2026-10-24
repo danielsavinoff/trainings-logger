@@ -1,0 +1,69 @@
+<GraceChangePlan graceVersion="4.0" status="applied">
+  <C-DROPBOX-RELEASE-SECRET>
+    <IntentSummary>Sequentially fix the Actions secret context, align release documentation, verify with placeholders and archive.</IntentSummary>
+    <BaselineAssertions>
+      <MustContain>
+        <File>.github/workflows/main.yml</File>
+        <Text>vars.DROPBOX_APP_KEY</Text>
+      </MustContain>
+    </BaselineAssertions>
+    <TargetAssertions>
+      <MustContain>
+        <File>.github/workflows/main.yml</File>
+        <Text>secrets.DROPBOX_APP_KEY</Text>
+      </MustContain>
+      <MustContain>
+        <File>.github/workflows/main.yml</File>
+        <Text>repository secret</Text>
+      </MustContain>
+      <MustContain>
+        <File>README.md</File>
+        <Text>Actions → Secrets</Text>
+      </MustContain>
+      <MustVerify>
+        <Module>M-RELEASE</Module>
+      </MustVerify>
+      <MustPassCommand>
+        <Command budgetSeconds="10">git diff --check</Command>
+      </MustPassCommand>
+    </TargetAssertions>
+    <DurableScope>
+      <GraphAnchors>
+        <M-RELEASE />
+      </GraphAnchors>
+      <VerificationAnchors>
+        <V-M-RELEASE />
+      </VerificationAnchors>
+      <GraphDocuments>
+        <GD-MAIN />
+      </GraphDocuments>
+      <VerificationDocuments>
+        <VD-MAIN />
+      </VerificationDocuments>
+      <ContextArtifact>deployment.xml</ContextArtifact>
+    </DurableScope>
+    <ObservedWriteScope>
+      <File>.github/workflows/main.yml</File>
+      <File>README.md</File>
+      <File>.grace/context/deployment.xml</File>
+      <File>.grace/graph/main.xml</File>
+      <File>.grace/verification/main.xml</File>
+      <File>.grace/changes/active/C-DROPBOX-RELEASE-SECRET/spec.xml</File>
+      <File>.grace/changes/active/C-DROPBOX-RELEASE-SECRET/plan.xml</File>
+      <File>.grace/changes/archive/C-DROPBOX-RELEASE-SECRET/spec.xml</File>
+      <File>.grace/changes/archive/C-DROPBOX-RELEASE-SECRET/plan.xml</File>
+    </ObservedWriteScope>
+    <ImplementationPlan>
+      <T-001>
+        <Title>Read the existing repository secret and correct configuration instructions</Title>
+        <DependsOn />
+        <AcceptanceCriteria>
+          <Criterion>Workflow uses secrets context and documentation points at repository secrets; placeholder YAML/guard checks and final GRACE validation pass before authorized archive.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>git diff --check</Command>
+        </Verification>
+      </T-001>
+    </ImplementationPlan>
+  </C-DROPBOX-RELEASE-SECRET>
+</GraceChangePlan>
