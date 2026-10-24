@@ -1,6 +1,10 @@
 <h1 align="center">Trainings logger</h1>
 
-[![Release](https://github.com/danielsavinoff/trainings-logger/actions/workflows/main.yml/badge.svg)](https://github.com/danielsavinoff/trainings-logger/actions/workflows/main.yml)
+<p align="center">
+  <a href="https://github.com/danielsavinoff/trainings-logger/actions/workflows/main.yml">
+    <img src="https://github.com/danielsavinoff/trainings-logger/actions/workflows/main.yml/badge.svg" alt="Release">
+  </a>
+</p>
 
 <p align="center">
 Track your workout progress in the CLI while waiting for your agent to finish in another tab.
