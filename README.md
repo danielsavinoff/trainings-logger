@@ -1,12 +1,8 @@
 <h1 align="center">Trainings logger</h1>
 
 <p align="center">
-  <a href="https://github.com/danielsavinoff/trainings-logger/actions/workflows/main.yml">
-    <img src="https://github.com/danielsavinoff/trainings-logger/actions/workflows/main.yml/badge.svg" alt="Release">
-  </a>
-  <a href="https://github.com/danielsavinoff/trainings-logger/releases/latest">
-    <img src="https://img.shields.io/github/v/release/danielsavinoff/trainings-logger" alt="Release version">
-  </a>
+  <a href="https://github.com/danielsavinoff/trainings-logger/actions/workflows/main.yml"><img src="https://github.com/danielsavinoff/trainings-logger/actions/workflows/main.yml/badge.svg" alt="Release"></a>
+  <a href="https://github.com/danielsavinoff/trainings-logger/releases/latest"><img src="https://img.shields.io/github/v/release/danielsavinoff/trainings-logger" alt="Release version"></a>
 </p>
 
 <p align="center">
