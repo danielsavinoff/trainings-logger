@@ -46,7 +46,7 @@ func (m RecordsModel) resize() RecordsModel {
 	// Reserve at least one line for the column names.
 	m.table.SetHeight(max(
 		1,
-		panelHeight-frameHeight-1,
+		panelHeight-frameHeight,
 	))
 
 	m.timeline.SetWidth(rightWidth)
@@ -54,7 +54,7 @@ func (m RecordsModel) resize() RecordsModel {
 	// Keep the Sets column headings fixed above the scrolling history.
 	m.timeline.SetHeight(max(
 		0,
-		panelHeight-frameHeight-2,
+		panelHeight-frameHeight-1,
 	))
 
 	m.syncExercisePager()

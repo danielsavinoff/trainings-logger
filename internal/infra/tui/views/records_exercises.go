@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"charm.land/bubbles/v2/table"
-	"charm.land/lipgloss/v2"
 
 	"github.com/danielsavinoff/trainings-logger/internal/infra/tui/components"
 )
@@ -62,5 +61,5 @@ func (m RecordsModel) exercisesView() string {
 	t.GotoTop()
 	t.SetCursor(max(0, m.table.Cursor()-start))
 
-	return lipgloss.JoinVertical(lipgloss.Left, t.View(), components.PaginatorView(m.exercisePager, m.table.Width()))
+	return t.View()
 }

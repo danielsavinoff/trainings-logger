@@ -139,7 +139,11 @@ func (m RecordsModel) setsView() string {
 
 	header := m.renderSetRow(titles, lipgloss.NewStyle().Foreground(components.ActivePanelColor))
 
-	return lipgloss.JoinVertical(lipgloss.Left, header, m.timeline.View(), components.PaginatorView(m.setPager, m.timeline.Width()))
+	return lipgloss.JoinVertical(
+		lipgloss.Left,
+		header,
+		m.timeline.View(),
+	)
 }
 
 func (m *RecordsModel) refreshTimeline() {

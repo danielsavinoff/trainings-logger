@@ -78,10 +78,6 @@ func (m RecordsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
-	if wheel, ok := msg.(tea.MouseWheelMsg); ok {
-		return m.scrollPanel(wheel)
-	}
-
 	if _, ok := msg.(tea.MouseMsg); ok {
 		return m, nil
 	}
