@@ -1,6 +1,6 @@
 // START_MODULE_CONTRACT
-//   PURPOSE: Open Dropbox consent in a chosen system browser.
-//   SCOPE: Native browser commands and optional DROPBOX_BROWSER override.
+//   PURPOSE: Open Dropbox consent in the system default browser.
+//   SCOPE: Native default-browser commands.
 //   DEPENDS: none
 //   LINKS: M-INFRA-DROPBOX-AUTH, V-M-INFRA-DROPBOX-AUTH
 //   MAP_MODE: SUMMARY
@@ -14,40 +14,20 @@ package dropbox
 
 import (
 	"context"
-	"os"
 	"os/exec"
 	"runtime"
-	"strings"
 )
 
 // START_BLOCK_BROWSER_LAUNCH
 func browserCommand(
 	ctx context.Context,
 	platform string,
-	browser string,
 	address string,
 ) *exec.Cmd {
-	browser = strings.TrimSpace(browser)
 	if platform == "darwin" {
-		if browser != "" {
-			return exec.CommandContext(
-				ctx,
-				"open",
-				"-a",
-				browser,
-				address,
-			)
-		}
 		return exec.CommandContext(
 			ctx,
 			"open",
-			address,
-		)
-	}
-	if browser != "" {
-		return exec.CommandContext(
-			ctx,
-			browser,
 			address,
 		)
 	}
@@ -73,7 +53,6 @@ func openBrowser(
 	return browserCommand(
 		ctx,
 		runtime.GOOS,
-		os.Getenv("DROPBOX_BROWSER"),
 		authorizationURL,
 	).Run()
 }

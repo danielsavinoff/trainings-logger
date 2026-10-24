@@ -39,14 +39,7 @@ In the code-entry step, `ctrl+r` starts a fresh authorization attempt. `ctrl+o`
 shows the full sign-in URL in a scrollable view; use `j`/`k` and Escape to return.
 You can open that URL in another browser.
 
-Before launching the application on macOS, you can choose a browser:
-
-```sh
-export DROPBOX_BROWSER="Google Chrome"
-```
-
-On Linux or Windows, `DROPBOX_BROWSER` is the browser executable path. Leave it
-unset to use the system default. It is a browser name/path, not a shell command.
+Authorization always opens the system default browser.
 
 The URL `/1/oauth2/authorize_submit` is part of Dropbox's consent submission.
 An error there occurs before the application receives an authorization code;
