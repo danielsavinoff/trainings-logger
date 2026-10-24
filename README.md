@@ -11,7 +11,7 @@ Track your workout progress in the CLI while waiting for your agent to finish in
 </p>
 
 <p align="center">
-  <img src="assets/screenshot.png" alt="Trainings logger terminal interface showing workout sessions, exercises, and sets">
+  <img src="assets/screenshot.png?v=55232ce" alt="Trainings logger terminal interface showing workout sessions, exercises, and sets">
 </p>
 
 ## ✨ Features
