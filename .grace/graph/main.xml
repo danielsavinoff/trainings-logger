@@ -89,7 +89,7 @@
         <File>internal/app/command/complete_questionnaire.go</File>
         <File>internal/app/ports/identity_linker.go</File>
         <File>internal/infra/tui/app.go</File>
-        <File>cmd/cli/bootstrap.go</File>
+        <File>cmd/trainings-logger/bootstrap.go</File>
       </Files>
       <Links>
         <M-DOMAIN-USER-PREFERENCES />
@@ -98,7 +98,7 @@
         <M-INFRA-DROPBOX-AUTH />
         <M-CLI-BUILD-CONFIG />
       </Links>
-      <Behavior>Validate models through constructors and matching identity IDs. An empty completion returns before opening a transaction; explicit answers save through one transaction and roll back together on failure. Bootstrap wires real Dropbox linking using the configured key: a nonempty runtime DROPBOX_APP_KEY overrides the release-embedded default. Access and refresh tokens are persisted in the local SQLite database.</Behavior>
+      <Behavior>Validate models through constructors and matching identity IDs. An empty completion returns before opening a transaction; explicit answers save through one transaction and roll back together on failure. Bootstrap wires real Dropbox linking using the build-time dropboxAppKey string directly, with no runtime environment lookup. Access and refresh tokens are persisted in the local SQLite database.</Behavior>
     </M-APP-QUESTIONNAIRE>
     <M-INFRA-DROPBOX-AUTH>
       <Name>Dropbox authorization</Name>
@@ -314,7 +314,7 @@
         <File>internal/app/command/update_set.go</File>
         <File>internal/app/query/list_sets.go</File>
         <File>internal/infra/tui/app.go</File>
-        <File>cmd/cli/bootstrap.go</File>
+        <File>cmd/trainings-logger/bootstrap.go</File>
       </Files>
       <Links>
         <M-DOMAIN-SESSION />
@@ -357,15 +357,15 @@
     <M-CLI-BUILD-CONFIG>
       <Name>CLI build configuration</Name>
       <Type>infrastructure</Type>
-      <Path>cmd/cli/config.go</Path>
-      <Purpose>Resolve the public Dropbox app key from a runtime override or build-time default.</Purpose>
+      <Path>cmd/trainings-logger/config.go</Path>
+      <Purpose>Supply the public Dropbox app key through Go linker flags for local and release builds.</Purpose>
       <Files>
-        <File>cmd/cli/config.go</File>
+        <File>cmd/trainings-logger/config.go</File>
       </Files>
       <Links>
         <M-INFRA-DROPBOX-AUTH />
       </Links>
-      <Behavior>A package-main string dropboxAppKey is settable with Go -X linker flags. configuredDropboxAppKey returns a trimmed nonempty runtime DROPBOX_APP_KEY first, otherwise the embedded default. Unconfigured source builds keep an empty default and optional Dropbox setup. No user credentials or app secret are embedded.</Behavior>
+      <Behavior>cmd/trainings-logger/config.go provides the package-main string dropboxAppKey, settable with Go -X linker flags in both go run and go build. Bootstrap passes it directly to the Dropbox linker. The executable does not read DROPBOX_APP_KEY at runtime. Unconfigured builds keep an empty key and optional Dropbox setup. No user credentials or app secret are embedded.</Behavior>
     </M-CLI-BUILD-CONFIG>
     <M-RELEASE>
       <Name>Tagged CLI releases</Name>
@@ -379,7 +379,7 @@
       <Links>
         <M-CLI-BUILD-CONFIG />
       </Links>
-      <Behavior>On v* tags, GitHub Actions checks out the repository, selects Go from go.mod, exposes vars.DROPBOX_APP_KEY as a job environment variable, and rejects a missing key before running GoReleaser. GoReleaser injects it using -X main.dropboxAppKey and builds linux/darwin/windows for amd64/arm64. Existing GITHUB_TOKEN and contents:write permissions publish release artifacts. The repository variable is public configuration; no access/refresh tokens or app secret are embedded.</Behavior>
+      <Behavior>On v* tags, GitHub Actions checks out the repository, selects Go from go.mod, exposes vars.DROPBOX_APP_KEY as a job environment variable, and rejects a missing key before running GoReleaser. GoReleaser injects it using -X main.dropboxAppKey and builds ./cmd/trainings-logger for linux/darwin/windows on amd64/arm64. Executables are named trainings-logger, with .exe on Windows. Archives explicitly include only LICENSE in addition to the binary, overriding automatic README inclusion. Existing GITHUB_TOKEN and contents:write permissions publish release artifacts. The repository variable is public configuration; no access/refresh tokens or app secret are embedded.</Behavior>
     </M-RELEASE>
   </GD-MAIN>
 </GraceGraphDocument>

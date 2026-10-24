@@ -25,7 +25,7 @@
       <Scenario>Manual check: Exercise records, help, open-dialog, and questionnaire states with the actual model and a temporary SQLite database; q remains text in dialogs and setup.</Scenario>
     </V-M-TUI-STARTER>
     <V-M-TUI-QUESTIONNAIRE>
-      <Command>go vet ./internal/infra/tui/... ./cmd/cli</Command>
+      <Command>go vet ./internal/infra/tui/... ./cmd/trainings-logger</Command>
       <TraceAssertion>The declared go vet command type-checks the listed packages and checks static diagnostics. No automated behavioral test coverage is declared; scenarios require manual verification.</TraceAssertion>
       <Scenario>Manual check: A missing preferences row opens unit setup, then provider setup; skipped answers and cancelled setup leave application tables untouched. An explicitly saved preference suppresses later automatic setup.</Scenario>
       <Scenario>Manual check: r reopens setup while retaining records selection, pages, offsets, errors, and existing settings. Dialog and help input retain ownership; p no longer opens a screen and s remains a records-only save action.</Scenario>
@@ -33,7 +33,7 @@
       <Scenario>Manual check: Async authorization and saves support invalid input, failure retry, cancellation, and stale-message rejection; successful completion reformats weights without mutating the underlying domain values. ctrl+r retries with a fresh session; ctrl+o exposes the complete scrollable URL at compact sizes.</Scenario>
     </V-M-TUI-QUESTIONNAIRE>
     <V-M-APP-QUESTIONNAIRE>
-      <Command>go vet ./internal/app/command ./cmd/cli</Command>
+      <Command>go vet ./internal/app/command ./cmd/trainings-logger</Command>
       <TraceAssertion>The declared go vet command type-checks the listed packages and checks static diagnostics. No automated behavioral test coverage is declared; scenarios require manual verification.</TraceAssertion>
       <Scenario>Manual check: An empty completion does not start a transaction. Explicit answers validate through constructors and save together; credential failure rolls back preferences and identity.</Scenario>
     </V-M-APP-QUESTIONNAIRE>
@@ -49,7 +49,7 @@
       <Scenario>Manual check: Check identity and credential constructor validation, repository round trips, rejection of unsupported providers and missing identity references, and deterministic latest-account selection.</Scenario>
     </V-M-DOMAIN-IDENTITY>
     <V-M-DOMAIN-USER-PREFERENCES>
-      <Command>go vet ./internal/domain/user/preferences ./internal/app/command ./internal/app/query ./internal/infra/persistence/sqlite ./internal/infra/tui/views ./cmd/cli</Command>
+      <Command>go vet ./internal/domain/user/preferences ./internal/app/command ./internal/app/query ./internal/infra/persistence/sqlite ./internal/infra/tui/views ./cmd/trainings-logger</Command>
       <TraceAssertion>The declared go vet command type-checks the listed packages and checks static diagnostics. No automated behavioral test coverage is declared; scenarios require manual verification.</TraceAssertion>
       <Scenario>Manual check: Absent preferences return a validated kg default without creating a row. Explicit unit completion persists kg/lb and updates visible sets; skipping on reset retains existing preferences.</Scenario>
     </V-M-DOMAIN-USER-PREFERENCES>
@@ -95,7 +95,7 @@
       <Scenario>Construct sessions with valid UUIDs, positive integer indices, and default or explicit UTC timestamps; reject invalid UUIDs, nonpositive indices, and invalid timestamps. Snapshot validation rejects duplicate session indices before writes.</Scenario>
     </V-M-DOMAIN-SESSION>
     <V-M-APP-SESSIONS>
-      <Command>go vet ./internal/app/command ./internal/app/query ./cmd/cli</Command>
+      <Command>go vet ./internal/app/command ./internal/app/query ./cmd/trainings-logger</Command>
       <TraceAssertion>Static diagnostics only; temporary-database scenarios exercise real handlers and transaction runners without contacting Dropbox or opening the real user database.</TraceAssertion>
       <Scenario>Create sessions without fields using maximum existing index plus one in a transaction (1 when empty). Check indices 1, 2, 3; delete 2 then create 4, delete the maximum then use remaining maximum plus one, and restore sparse indices then continue from the restored maximum. List by descending index; preserve creation time and UUID relationships. Session n creates/selects immediately without a dialog, e is a no-op, and the table contains only Index. Cascade deletion through performances and sets without removing catalog definitions; preserve empty workouts.</Scenario>
     </V-M-APP-SESSIONS>
@@ -105,7 +105,7 @@
       <Scenario>Validate UUID identity, required parent IDs and explicit/default UTC timestamps. Exercise membership stores only IDs and time; catalog display names remain in the reusable definition.</Scenario>
     </V-M-DOMAIN-PERFORMANCE>
     <V-M-APP-PERFORMANCES>
-      <Command>go vet ./internal/app/command ./internal/app/query ./cmd/cli</Command>
+      <Command>go vet ./internal/app/command ./internal/app/query ./cmd/trainings-logger</Command>
       <TraceAssertion>Static diagnostics only; temporary database and TUI harnesses exercise real transaction runners, handlers and models without opening the user database or contacting Dropbox.</TraceAssertion>
       <Scenario>Add existing catalog definitions only to existing sessions, return the same ID/time on repeated add, preserve insertion order, allow the same catalog exercise in another session, reject protected catalog deletion, remove performances with only their sets, and retain parents when final children are removed.</Scenario>
       <Scenario>Verify full-screen catalog Enter add/select and Escape return, save-time catalog entry blocking, independent browsing, retained selected IDs, form ownership, keyboard navigation, setup/help isolation, display-only weights and bounded compact/zero-size output.</Scenario>
@@ -123,14 +123,14 @@
       <Scenario>Verify shared padding is zero vertical/one horizontal. Render wide and compact dialog fields on consecutive rows, compare actual caret positions with displayed text including Unicode and long input, preserve insert/navigation/save/cancel behavior, and check bounds at normal/tiny/zero dimensions. Help starts at the records outer padding; setup borders and contents align with catalog/main frames, including code entry and scrollable authorization URL.</Scenario>
     </V-M-TUI-COMPONENTS>
     <V-M-CLI-BUILD-CONFIG>
-      <Command>go vet ./cmd/cli</Command>
+      <Command>go vet ./cmd/trainings-logger</Command>
       <TraceAssertion>Compilation/static evidence is supplemented by temporary configuration probes and configuration checks; no committed automated tests or release publication are performed.</TraceAssertion>
-      <Scenario>Use temporary copies of config.go with a probe entrypoint; compile using -X main.dropboxAppKey=placeholder and verify unset/empty/whitespace environment uses the embedded default, a nonempty trimmed runtime variable overrides it, and a normal build without linker flags defaults to empty. Build the real CLI with the same placeholder linker flags without running it or opening the user database.</Scenario>
+      <Scenario>Use temporary copies of cmd/trainings-logger/config.go with a probe entrypoint; verify go run and go build with -X main.dropboxAppKey=placeholder inject that value even when runtime DROPBOX_APP_KEY differs. A build without linker flags returns an empty key. Build the real renamed command without running it or opening the user database.</Scenario>
     </V-M-CLI-BUILD-CONFIG>
     <V-M-RELEASE>
       <Command>go build ./...</Command>
       <TraceAssertion>Compilation/static evidence is supplemented by temporary configuration probes and configuration checks; no committed automated tests or release publication are performed.</TraceAssertion>
-      <Scenario>Parse workflow and GoReleaser YAML; check vars.DROPBOX_APP_KEY is inherited by the release step, missing-key validation fails before release, and ldflags interpolate the key into main.dropboxAppKey for every existing build target. Validate with placeholder values locally. Publishing is verified by the actual tag-triggered GitHub workflow; local checks do not claim a hosted release run.</Scenario>
+      <Scenario>Parse workflow and GoReleaser YAML; check vars.DROPBOX_APP_KEY is inherited by the release step, missing-key validation fails before release, and ldflags interpolate the key into main.dropboxAppKey for every existing build target. Validate with placeholder values locally. Publishing is verified by the actual tag-triggered GitHub workflow; local checks do not claim a hosted release run. Verify the main path is ./cmd/trainings-logger and binary name is trainings-logger; build a temporary local GoReleaser snapshot and inspect its archive to confirm the executable and LICENSE are present and no README variant is packaged. Preserve the configured target matrix and app-key injection.</Scenario>
     </V-M-RELEASE>
   </VD-MAIN>
 </GraceVerificationDocument>

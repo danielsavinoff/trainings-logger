@@ -1,6 +1,6 @@
 <GraceTechnology graceVersion="4.0">
   <Language>Go; SQL for SQLite migrations.</Language>
-  <Runtime>Go 1.27, as declared in go.mod; local terminal process launched from cmd/cli.</Runtime>
+  <Runtime>Go 1.27, as declared in go.mod; local terminal process launched from cmd/trainings-logger.</Runtime>
   <Framework>Bubble Tea v2.0.10, Bubbles v2.2.1, and Lip Gloss v2.0.6; modernc.org/sqlite v1.59.0; golang-migrate v4.20.1 with embedded SQL migrations.</Framework>
   <TestingStack>No automated test files or golden snapshots are currently present. Use go build ./... and go vet ./... for compilation and static checks. Verification scenarios describe manual checks and do not claim automated behavioral coverage. Do not add tests unless the user requests them.</TestingStack>
   <Observability>Current implementation uses the standard log package for fatal startup or runtime errors and displays action or validation errors in the TUI. No metrics, tracing, or external telemetry integration is present. Preserve terminal rendering when adding diagnostics; additional observability requirements are unspecified.</Observability>

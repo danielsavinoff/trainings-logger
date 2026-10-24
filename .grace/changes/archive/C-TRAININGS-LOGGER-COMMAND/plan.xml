@@ -1,0 +1,131 @@
+<GraceChangePlan graceVersion="4.0" status="applied">
+  <C-TRAININGS-LOGGER-COMMAND>
+    <IntentSummary>Sequentially rename the command/release binary, explicitly package LICENSE without README, synchronize references, validate and archive.</IntentSummary>
+    <BaselineAssertions>
+      <MustContain>
+        <File>.goreleaser.yaml</File>
+        <Text>main: ./cmd/cli</Text>
+      </MustContain>
+      <MustContain>
+        <File>.goreleaser.yaml</File>
+        <Text>binary: cli</Text>
+      </MustContain>
+      <MustContain>
+        <File>cmd/cli/config.go</File>
+        <Text>var dropboxAppKey string</Text>
+      </MustContain>
+    </BaselineAssertions>
+    <TargetAssertions>
+      <MustExist>
+        <Value>cmd/trainings-logger/main.go</Value>
+        <Value>cmd/trainings-logger/bootstrap.go</Value>
+        <Value>cmd/trainings-logger/config.go</Value>
+      </MustExist>
+      <MustNotExist>
+        <Value>cmd/cli</Value>
+        <Value>.grace/changes/active/C-EMBED-DROPBOX-APP-KEY/spec.xml</Value>
+        <Value>.grace/changes/active/C-EMBED-DROPBOX-APP-KEY/plan.xml</Value>
+      </MustNotExist>
+      <MustContain>
+        <File>.goreleaser.yaml</File>
+        <Text>main: ./cmd/trainings-logger</Text>
+      </MustContain>
+      <MustContain>
+        <File>.goreleaser.yaml</File>
+        <Text>binary: trainings-logger</Text>
+      </MustContain>
+      <MustContain>
+        <File>.goreleaser.yaml</File>
+        <Text>archives:</Text>
+      </MustContain>
+      <MustContain>
+        <File>.goreleaser.yaml</File>
+        <Text>- LICENSE</Text>
+      </MustContain>
+      <MustContain>
+        <File>README.md</File>
+        <Text>./trainings-logger</Text>
+      </MustContain>
+      <MustVerify>
+        <Module>M-APP-QUESTIONNAIRE</Module>
+        <Module>M-APP-PERFORMANCES</Module>
+        <Module>M-CLI-BUILD-CONFIG</Module>
+        <Module>M-RELEASE</Module>
+      </MustVerify>
+      <MustPassCommand>
+        <Command budgetSeconds="60">go build ./...</Command>
+        <Command budgetSeconds="60">go vet ./...</Command>
+      </MustPassCommand>
+    </TargetAssertions>
+    <DurableScope>
+      <GraphAnchors>
+        <M-APP-QUESTIONNAIRE />
+        <M-APP-PERFORMANCES />
+        <M-CLI-BUILD-CONFIG />
+        <M-RELEASE />
+      </GraphAnchors>
+      <VerificationAnchors>
+        <V-M-TUI-QUESTIONNAIRE />
+        <V-M-APP-QUESTIONNAIRE />
+        <V-M-DOMAIN-USER-PREFERENCES />
+        <V-M-APP-SESSIONS />
+        <V-M-APP-PERFORMANCES />
+        <V-M-CLI-BUILD-CONFIG />
+        <V-M-RELEASE />
+      </VerificationAnchors>
+      <GraphDocuments>
+        <GD-MAIN />
+      </GraphDocuments>
+      <VerificationDocuments>
+        <VD-MAIN />
+      </VerificationDocuments>
+      <ContextArtifact>deployment.xml</ContextArtifact>
+      <ContextArtifact>technology.xml</ContextArtifact>
+    </DurableScope>
+    <ObservedWriteScope>
+      <File>.goreleaser.yaml</File>
+      <File>README.md</File>
+      <File>AGENTS.md</File>
+      <File>.grace/context/deployment.xml</File>
+      <File>.grace/context/technology.xml</File>
+      <File>.grace/graph/main.xml</File>
+      <File>.grace/verification/main.xml</File>
+      <File>cmd/cli/main.go</File>
+      <File>cmd/cli/bootstrap.go</File>
+      <File>cmd/cli/config.go</File>
+      <File>cmd/trainings-logger/main.go</File>
+      <File>cmd/trainings-logger/bootstrap.go</File>
+      <File>cmd/trainings-logger/config.go</File>
+      <File>.grace/changes/active/C-EMBED-DROPBOX-APP-KEY/spec.xml</File>
+      <File>.grace/changes/active/C-EMBED-DROPBOX-APP-KEY/plan.xml</File>
+      <File>.grace/changes/active/C-TRAININGS-LOGGER-COMMAND/spec.xml</File>
+      <File>.grace/changes/active/C-TRAININGS-LOGGER-COMMAND/plan.xml</File>
+      <File>.grace/changes/archive/C-TRAININGS-LOGGER-COMMAND/spec.xml</File>
+      <File>.grace/changes/archive/C-TRAININGS-LOGGER-COMMAND/plan.xml</File>
+    </ObservedWriteScope>
+    <ImplementationPlan>
+      <T-001>
+        <Title>Rename command and restrict release archive file list</Title>
+        <DependsOn />
+        <AcceptanceCriteria>
+          <Criterion>GoReleaser builds the new command path/name and explicitly packages LICENSE without README; source content and workflow settings are preserved.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go build ./...</Command>
+          <Command>go vet ./...</Command>
+        </Verification>
+      </T-001>
+      <T-002>
+        <Title>Reconcile references and verify release artifacts</Title>
+        <DependsOn>T-001</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Current path guidance and GRACE references match the new name; build/vet and archive checks pass before final validation and authorized archive.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go build ./...</Command>
+          <Command>go vet ./...</Command>
+        </Verification>
+      </T-002>
+    </ImplementationPlan>
+  </C-TRAININGS-LOGGER-COMMAND>
+</GraceChangePlan>

@@ -1,8 +1,8 @@
 version: 2
 
 builds:
-  - main: ./cmd/cli
-    binary: cli
+  - main: ./cmd/trainings-logger
+    binary: trainings-logger
     ldflags:
       - -s -w -X main.dropboxAppKey={{ .Env.DROPBOX_APP_KEY }}
     goos:
@@ -12,3 +12,7 @@ builds:
     goarch:
       - amd64
       - arm64
+
+archives:
+  - files:
+      - LICENSE

@@ -20,14 +20,14 @@ Download the archive for your operating system and architecture from
 On macOS or Linux, run:
 
 ```sh
-chmod +x cli
-./cli
+chmod +x trainings-logger
+./trainings-logger
 ```
 
 On Windows, open PowerShell in the extracted folder and run:
 
 ```powershell
-.\cli.exe
+.\trainings-logger.exe
 ```
 
 To run it from any directory, move the executable into a folder on your `PATH`.

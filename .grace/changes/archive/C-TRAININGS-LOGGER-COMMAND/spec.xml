@@ -1,0 +1,38 @@
+<GraceChangeSpec graceVersion="4.0" status="applied">
+  <C-TRAININGS-LOGGER-COMMAND>
+    <Summary>Rename cmd/cli and the release executable to trainings-logger; exclude README files from binary release archives while retaining LICENSE.</Summary>
+    <Goals>
+      <Goal>Move all command files into cmd/trainings-logger and build binaries named trainings-logger (trainings-logger.exe on Windows).</Goal>
+      <Goal>Configure release archives with an explicit LICENSE-only extra-file list, overriding the default README inclusion.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>Preserve application behavior, the build-time app-key linker symbol main.dropboxAppKey, the release matrix, tag trigger, workflow key source and permissions.</Constraint>
+      <Constraint>Update README installation commands, repository path guidance and current GRACE source/verification paths; do not rewrite archived plans/specifications.</Constraint>
+      <Constraint>An active C-EMBED-DROPBOX-APP-KEY copy matches its applied archive exactly except root statuses. Remove only those redundant active files after verifying equality and preserving the applied archive.</Constraint>
+      <Constraint>Do not change the git index, open the real user database, publish a release or push a tag. Execute sequentially and add no committed test files.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>No OAuth/environment-source changes, domain/schema changes, new package manager or archive format changes.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>cmd/trainings-logger contains the existing command source files and cmd/cli no longer exists. GoReleaser main points to the new directory and binary is trainings-logger.</Criterion>
+      <Criterion>Generated binary archives contain trainings-logger (or .exe) and LICENSE without README.md or other README variants.</Criterion>
+      <Criterion>README launch instructions, AGENTS.md paths and durable GRACE context/graph/verification commands use the new command directory and binary name.</Criterion>
+      <Criterion>Build/vet and selected final GRACE validation pass; verify an actual local snapshot archive if a temporary GoReleaser can be obtained, with no publication or real database access. Archive completed work using the existing instruction.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-APP-QUESTIONNAIRE />
+      <M-APP-PERFORMANCES />
+      <M-CLI-BUILD-CONFIG />
+      <M-RELEASE />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>go build ./...</ExpectedCommand>
+      <ExpectedCommand>go vet ./...</ExpectedCommand>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>Archive means the downloadable binary release archive, not the repository README or historical GRACE archive. Retain LICENSE as the only additional packaged file.</Assumption>
+      <Assumption>The existing GoReleaser configuration is used by the workflow; changing its build main/binary config changes workflow artifacts. Prior sequential execution and completed-change archive authorization persist.</Assumption>
+    </Assumptions>
+  </C-TRAININGS-LOGGER-COMMAND>
+</GraceChangeSpec>

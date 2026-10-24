@@ -73,7 +73,7 @@ Legacy `docs/*.xml` files are not GRACE 4 state. If legacy GRACE 3 docs appear, 
 ## Repository Context
 
 - Go module: `github.com/danielsavinoff/trainings-logger`; `go.mod` declares Go 1.27.
-- `cmd/cli`: process entry point and dependency wiring.
+- `cmd/trainings-logger`: process entry point and dependency wiring.
 - `internal/domain`: exercises, workout sets, weight values and units, user preferences, and repository interfaces.
 - `internal/app`: command and query handlers plus the transaction-runner port.
 - `internal/infra/persistence`: SQL transaction support and SQLite repositories and database setup.
@@ -87,7 +87,7 @@ These paths describe the observed package layout. The initial GRACE graph and ve
 - `go test ./...`: existing automated tests, including TUI snapshots and interaction tests.
 - `go vet ./...`: Go static checks.
 - Do not set `UPDATE_GOLDEN=1` during normal validation; review snapshot updates when changing intended rendering.
-- Run the application with `go run ./cmd/cli` only when interactive execution is needed; it opens the real user database and applies embedded migrations.
+- Run the application with `go run ./cmd/trainings-logger` only when interactive execution is needed; it opens the real user database and applies embedded migrations.
 
 ## Go Source Formatting
 
