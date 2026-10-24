@@ -5,17 +5,18 @@
       <TraceAssertion>The declared go vet command type-checks the listed packages and checks static diagnostics. No automated behavioral test coverage is declared; scenarios require manual verification.</TraceAssertion>
       <Scenario>Manual check: Open help from each panel and return with any key without triggering that key's records action; preserve selection, page, scroll position, and existing errors across resizing.</Scenario>
       <Scenario>Manual check: Help actions and mouse events do not mutate records or access persistence; dialog insert mode retains ? and q as text.</Scenario>
-      <Scenario>Manual check: Compact and wide snapshots preserve terminal modes and dialog cursors while showing help/load/save/quit hints in the inactive-color footer.</Scenario>
-      <Scenario>Manual check: On either active panel, gg selects the first row and G selects the last row; ge and gs continue to change panel focus.</Scenario>
+      <Scenario>Manual check: Compact and wide snapshots preserve terminal modes and dialog cursors while showing only ? - help as the shortcut hint, aligned to table outer spacing, while retaining actual errors/transfer feedback.</Scenario>
+      <Scenario>Manual check: In three compact records panes, 1/2/3 focus sessions/performances/sets, sessions use one fifth and the right column uses the rest with an equal vertical split. Check two cells between adjacent borders and no blank rows between stacked borders. n in Performances opens the full-screen catalog. Keyboard navigation, parent filtering, counters and date-free set rows remain intact.</Scenario>
       <Scenario>Manual check: Questionnaire transitions retain alternate-screen mode and records selections, pagination, scroll position, and errors; cancelling or completing skipped setup does not trigger records actions.</Scenario>
       <Scenario>Manual check: s/l start asynchronous save/load only from records. Transfers prevent overlap and unsafe edits; successful restore refreshes units/data while retaining selected IDs and terminal dimensions.</Scenario>
+      <Scenario>Manual check: Body Weight % in workout performances and the catalog uses the same formatter for zero, fractional, and full shares; catalog edits refresh both tables. Footer wrapping accounts for shared horizontal panel spacing, and the only records shortcut text is ? - help.</Scenario>
     </V-M-TUI-RECORDS>
     <V-M-TUI-HELP>
       <Command>go vet ./internal/infra/tui/views</Command>
       <TraceAssertion>The declared go vet command type-checks the listed packages and checks static diagnostics. No automated behavioral test coverage is declared; scenarios require manual verification.</TraceAssertion>
-      <Scenario>Manual check: Render titled, tab-aligned groups without a separate page title using one-row vertical and two-column horizontal padding; use active-panel color for keys and inactive-border color for borderless records hints.</Scenario>
-      <Scenario>Manual check: Place groups side by side when space allows, stack on compact widths, and reach all content by scrolling.</Scenario>
-      <Scenario>Manual check: Render home/gg, end/G, r reset setup, l load, and s save in help; l is absent from next-page bindings and separate Preferences/Sync destinations remain removed.</Scenario>
+      <Scenario>Manual check: Render titled, tab-aligned groups without a separate page title using zero vertical and one-cell horizontal outer padding, a two-cell column gap, and no extra blank rows between groups; use active-panel color for keys and inactive-border color for borderless records hints.</Scenario>
+      <Scenario>Manual check: At wide sizes, Navigation and Actions occupy the left column and Help begins at the top of the right column; compact widths stack Navigation, Actions and Help within bounds.</Scenario>
+      <Scenario>Manual check: No Pages section or 1/2/3 focus descriptions appear. Navigation shows up/down, gg first row, G last row, and enter select. Actions show exactly n new record, e edit record, d delete record, r reset setup, l load backup, and s save backup. Actual paging/focus bindings and any-key return semantics remain unchanged.</Scenario>
     </V-M-TUI-HELP>
     <V-M-TUI-STARTER>
       <Command>go vet ./internal/infra/tui/starter</Command>
@@ -29,7 +30,7 @@
       <Scenario>Manual check: A missing preferences row opens unit setup, then provider setup; skipped answers and cancelled setup leave application tables untouched. An explicitly saved preference suppresses later automatic setup.</Scenario>
       <Scenario>Manual check: r reopens setup while retaining records selection, pages, offsets, errors, and existing settings. Dialog and help input retain ownership; p no longer opens a screen and s remains a records-only save action.</Scenario>
       <Scenario>Manual check: Unit/provider/code steps fill the usable terminal with main-view spacing and a complete border; compact/tiny/zero layouts remain bounded. Native input cursor stays in bounds and code input is masked.</Scenario>
-      <Scenario>Manual check: Async authorization and saves support invalid input, failure retry, cancellation, and stale-message rejection; successful completion updates visible weights. ctrl+r retries with a fresh session; ctrl+o exposes the complete scrollable URL at compact sizes.</Scenario>
+      <Scenario>Manual check: Async authorization and saves support invalid input, failure retry, cancellation, and stale-message rejection; successful completion reformats weights without mutating the underlying domain values. ctrl+r retries with a fresh session; ctrl+o exposes the complete scrollable URL at compact sizes.</Scenario>
     </V-M-TUI-QUESTIONNAIRE>
     <V-M-APP-QUESTIONNAIRE>
       <Command>go vet ./internal/app/command ./cmd/cli</Command>
@@ -60,7 +61,7 @@
     <V-M-DOMAIN-STATE>
       <Command>go vet ./internal/domain/state</Command>
       <TraceAssertion>The declared go vet command type-checks the listed packages and checks static diagnostics. No automated behavioral test coverage is declared; scenarios require manual verification.</TraceAssertion>
-      <Scenario>Manual check: Validate domain snapshot versions, exercises, set references and timestamps, workout sets, and optional preferences while preserving existing backup JSON.</Scenario>
+      <Scenario>Manual check: Validate version-4 snapshots with catalog exercises, independent workout sessions, unique membership pairs, performance-owned sets, valid timestamps and positive unique session indices and optional preferences. Preserve empty sessions/performances; reject versions 1, 2, and 3 or invalid references before local writes.</Scenario>
     </V-M-DOMAIN-STATE>
     <V-M-INFRA-DROPBOX-STATE>
       <Command>go vet ./internal/infra/dropbox</Command>
@@ -71,22 +72,55 @@
     <V-M-INFRA-PERSISTENCE-SQLITE>
       <Command>go vet ./internal/infra/persistence/sqlite</Command>
       <TraceAssertion>The declared go vet command type-checks the listed packages and checks static diagnostics. No automated behavioral test coverage is declared; scenarios require manual verification.</TraceAssertion>
-      <Scenario>Manual check: Check migration and repository persistence, database file permissions, preference reads without writes, questionnaire transaction rollback, consistent snapshot export, and atomic import retaining local identities and credentials. Reject weights outside SQLite limits before import writes.</Scenario>
+      <Scenario>Manual check: Check the seven-table single initial migration through the embedded runner, up/down/up and repeated startup, SQL timestamp defaults, idempotent pair insertion, descending-index sessions and newest-first sets, insertion-ordered performances, protected catalog deletion, scoped membership/workout cascades, write-free preferences, version-4 round trips, credential retention and mid-import rollback. Reject orphan references, duplicate pairs and oversized weights before writes.</Scenario>
     </V-M-INFRA-PERSISTENCE-SQLITE>
     <V-M-DOMAIN-EXERCISE>
-      <Command>go vet ./internal/domain/exercise</Command>
+      <Command>go vet ./internal/domain/session/exercise</Command>
       <TraceAssertion>The declared go vet command type-checks the listed packages and checks static diagnostics. No automated behavioral test coverage is declared; scenarios require manual verification.</TraceAssertion>
       <Scenario>Manual check: Exercise construction rejects empty IDs and names and out-of-range body-weight shares.</Scenario>
     </V-M-DOMAIN-EXERCISE>
     <V-M-DOMAIN-SET>
-      <Command>go vet ./internal/domain/exercise/set</Command>
+      <Command>go vet ./internal/domain/session/exercise/set</Command>
       <TraceAssertion>The declared go vet command type-checks the listed packages and checks static diagnostics. No automated behavioral test coverage is declared; scenarios require manual verification.</TraceAssertion>
-      <Scenario>Manual check: Set construction rejects empty set and exercise IDs and validates weight and rest values.</Scenario>
+      <Scenario>Manual check: Set construction rejects empty set and performance IDs and validates weight and rest values; set edits retain original timestamps and ownership.</Scenario>
     </V-M-DOMAIN-SET>
     <V-M-DOMAIN-SHARED-WEIGHT>
       <Command>go vet ./internal/domain/shared</Command>
       <TraceAssertion>The declared go vet command type-checks the listed packages and checks static diagnostics. No automated behavioral test coverage is declared; scenarios require manual verification.</TraceAssertion>
       <Scenario>Manual check: Weight and weight-unit constructors reject unsupported or empty unit values.</Scenario>
     </V-M-DOMAIN-SHARED-WEIGHT>
+    <V-M-DOMAIN-SESSION>
+      <Command>go vet ./internal/domain/session</Command>
+      <TraceAssertion>Static diagnostics only; behavioral scenarios were exercised with a temporary standalone harness, not retained automated test files.</TraceAssertion>
+      <Scenario>Construct sessions with valid UUIDs, positive integer indices, and default or explicit UTC timestamps; reject invalid UUIDs, nonpositive indices, and invalid timestamps. Snapshot validation rejects duplicate session indices before writes.</Scenario>
+    </V-M-DOMAIN-SESSION>
+    <V-M-APP-SESSIONS>
+      <Command>go vet ./internal/app/command ./internal/app/query ./cmd/cli</Command>
+      <TraceAssertion>Static diagnostics only; temporary-database scenarios exercise real handlers and transaction runners without contacting Dropbox or opening the real user database.</TraceAssertion>
+      <Scenario>Create sessions without fields using maximum existing index plus one in a transaction (1 when empty). Check indices 1, 2, 3; delete 2 then create 4, delete the maximum then use remaining maximum plus one, and restore sparse indices then continue from the restored maximum. List by descending index; preserve creation time and UUID relationships. Session n creates/selects immediately without a dialog, e is a no-op, and the table contains only Index. Cascade deletion through performances and sets without removing catalog definitions; preserve empty workouts.</Scenario>
+    </V-M-APP-SESSIONS>
+    <V-M-DOMAIN-PERFORMANCE>
+      <Command>go vet ./internal/domain/session/exercise/performance</Command>
+      <TraceAssertion>Static diagnostics only; constructor scenarios are exercised using a temporary standalone harness without retained test files.</TraceAssertion>
+      <Scenario>Validate UUID identity, required parent IDs and explicit/default UTC timestamps. Exercise membership stores only IDs and time; catalog display names remain in the reusable definition.</Scenario>
+    </V-M-DOMAIN-PERFORMANCE>
+    <V-M-APP-PERFORMANCES>
+      <Command>go vet ./internal/app/command ./internal/app/query ./cmd/cli</Command>
+      <TraceAssertion>Static diagnostics only; temporary database and TUI harnesses exercise real transaction runners, handlers and models without opening the user database or contacting Dropbox.</TraceAssertion>
+      <Scenario>Add existing catalog definitions only to existing sessions, return the same ID/time on repeated add, preserve insertion order, allow the same catalog exercise in another session, reject protected catalog deletion, remove performances with only their sets, and retain parents when final children are removed.</Scenario>
+      <Scenario>Verify full-screen catalog Enter add/select and Escape return, save-time catalog entry blocking, independent browsing, retained selected IDs, form ownership, keyboard navigation, setup/help isolation, display-only weights and bounded compact/zero-size output.</Scenario>
+    </V-M-APP-PERFORMANCES>
+    <V-M-TUI-CATALOG>
+      <Command>go vet ./internal/infra/tui/views</Command>
+      <TraceAssertion>Static diagnostics only; temporary standalone TUI scenarios exercise actual handlers/models on temporary databases without retained test files or real-user database access.</TraceAssertion>
+      <Scenario>Open catalog with n in Performances and verify only a full-screen catalog table with Name and Body Weight % renders, with no shortcut hints or reserved blank help row. Enter selects/adds exactly once and returns to Performances; repeated selection retains the membership ID. Escape with a pending g returns without adding and preserves the exact records view and its errors at unchanged dimensions.</Scenario>
+      <Scenario>Catalog n/e/d create/edit/delete definitions; form save/cancel remains in catalog and never implicitly adds membership. Referenced definitions are protected. Local errors do not replace retained records errors; numeric focus, save/load/setup/help/quit keys remain isolated.</Scenario>
+      <Scenario>Verify catalog paging/jumps, resize with forms, compact/zero bounds, missing-session errors, no opening during transfer, and stale transfer replies preserving current view ownership.</Scenario>
+    </V-M-TUI-CATALOG>
+    <V-M-TUI-COMPONENTS>
+      <Command>go vet ./internal/infra/tui/components</Command>
+      <TraceAssertion>Static checks cover shared styles and modal layout; runtime scenarios use temporary verification harnesses, with no automated test files committed.</TraceAssertion>
+      <Scenario>Verify shared padding is zero vertical/one horizontal. Render wide and compact dialog fields on consecutive rows, compare actual caret positions with displayed text including Unicode and long input, preserve insert/navigation/save/cancel behavior, and check bounds at normal/tiny/zero dimensions. Help starts at the records outer padding; setup borders and contents align with catalog/main frames, including code entry and scrollable authorization URL.</Scenario>
+    </V-M-TUI-COMPONENTS>
   </VD-MAIN>
 </GraceVerificationDocument>

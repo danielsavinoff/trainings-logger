@@ -45,6 +45,8 @@ func (h LoadRemoteStateHandler) Handle(ctx context.Context) error {
 	validated, err := state.NewSnapshot(
 		snapshot.Version,
 		snapshot.Exercises,
+		snapshot.Sessions,
+		snapshot.Performances,
 		snapshot.Sets,
 		snapshot.Preferences,
 	)

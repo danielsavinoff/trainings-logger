@@ -1,0 +1,64 @@
+<GraceChangeSpec graceVersion="4.0" status="superseded">
+  <C-RECORDS-FOOTER-BODY-WEIGHT>
+    <Summary>Keep only the padded ? - help shortcut on records, remove catalog shortcut help, display body-weight percentages in catalog and workout exercises, and archive completed GRACE work after validation.</Summary>
+    <Goals>
+      <Goal>Replace exercise-owned sessions with independent workout sessions containing session-exercise entries, each of which owns sets.</Goal>
+      <Goal>Keep the reusable catalog out of records and open it full screen when adding a workout exercise. Enter selects/adds; Escape returns; n/e/d manage catalog definitions.</Goal>
+      <Goal>Use 1/2/3 for sessions, exercises, and sets on records; allocate one fifth to sessions and the remaining four fifths to exercises above sets with compact spacing.</Goal>
+      <Goal>Use shared table layout spacing for the records help footer and show Name plus Body Weight % columns in both exercise tables.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>Sessions retain UUID id, required trimmed title, and created_at default UTC now; remove their exercise_id. Add a constructor-validated SessionExercise with UUID id, session_id, exercise_id, and created_at for stable insertion ordering. Replace sets.session_id with sets.session_exercise_id. Keep stored set timestamps.</Constraint>
+      <Constraint>Each exercise can occur once per session; enforce unique(session_id, exercise_id). Repeated add selects the existing entry without duplication. Exercise definitions remain shared across workouts.</Constraint>
+      <Constraint>Deleting a session cascades its exercise entries and sets. Removing one session-exercise entry cascades only its sets and keeps the catalog exercise. Reject catalog deletion while referenced so historical workouts are preserved.</Constraint>
+      <Constraint>Keep the recently requested single initial migration baseline; revise that CLI-generated init pair to the new seven-table schema rather than introducing a legacy-data conversion. Do not open, reset, or mutate the real user database.</Constraint>
+      <Constraint>Use snapshot version 3 with sessions, catalog exercises, session_exercises, sets, and optional preferences. Reject older snapshots before import. Keep restore atomic and retain local credentials.</Constraint>
+      <Constraint>Preserve help/setup/dialog input isolation, asynchronous transfer ownership, stable selected IDs across refresh/restore, Vim navigation, keyboard paging, and existing border counters. No date separators in set rows, no extra paginator indicators, and no mouse-wheel navigation.</Constraint>
+      <Constraint>Use constructors at domain/application/persistence boundaries, one operation per use case source file, domain errors.go files, one argument per line for multiargument calls, multiline structs with fields, compact empty structs, and blank lines between type declarations. Do not add automated test files.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>No routines, workout templates, analytics, exercise-entry reordering, duplicated exercise blocks in a single workout, or backward snapshot/data conversion.</NonGoal>
+      <NonGoal>No database reset, network sign-in, or unrelated Dropbox/browser behavior changes.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>After reserving the footer, sessions use floor(width/5) and exercises above sets share the remaining width equally by height. Only three panels appear on records. Reduce record-pane outer spacing to zero vertical/one horizontal cell and pane inner padding to zero vertical/one horizontal cell, giving two columns between adjacent borders and no blank rows between stacked borders. Keep shared help/setup/dialog styles unchanged and all output bounded.</Criterion>
+      <Criterion>Sessions &lt;1&gt; show workout titles, Exercises &lt;2&gt; and the full-screen catalog show Name and Body Weight % columns, and Sets &lt;3&gt; show reps, weight, and rest. Format the validated body-weight share as percentage using the same formatter in both exercise tables. No catalog shortcut help is rendered; only actual local errors reserve catalog footer space.</Criterion>
+      <Criterion>n from Exercises opens the full-screen catalog. Enter adds/selects the highlighted definition in the selected workout and returns to Exercises; repeated add selects the existing entry. Escape returns without adding an entry, retaining workout/entry/set selection. Catalog definition edits persist as normal. Missing-session selection reports a nonmutating error and stays in the catalog.</Criterion>
+      <Criterion>In records, 1/2/3 focus sessions/exercises/sets, Enter advances sessions to exercises to sets, and n/e/d manage sessions and sets. Exercises n opens catalog, e has no independent edit, and d removes only that entry and its sets. In catalog, n/e/d create/edit/delete definitions; form save/cancel returns to catalog. Referenced catalog definitions remain protected.</Criterion>
+      <Criterion>Catalog owns its input: records focus keys, save/load/setup/help/quit shortcuts do not trigger records actions there. Keep Vim row/jump/half-page/page navigation and ignore mouse input. Escape clears a pending g prefix before returning. Catalog browsing and Escape preserve records selection, paging, focus on Exercises, and pre-existing errors at unchanged dimensions; resizes propagate to catalog and forms. Catalog-local errors do not replace retained records errors.</Criterion>
+      <Criterion>Domain models and repository/application operations support standalone session CRUD/listing, catalog CRUD/listing, idempotent AddSessionExercise, ListSessionExercises, DeleteSessionExercise, and set operations by SessionExerciseID. Validate both parents and ownership; preserve parent IDs and creation timestamps on edits.</Criterion>
+      <Criterion>The single initial up/down pair creates/drops the complete seven-table schema with foreign keys, unique entry membership, indexes, and timestamp defaults. Snapshot version 3 validates all references and duplicates, preserves empty sessions/entries, and rejects invalid/older payloads before mutation.</Criterion>
+      <Criterion>Update help, README, semantic contracts, and GRACE graph/verification through an approved replacement lifecycle. Build/vet/formatting, temporary-database constraint and snapshot checks, and records/catalog interaction/layout checks pass.</Criterion>
+      <Criterion>Keep session-exercise ownership, version-3 snapshots, initial migration contents, and domain/application operations unchanged. Save-time input ownership prevents opening or mutating the catalog during transfers; stale transfer replies cannot leave a hidden catalog active.</Criterion>
+      <Criterion>The only records shortcut hint is ? - help. Wrap it with the same recordsPaneSpacing used by tables, calculate wrapping width after that padding, and preserve actual error/transfer status feedback. Catalog has no shortcut/help footer and uses all available rows when no error is present; local errors still render with consistent padding and remain isolated.</Criterion>
+      <Criterion>After fresh final assertions and runtime scenarios pass, mark the completed change applied and move every active change bundle to .grace/changes/archive. Preserve historical superseded statuses. The user explicitly authorized final apply/archive, so no additional confirmation is required.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-DOMAIN-SESSION />
+      <M-DOMAIN-SESSION-EXERCISE />
+      <M-DOMAIN-SET />
+      <M-DOMAIN-STATE />
+      <M-APP-SESSIONS />
+      <M-APP-SESSION-EXERCISES />
+      <M-APP-REMOTE-STATE />
+      <M-INFRA-PERSISTENCE-SQLITE />
+      <M-INFRA-DROPBOX-STATE />
+      <M-TUI-RECORDS />
+      <M-TUI-HELP />
+      <M-TUI-CATALOG />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>go build ./...</ExpectedCommand>
+      <ExpectedCommand>go vet ./...</ExpectedCommand>
+      <ExpectedCommand>grace lint --path .</ExpectedCommand>
+      <ExpectedEvidence>Temporary TUI checks verify one padded records help hint, no catalog shortcut text or reserved empty footer row, consistent percentage columns including fractional/zero/full shares and edits, local errors, picker navigation and retained state, compact sizes, and unchanged backend scenarios. Final validation precedes authorized apply/archive.</ExpectedEvidence>
+      <ExpectedEvidence>Temporary TUI checks verify one padded records help hint, no catalog shortcut text or reserved empty footer row, consistent percentage columns including fractional/zero/full shares and edits, local errors, picker navigation and retained state, compact sizes, and unchanged backend scenarios. Final validation precedes authorized apply/archive.</ExpectedEvidence>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>The latest user request authorizes these UI refinements and explicitly asks to move all completed work to the GRACE archive afterward. The existing sequential execution preference persists.</Assumption>
+      <Assumption>Only shortcut hints are reduced: retain real errors and transfer outcomes. Use the same one-cell horizontal outer panel spacing for footer text. Body-weight percentages are display values derived from existing catalog definitions; no schema/domain changes are required.</Assumption>
+      <Assumption>Supersede the immutable catalog-view plan with this replacement. Carry existing staged/unstaged work as preservation scope, do not change the git index, and do not open/reset the real database.</Assumption>
+    </Assumptions>
+    <Replacement>C-SESSION-INDEX</Replacement>
+  </C-RECORDS-FOOTER-BODY-WEIGHT>
+</GraceChangeSpec>

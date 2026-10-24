@@ -5,9 +5,10 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/danielsavinoff/trainings-logger/internal/domain/exercise"
-	"github.com/danielsavinoff/trainings-logger/internal/infra/persistence"
 	"modernc.org/sqlite"
+
+	"github.com/danielsavinoff/trainings-logger/internal/domain/session/exercise"
+	"github.com/danielsavinoff/trainings-logger/internal/infra/persistence"
 )
 
 type ExerciseRepository struct {
@@ -30,12 +31,22 @@ func (r *ExerciseRepository) Save(
 			body_weight_share = excluded.body_weight_share
 	`
 
-	_, err := persistence.ExecutorFromContext(ctx, r.db).ExecContext(
-		ctx, query, e.ID, e.Name, e.BodyWeightShare,
+	_, err := persistence.ExecutorFromContext(
+		ctx,
+		r.db,
+	).ExecContext(
+		ctx,
+		query,
+		e.ID,
+		e.Name,
+		e.BodyWeightShare,
 	)
 
 	var sqliteErr *sqlite.Error
-	if errors.As(err, &sqliteErr) && sqliteErr.Code() == 2067 {
+	if errors.As(
+		err,
+		&sqliteErr,
+	) && sqliteErr.Code() == 2067 {
 		return exercise.ErrExerciseNameConflict
 	}
 
@@ -49,7 +60,13 @@ func (r *ExerciseRepository) FindAll(
 		SELECT id, name, body_weight_share FROM exercises ORDER BY rowid
 	`
 
-	rows, err := persistence.ExecutorFromContext(ctx, r.db).QueryContext(ctx, query)
+	rows, err := persistence.ExecutorFromContext(
+		ctx,
+		r.db,
+	).QueryContext(
+		ctx,
+		query,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +93,10 @@ func (r *ExerciseRepository) FindAll(
 			return nil, err
 		}
 
-		result = append(result, e)
+		result = append(
+			result,
+			e,
+		)
 	}
 
 	return result, rows.Err()
@@ -89,8 +109,15 @@ func (r *ExerciseRepository) ExistsByName(
 	const query = "SELECT EXISTS(SELECT 1 FROM exercises WHERE name = ?)"
 
 	var exists bool
-	err := persistence.ExecutorFromContext(ctx, r.db).
-		QueryRowContext(ctx, query, name).
+	err := persistence.ExecutorFromContext(
+		ctx,
+		r.db,
+	).
+		QueryRowContext(
+			ctx,
+			query,
+			name,
+		).
 		Scan(&exists)
 
 	return exists, err
@@ -103,17 +130,38 @@ func (r *ExerciseRepository) ExistsByID(
 	const query = "SELECT EXISTS(SELECT 1 FROM exercises WHERE id = ?)"
 
 	var exists bool
-	err := persistence.ExecutorFromContext(ctx, r.db).
-		QueryRowContext(ctx, query, id).
+	err := persistence.ExecutorFromContext(
+		ctx,
+		r.db,
+	).
+		QueryRowContext(
+			ctx,
+			query,
+			id,
+		).
 		Scan(&exists)
 
 	return exists, err
 }
 
 func (r *ExerciseRepository) DeleteByID(ctx context.Context, id string) error {
-	_, err := persistence.ExecutorFromContext(ctx, r.db).ExecContext(
-		ctx, "DELETE FROM exercises WHERE id = ?", id,
+	_, err := persistence.ExecutorFromContext(
+		ctx,
+		r.db,
+	).ExecContext(
+		ctx,
+		"DELETE FROM exercises WHERE id = ?",
+		id,
 	)
+
+	var sqliteErr *sqlite.Error
+	// SQLite reports RESTRICT foreign keys as trigger constraints (1811).
+	if errors.As(
+		err,
+		&sqliteErr,
+	) && (sqliteErr.Code() == 787 || sqliteErr.Code() == 1811) {
+		return exercise.ErrExerciseInUse
+	}
 
 	return err
 }

@@ -16,6 +16,8 @@ import (
 func bootstrap(db *sql.DB) tui.App {
 	exercises := sqlite.NewExerciseRepository(db)
 	sets := sqlite.NewSetRepository(db)
+	sessions := sqlite.NewSessionRepository(db)
+	performances := sqlite.NewPerformanceRepository(db)
 	preferences := sqlite.NewPreferencesRepository(db)
 	identities := sqlite.NewIdentityRepository(db)
 	credentials := sqlite.NewIdentityCredentialsRepository(db)
@@ -46,6 +48,32 @@ func bootstrap(db *sql.DB) tui.App {
 	)
 
 	return tui.App{
+		AddPerformance: command.NewAddPerformanceHandler(
+			performances,
+			sessions,
+			exercises,
+			persistence.NewTransactionRunner[command.AddPerformanceResult](db),
+		),
+		DeletePerformance: command.NewDeletePerformanceHandler(
+			performances,
+			transactions,
+		),
+		ListPerformances: query.NewListPerformancesHandler(
+			performances,
+			persistence.NewTransactionRunner[query.ListPerformancesResult](db),
+		),
+		ListSessions: query.NewListSessionsHandler(
+			sessions,
+			persistence.NewTransactionRunner[query.ListSessionsResult](db),
+		),
+		CreateSession: command.NewCreateSessionHandler(
+			sessions,
+			persistence.NewTransactionRunner[command.CreateSessionResult](db),
+		),
+		DeleteSession: command.NewDeleteSessionHandler(
+			sessions,
+			transactions,
+		),
 		ListExercises: query.NewListExercisesHandler(
 			exercises,
 			persistence.NewTransactionRunner[query.ListExercisesResult](db),
@@ -69,7 +97,7 @@ func bootstrap(db *sql.DB) tui.App {
 		CreateSet: command.NewCreateSetHandler(
 			preferences,
 			sets,
-			exercises,
+			performances,
 			persistence.NewTransactionRunner[command.CreateSetResult](db),
 		),
 		UpdateExercise: command.NewUpdateExerciseHandler(

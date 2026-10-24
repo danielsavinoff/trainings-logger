@@ -1,0 +1,194 @@
+<GraceChangePlan graceVersion="4.0" status="superseded">
+  <C-INITIAL-SCHEMA-BASELINE>
+    <Replacement>C-WORKOUT-SESSIONS-FOUR-PANELS</Replacement>
+    <IntentSummary>Supersede the completed session plan because the user changed migration requirements: preserve that implementation, replace all SQL history with golang-migrate-generated init files, and reconcile current documentation. Execute sequentially.</IntentSummary>
+    <BaselineAssertions>
+      <MustExist>
+        <Value>migrations/sqlite/20260927094609_initial.down.sql</Value>
+        <Value>migrations/sqlite/20260927094609_initial.up.sql</Value>
+        <Value>migrations/sqlite/20261004160000_identity_sync.down.sql</Value>
+        <Value>migrations/sqlite/20261004160000_identity_sync.up.sql</Value>
+        <Value>migrations/sqlite/20261024140000_sessions.down.sql</Value>
+        <Value>migrations/sqlite/20261024140000_sessions.up.sql</Value>
+        <Value>M-DOMAIN-SESSION</Value>
+        <Value>M-TUI-RECORDS</Value>
+        <Value>internal/domain/exercise/session/session.go</Value>
+      </MustExist>
+      <MustContain>
+        <File>internal/domain/state/version.go</File>
+        <Text>const Version2 Version = 2</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/exercise/set/set.go</File>
+        <Text>SessionID</Text>
+      </MustContain>
+    </BaselineAssertions>
+    <TargetAssertions>
+      <MustExist>
+        <Value>internal/domain/exercise/session/session.go</Value>
+        <Value>internal/infra/persistence/sqlite/session_repository.go</Value>
+        <Value>migrations/sqlite/20261024155102_init.down.sql</Value>
+        <Value>migrations/sqlite/20261024155102_init.up.sql</Value>
+      </MustExist>
+      <MustNotExist>
+        <Value>internal/infra/tui/views/records_data.go</Value>
+        <Value>migrations/sqlite/20260927094609_initial.down.sql</Value>
+        <Value>migrations/sqlite/20260927094609_initial.up.sql</Value>
+        <Value>migrations/sqlite/20261004160000_identity_sync.down.sql</Value>
+        <Value>migrations/sqlite/20261004160000_identity_sync.up.sql</Value>
+        <Value>migrations/sqlite/20261024140000_sessions.down.sql</Value>
+        <Value>migrations/sqlite/20261024140000_sessions.up.sql</Value>
+      </MustNotExist>
+      <MustContain>
+        <File>internal/domain/state/version.go</File>
+        <Text>const Version2 Version = 2</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/exercise/set/set.go</File>
+        <Text>SessionID</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/records_view.go</File>
+        <Text>Sessions &lt;2&gt;</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/records_view.go</File>
+        <Text>Sets &lt;3&gt;</Text>
+      </MustContain>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-DOMAIN-SESSION</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-APP-SESSIONS</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-DOMAIN-SESSION</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-APP-SESSIONS</Anchor>
+      </MustOwn>
+      <MustVerify>
+        <Module>M-DOMAIN-SESSION</Module>
+        <Module>M-DOMAIN-SET</Module>
+        <Module>M-DOMAIN-STATE</Module>
+        <Module>M-APP-SESSIONS</Module>
+        <Module>M-APP-REMOTE-STATE</Module>
+        <Module>M-INFRA-PERSISTENCE-SQLITE</Module>
+        <Module>M-INFRA-DROPBOX-STATE</Module>
+        <Module>M-TUI-RECORDS</Module>
+        <Module>M-TUI-HELP</Module>
+        <Module>M-TUI-QUESTIONNAIRE</Module>
+      </MustVerify>
+      <MustPassCommand>
+        <Command budgetSeconds="60">go build ./...</Command>
+        <Command budgetSeconds="60">go vet ./...</Command>
+      </MustPassCommand>
+      <MustContain>
+        <File>README.md</File>
+        <Text>single initial migration</Text>
+      </MustContain>
+    </TargetAssertions>
+    <DurableScope>
+      <GraphAnchors>
+        <M-DOMAIN-SESSION />
+        <M-DOMAIN-SET />
+        <M-DOMAIN-STATE />
+        <M-APP-SESSIONS />
+        <M-APP-REMOTE-STATE />
+        <M-INFRA-PERSISTENCE-SQLITE />
+        <M-INFRA-DROPBOX-STATE />
+        <M-TUI-RECORDS />
+        <M-TUI-HELP />
+        <M-TUI-QUESTIONNAIRE />
+      </GraphAnchors>
+      <VerificationAnchors>
+        <V-M-DOMAIN-SESSION />
+        <V-M-DOMAIN-SET />
+        <V-M-DOMAIN-STATE />
+        <V-M-APP-SESSIONS />
+        <V-M-APP-REMOTE-STATE />
+        <V-M-INFRA-PERSISTENCE-SQLITE />
+        <V-M-INFRA-DROPBOX-STATE />
+        <V-M-TUI-RECORDS />
+        <V-M-TUI-HELP />
+        <V-M-TUI-QUESTIONNAIRE />
+      </VerificationAnchors>
+      <GraphDocuments>
+        <GD-MAIN />
+      </GraphDocuments>
+      <VerificationDocuments>
+        <VD-MAIN />
+      </VerificationDocuments>
+      <ContextArtifact>deployment.xml</ContextArtifact>
+    </DurableScope>
+    <ObservedWriteScope>
+      <File>README.md</File>
+      <File>cmd/cli/bootstrap.go</File>
+      <File>internal/infra/tui/app.go</File>
+      <File>internal/infra/persistence/sqlite/set_repository.go</File>
+      <File>internal/infra/persistence/sqlite/session_repository.go</File>
+      <File>internal/infra/persistence/sqlite/state_exporter.go</File>
+      <File>internal/infra/persistence/sqlite/state_importer.go</File>
+      <File>internal/infra/dropbox/state_store.go</File>
+      <File>.grace/graph/index.xml</File>
+      <File>.grace/graph/main.xml</File>
+      <File>.grace/verification/index.xml</File>
+      <File>.grace/verification/main.xml</File>
+      <Glob>internal/domain/exercise/session/*.go</Glob>
+      <Glob>internal/domain/exercise/set/*.go</Glob>
+      <Glob>internal/domain/state/*.go</Glob>
+      <Glob>internal/app/command/*session.go</Glob>
+      <Glob>internal/app/command/*set.go</Glob>
+      <Glob>internal/app/command/load_remote_state.go</Glob>
+      <Glob>internal/app/query/list_sessions.go</Glob>
+      <Glob>internal/app/query/list_sets.go</Glob>
+      <Glob>internal/infra/tui/views/*.go</Glob>
+      <Glob>migrations/sqlite/20261024140000_sessions.*.sql</Glob>
+      <File>migrations/sqlite/20260927094609_initial.down.sql</File>
+      <File>migrations/sqlite/20260927094609_initial.up.sql</File>
+      <File>migrations/sqlite/20261004160000_identity_sync.down.sql</File>
+      <File>migrations/sqlite/20261004160000_identity_sync.up.sql</File>
+      <File>migrations/sqlite/20261024140000_sessions.down.sql</File>
+      <File>migrations/sqlite/20261024140000_sessions.up.sql</File>
+      <File>migrations/sqlite/20261024155102_init.down.sql</File>
+      <File>migrations/sqlite/20261024155102_init.up.sql</File>
+      <File>.grace/context/deployment.xml</File>
+      <File>.grace/changes/active/C-PERSISTED-SESSIONS/spec.xml</File>
+      <File>.grace/changes/active/C-PERSISTED-SESSIONS/plan.xml</File>
+      <File>.grace/changes/archive/C-PERSISTED-SESSIONS/spec.xml</File>
+      <File>.grace/changes/archive/C-PERSISTED-SESSIONS/plan.xml</File>
+    </ObservedWriteScope>
+    <ImplementationPlan>
+      <T-001>
+        <Title>Replace the SQL history with the CLI-generated initial migration pair</Title>
+        <DependsOn />
+        <AcceptanceCriteria>
+          <Criterion>Use the generated filenames, preserve the exact latest six-table schema, remove all prior SQL files, and prove fresh initialization, rollback, and reinitialization on temporary databases.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go vet ./internal/infra/persistence/sqlite</Command>
+        </Verification>
+      </T-001>
+      <T-002>
+        <Title>Reconcile migration references and verify the complete workspace</Title>
+        <DependsOn>T-001</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Update graph paths, verification expectations, deployment context, and README for the fresh-database baseline. Preserve prior session/TUI behavior, run build/vet and selected final assertions, and retain the approved active bundle pending final archive confirmation.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go build ./...</Command>
+          <Command>go vet ./...</Command>
+        </Verification>
+      </T-002>
+    </ImplementationPlan>
+    <ExecutionNotes>
+      <Note>The user confirmed golang-migrate and the previous explicit sequential choice persists. Generate command: migrate create -ext sql -dir /private/tmp/trainings-init.JxRnqs -tz Europe/Moscow init. The CLI generated version 20261024155102 from the real clock; no timestamp was hand-written.</Note>
+      <Note>The former approved C-PERSISTED-SESSIONS plan is immutable and becomes superseded with a replacement reference. Its completed source and current-state changes are inherited preservation scope. No new changes to those application/domain/TUI files are required by this squash.</Note>
+      <Note>Current and selected baseline gates apply to the already implemented session state before migration replacement. Verify only temporary databases and temporary standalone harnesses; do not add test files or open the real database. Final apply/archive requires explicit confirmation.</Note>
+    </ExecutionNotes>
+  </C-INITIAL-SCHEMA-BASELINE>
+</GraceChangePlan>

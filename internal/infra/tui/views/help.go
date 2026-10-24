@@ -42,42 +42,64 @@ var recordsHelp = []helpGroup{
 	{
 		title: "Navigation",
 		entries: []helpEntry{
-			{key: "↑/k", explanation: "move up"},
-			{key: "↓/j", explanation: "move down"},
-			{key: "1", explanation: "focus exercises"},
-			{key: "2", explanation: "focus sets"},
-			{key: "enter", explanation: "focus sets from exercises"},
-			{key: "r", explanation: "reset setup"},
-			{key: "l", explanation: "load"},
-			{key: "s", explanation: "save"},
+			{
+				key:         "↑/k",
+				explanation: "move up",
+			},
+			{
+				key:         "↓/j",
+				explanation: "move down",
+			},
+			{
+				key:         "gg",
+				explanation: "first row",
+			},
+			{
+				key:         "G",
+				explanation: "last row",
+			},
+			{
+				key:         "enter",
+				explanation: "select",
+			},
 		},
 	},
-
 	{
-		title: "Pages",
+		title: "Actions",
 		entries: []helpEntry{
-			{key: "←/h/pgup/b", explanation: "previous page"},
-			{key: "→/pgdown/f/space", explanation: "next page"},
-			{key: "u/ctrl+u", explanation: "half page up"},
-			{key: "ctrl+d", explanation: "half page down"},
-			{key: "home/gg", explanation: "first row"},
-			{key: "end/G", explanation: "last row"},
+			{
+				key:         "n",
+				explanation: "new record",
+			},
+			{
+				key:         "e",
+				explanation: "edit record",
+			},
+			{
+				key:         "d",
+				explanation: "delete record",
+			},
+			{
+				key:         "r",
+				explanation: "reset setup",
+			},
+			{
+				key:         "l",
+				explanation: "load backup",
+			},
+			{
+				key:         "s",
+				explanation: "save backup",
+			},
 		},
 	},
-
-	{
-		title: "Records (active panel)",
-		entries: []helpEntry{
-			{key: "n", explanation: "new record"},
-			{key: "e", explanation: "edit record"},
-			{key: "d", explanation: "delete record"},
-		},
-	},
-
 	{
 		title: "Help",
 		entries: []helpEntry{
-			{key: "any key", explanation: "return to records"},
+			{
+				key:         "any key",
+				explanation: "return to records",
+			},
 		},
 	},
 }
@@ -122,7 +144,7 @@ func (m *helpModel) resize(
 }
 
 func (m helpModel) content() string {
-	gap := 4
+	gap := 2
 	colWidth := (m.viewport.Width() - gap) / 2
 	if colWidth >= 40 {
 		left := strings.Join(
@@ -130,31 +152,26 @@ func (m helpModel) content() string {
 				recordsHelp[0],
 				colWidth,
 			), m.renderGroup(
-				recordsHelp[2],
-				colWidth,
-			)},
-			"\n\n",
-		)
-		right := strings.Join(
-			[]string{m.renderGroup(
 				recordsHelp[1],
 				colWidth,
-			), m.renderGroup(
-				recordsHelp[3],
-				colWidth,
 			)},
-			"\n\n",
+			"\n",
+		)
+		right := m.renderGroup(
+			recordsHelp[2],
+			colWidth,
 		)
 		return lipgloss.JoinHorizontal(
 			lipgloss.Top,
-			left,
+			lipgloss.NewStyle().Width(colWidth).Render(left),
 			strings.Repeat(
 				" ",
 				gap,
 			),
-			right,
+			lipgloss.NewStyle().Width(colWidth).Render(right),
 		)
 	}
+
 	var groups []string
 	for _, group := range recordsHelp {
 		groups = append(
@@ -165,9 +182,10 @@ func (m helpModel) content() string {
 			),
 		)
 	}
+
 	return strings.Join(
 		groups,
-		"\n\n",
+		"\n",
 	)
 }
 
@@ -191,6 +209,7 @@ func (m helpModel) renderGroup(
 			ansi.StringWidth(entry.key),
 		)
 	}
+
 	tab := maxKey + 4
 	var lines = []string{title}
 	keyStyle := lipgloss.NewStyle().Foreground(components.ActivePanelColor)
@@ -222,6 +241,7 @@ func (m helpModel) renderGroup(
 			}
 			continue
 		}
+
 		desc := strings.Split(
 			ansi.Hardwrap(
 				entry.explanation,
@@ -251,6 +271,7 @@ func (m helpModel) renderGroup(
 			)
 		}
 	}
+
 	return strings.Join(
 		lines,
 		"\n",
@@ -263,9 +284,10 @@ func (m helpModel) update(msg tea.Msg) helpModel {
 }
 
 func (m helpModel) view() string {
-	if m.width <= 4 || m.height <= 2 {
+	if m.viewport.Width() <= 0 || m.viewport.Height() <= 0 {
 		return ""
 	}
+
 	return components.PanelSpacing.Render(m.viewport.View())
 }
 

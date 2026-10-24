@@ -1,0 +1,60 @@
+<GraceChangeSpec graceVersion="4.0" status="superseded">
+  <C-WORKOUT-SESSIONS-FOUR-PANELS>
+    <Replacement>C-FULLSCREEN-EXERCISE-CATALOG</Replacement>
+    <Summary>Model a session as an entire workout and provide four panels: sessions at one fifth width, exercise catalog at one fifth, and session exercises above sets in the remaining three fifths.</Summary>
+    <Goals>
+      <Goal>Replace exercise-owned sessions with independent workout sessions containing session-exercise entries, each of which owns sets.</Goal>
+      <Goal>Keep reusable exercise definitions available in a dedicated catalog panel while browsing or editing a workout.</Goal>
+      <Goal>Use 1/2/3/4 to focus sessions, catalog, session exercises, and sets, preserving domain objects in TUI state.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>Sessions retain UUID id, required trimmed title, and created_at default UTC now; remove their exercise_id. Add a constructor-validated SessionExercise with UUID id, session_id, exercise_id, and created_at for stable insertion ordering. Replace sets.session_id with sets.session_exercise_id. Keep stored set timestamps.</Constraint>
+      <Constraint>Each exercise can occur once per session; enforce unique(session_id, exercise_id). Repeated add selects the existing entry without duplication. Exercise definitions remain shared across workouts.</Constraint>
+      <Constraint>Deleting a session cascades its exercise entries and sets. Removing one session-exercise entry cascades only its sets and keeps the catalog exercise. Reject catalog deletion while referenced so historical workouts are preserved.</Constraint>
+      <Constraint>Keep the recently requested single initial migration baseline; revise that CLI-generated init pair to the new seven-table schema rather than introducing a legacy-data conversion. Do not open, reset, or mutate the real user database.</Constraint>
+      <Constraint>Use snapshot version 3 with sessions, catalog exercises, session_exercises, sets, and optional preferences. Reject older snapshots before import. Keep restore atomic and retain local credentials.</Constraint>
+      <Constraint>Preserve help/setup/dialog input isolation, asynchronous transfer ownership, stable selected IDs across refresh/restore, Vim navigation, keyboard paging, and existing border counters. No date separators in set rows, no extra paginator indicators, and no mouse-wheel navigation.</Constraint>
+      <Constraint>Use constructors at domain/application/persistence boundaries, one operation per use case source file, domain errors.go files, one argument per line for multiargument calls, multiline structs with fields, compact empty structs, and blank lines between type declarations. Do not add automated test files.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>No routines, workout templates, analytics, exercise-entry reordering, duplicated exercise blocks in a single workout, or backward snapshot/data conversion.</NonGoal>
+      <NonGoal>No database reset, network sign-in, or unrelated Dropbox/browser behavior changes.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>After reserving the shared footer, sessions use floor(width/5), catalog uses floor(width/5), and the right column uses all remaining width. The right column is split equally by height into Exercises &lt;3&gt; and Sets &lt;4&gt;, with any remaining row assigned to sets. Both left columns use full available height; all output remains bounded when resized.</Criterion>
+      <Criterion>Sessions &lt;1&gt; list whole-workout titles newest first. The exercise catalog &lt;2&gt; lists reusable exercise names in existing catalog order. Exercises &lt;3&gt; list the selected session's exercise names in insertion order. Sets &lt;4&gt; list the selected entry's reps, display-unit weight, and rest newest first without date separators. Body-weight share remains editable in catalog forms.</Criterion>
+      <Criterion>1/2/3/4 focus their respective panels. Enter from sessions focuses session exercises; Enter from catalog adds/selects the highlighted catalog exercise in the selected session and focuses panel 3; Enter from panel 3 focuses sets. Adding without an active session reports a clear nonmutating message.</Criterion>
+      <Criterion>n/e/d create/rename/delete sessions in panel 1 and create/edit/delete reusable catalog definitions in panel 2. In panel 3, n focuses the catalog, d removes the selected entry and its sets, and e has no mutation because entries have no independent editable fields. Panel 4 retains set create/edit/delete operations. Shared catalog edits are performed explicitly in panel 2.</Criterion>
+      <Criterion>Changing sessions reloads its exercise entries and the selected entry's sets. Browsing the catalog alone does not change session children. Changing a session-exercise entry reloads sets. New child selections start at the first row; refresh/restore retain IDs where available and otherwise clamp to nearby rows. Deleting the final set retains its exercise entry, and deleting the final entry retains its session.</Criterion>
+      <Criterion>Domain models and repository/application operations support standalone session CRUD/listing, catalog CRUD/listing, idempotent AddSessionExercise, ListSessionExercises, DeleteSessionExercise, and set operations by SessionExerciseID. Validate both parents and ownership; preserve parent IDs and creation timestamps on edits.</Criterion>
+      <Criterion>The single initial up/down pair creates/drops the complete seven-table schema with foreign keys, unique entry membership, indexes, and timestamp defaults. Snapshot version 3 validates all references and duplicates, preserves empty sessions/entries, and rejects invalid/older payloads before mutation.</Criterion>
+      <Criterion>Update help, README, semantic contracts, and GRACE graph/verification through an approved replacement lifecycle. Build/vet/formatting, temporary-database constraint and snapshot checks, and four-panel interaction/layout checks pass.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-DOMAIN-SESSION />
+      <M-DOMAIN-SESSION-EXERCISE />
+      <M-DOMAIN-SET />
+      <M-DOMAIN-STATE />
+      <M-APP-SESSIONS />
+      <M-APP-SESSION-EXERCISES />
+      <M-APP-REMOTE-STATE />
+      <M-INFRA-PERSISTENCE-SQLITE />
+      <M-INFRA-DROPBOX-STATE />
+      <M-TUI-RECORDS />
+      <M-TUI-HELP />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>go build ./...</ExpectedCommand>
+      <ExpectedCommand>go vet ./...</ExpectedCommand>
+      <ExpectedCommand>grace lint --path .</ExpectedCommand>
+      <ExpectedEvidence>Temporary database checks cover seven-table initialization, down/up, parent validation, unique entry membership, safe catalog deletion, cascade deletion, timestamp retention, version-3 snapshots, atomic restore, and credential preservation.</ExpectedEvidence>
+      <ExpectedEvidence>Temporary TUI checks cover 20/20/60 geometry, equal right-column split, 1/2/3/4, catalog add and repeated add, independent catalog browsing, all active-panel actions, child filtering, empty-state behavior, paging, selected-ID retention, input isolation, and compact/zero-size bounds.</ExpectedEvidence>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>The proposed horizontal split places session exercises above sets in the rightmost three fifths. Sessions and catalog occupy full-height columns to their left.</Assumption>
+      <Assumption>Retain a fresh-database initial baseline and reject old snapshot versions, following the prior migration-squash and backup compatibility decisions. No real data is deleted by this source change.</Assumption>
+      <Assumption>The user approved these defaults and sequential implementation by saying start after reviewing the draft specification and layout.</Assumption>
+      <Assumption>The prior explicit sequential execution choice persists. Supersede C-INITIAL-SCHEMA-BASELINE with an explicit replacement reference; preserve its completed work and the current formatting preferences.</Assumption>
+    </Assumptions>
+  </C-WORKOUT-SESSIONS-FOUR-PANELS>
+</GraceChangeSpec>

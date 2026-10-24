@@ -25,7 +25,10 @@ import (
 )
 
 // START_BLOCK_RECORDS_TRANSFER
-type recordTransfer struct{ load bool }
+type recordTransfer struct {
+	load bool
+}
+
 type recordTransferMsg struct {
 	owner   *recordTransfer
 	records *RecordsModel
@@ -36,11 +39,13 @@ func (m *RecordsModel) startTransfer(load bool) tea.Cmd {
 	if m.transfer != nil {
 		return nil
 	}
+
 	if m.store == nil || (load && m.store.LoadRemoteState == nil) || (!load && m.store.SaveRemoteState == nil) {
 		m.transferStatus = "Dropbox transfer is not configured; press r to set up Dropbox."
 		*m = m.resize()
 		return nil
 	}
+
 	operation := &recordTransfer{load: load}
 	m.transfer = operation
 	m.goPending = false
@@ -49,7 +54,7 @@ func (m *RecordsModel) startTransfer(load bool) tea.Cmd {
 		m.transferStatus = "Loading from Dropbox…"
 	}
 	*m = m.resize()
-	app := m.store.App
+	app := *m.store
 	return func() tea.Msg {
 		ctx, cancel := context.WithTimeout(
 			context.Background(),
@@ -57,16 +62,27 @@ func (m *RecordsModel) startTransfer(load bool) tea.Cmd {
 		)
 		defer cancel()
 		if !load {
-			return recordTransferMsg{owner: operation, err: app.SaveRemoteState(ctx)}
+			return recordTransferMsg{
+				owner: operation,
+				err:   app.SaveRemoteState(ctx),
+			}
 		}
+
 		if err := app.LoadRemoteState(ctx); err != nil {
-			return recordTransferMsg{owner: operation, err: err}
+			return recordTransferMsg{
+				owner: operation,
+				err:   err,
+			}
 		}
 		records, err := readTransferredRecords(
 			ctx,
 			app,
 		)
-		return recordTransferMsg{owner: operation, records: &records, err: err}
+		return recordTransferMsg{
+			owner:   operation,
+			records: &records,
+			err:     err,
+		}
 	}
 }
 
@@ -81,16 +97,11 @@ func readTransferredRecords(
 	if err != nil {
 		return RecordsModel{}, err
 	}
+
 	if fresh.questionnaire != nil {
 		fresh.closeQuestionnaire()
 	}
-	for index := range fresh.exercises {
-		fresh.table.SetCursor(index)
-		if err := fresh.loadSelectedSets(ctx); err != nil {
-			return RecordsModel{}, err
-		}
-	}
-	fresh.table.SetCursor(0)
+
 	return fresh, nil
 }
 
@@ -98,54 +109,42 @@ func (m RecordsModel) finishTransfer(result recordTransferMsg) RecordsModel {
 	if result.owner != m.transfer || m.transfer == nil {
 		return m
 	}
+
 	operation := m.transfer
 	m.transfer = nil
 	if result.err != nil {
 		m.transferStatus = result.err.Error()
 		return m.resize()
 	}
+
 	if !operation.load {
 		m.transferStatus = "Saved to Dropbox."
 		return m.resize()
 	}
+
 	if result.records == nil {
 		m.transferStatus = "Backup loaded; press q and reopen to refresh records."
 		return m.resize()
 	}
-	exerciseID, setID := "", ""
-	if index := m.selectedExercise(); index >= 0 {
-		exerciseID = m.exercises[index].id
-	}
-	if session, index, ok := m.selectedSet(); ok {
-		setID = m.exercises[m.selectedExercise()].sessions[session].sets[index].id
-	}
+	sessionID, catalogID, performanceID, setID := m.selectionIDs()
 	fresh := *result.records
 	fresh.width, fresh.height = m.width, m.height
 	fresh.showingHelp, fresh.help = m.showingHelp, m.help
 	fresh.err = m.err
 	fresh.transferStatus = "Loaded from Dropbox."
-	for index, item := range fresh.exercises {
-		if item.id == exerciseID {
-			fresh.table.SetCursor(index)
-			break
-		}
+	if err := fresh.reloadRecords(
+		context.Background(),
+		sessionID,
+		catalogID,
+		performanceID,
+		setID,
+	); err != nil {
+		fresh.err = err.Error()
 	}
-	if index := fresh.selectedExercise(); index >= 0 {
-		fresh.setsExerciseID = fresh.exercises[index].id
-		cursor := 0
-		for _, session := range fresh.exercises[index].sessions {
-			for _, item := range session.sets {
-				if setID != "" && item.id == setID {
-					fresh.setCursor = cursor
-				}
-				cursor++
-			}
-		}
-	}
+
 	fresh.focusPanel(m.activePanel)
 	fresh = fresh.resize()
-	fresh.syncExercisePager()
-	fresh.refreshTimeline()
+	fresh.syncPagers()
 	return fresh
 }
 

@@ -1,0 +1,305 @@
+<GraceChangePlan graceVersion="4.0" status="applied">
+  <C-PERFORMANCE-DOMAIN-REFACTOR>
+    <IntentSummary>Sequentially rename/move domain and performance data flow, reconcile current GRACE state, verify in temporary databases and archive as previously requested.</IntentSummary>
+    <BaselineAssertions>
+      <MustContain>
+        <File>internal/domain/exercise/sessionexercise/session_exercise.go</File>
+        <Text>type SessionExercise struct</Text>
+      </MustContain>
+      <MustContain>
+        <File>migrations/sqlite/20261024155102_init.up.sql</File>
+        <Text>CREATE TABLE session_exercises</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/state/version.go</File>
+        <Text>const Version3 Version = 3</Text>
+      </MustContain>
+    </BaselineAssertions>
+    <TargetAssertions>
+      <MustExist>
+        <Value>internal/domain/session/session.go</Value>
+        <Value>internal/domain/session/exercise/exercise.go</Value>
+        <Value>internal/domain/session/exercise/set/set.go</Value>
+        <Value>internal/domain/session/exercise/performance/performance.go</Value>
+        <Value>internal/infra/persistence/sqlite/performance_repository.go</Value>
+        <Value>internal/app/command/add_performance.go</Value>
+        <Value>internal/app/command/delete_performance.go</Value>
+        <Value>internal/app/query/list_performances.go</Value>
+      </MustExist>
+      <MustNotExist>
+        <Value>internal/domain/exercise</Value>
+        <Value>internal/infra/persistence/sqlite/session_exercise_repository.go</Value>
+        <Value>internal/app/command/add_session_exercise.go</Value>
+        <Value>internal/app/command/delete_session_exercise.go</Value>
+        <Value>internal/app/query/list_session_exercises.go</Value>
+      </MustNotExist>
+      <MustContain>
+        <File>migrations/sqlite/20261024155102_init.up.sql</File>
+        <Text>CREATE TABLE performances</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/session/exercise/set/set.go</File>
+        <Text>PerformanceID</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/state/snapshot.go</File>
+        <Text>json:"performances"</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/state/version.go</File>
+        <Text>const Version4 Version = 4</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/records_view.go</File>
+        <Text>Performances &lt;2&gt;</Text>
+      </MustContain>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-DOMAIN-PERFORMANCE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-APP-PERFORMANCES</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-DOMAIN-PERFORMANCE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-APP-PERFORMANCES</Anchor>
+      </MustOwn>
+      <MustVerify>
+        <Module>M-DOMAIN-SESSION</Module>
+        <Module>M-DOMAIN-EXERCISE</Module>
+        <Module>M-DOMAIN-SET</Module>
+        <Module>M-DOMAIN-STATE</Module>
+        <Module>M-DOMAIN-PERFORMANCE</Module>
+        <Module>M-APP-PERFORMANCES</Module>
+        <Module>M-APP-SESSIONS</Module>
+        <Module>M-APP-REMOTE-STATE</Module>
+        <Module>M-INFRA-PERSISTENCE-SQLITE</Module>
+        <Module>M-INFRA-DROPBOX-STATE</Module>
+        <Module>M-TUI-RECORDS</Module>
+        <Module>M-TUI-CATALOG</Module>
+      </MustVerify>
+      <MustPassCommand>
+        <Command budgetSeconds="60">go build ./...</Command>
+        <Command budgetSeconds="60">go vet ./...</Command>
+      </MustPassCommand>
+    </TargetAssertions>
+    <DurableScope>
+      <GraphAnchors>
+        <M-DOMAIN-SESSION />
+        <M-DOMAIN-EXERCISE />
+        <M-DOMAIN-SET />
+        <M-DOMAIN-STATE />
+        <M-DOMAIN-PERFORMANCE />
+        <M-APP-PERFORMANCES />
+        <M-APP-SESSIONS />
+        <M-APP-REMOTE-STATE />
+        <M-INFRA-PERSISTENCE-SQLITE />
+        <M-INFRA-DROPBOX-STATE />
+        <M-TUI-RECORDS />
+        <M-TUI-CATALOG />
+        <M-DOMAIN-SESSION-EXERCISE />
+        <M-APP-SESSION-EXERCISES />
+      </GraphAnchors>
+      <VerificationAnchors>
+        <V-M-DOMAIN-SESSION />
+        <V-M-DOMAIN-EXERCISE />
+        <V-M-DOMAIN-SET />
+        <V-M-DOMAIN-STATE />
+        <V-M-DOMAIN-PERFORMANCE />
+        <V-M-APP-PERFORMANCES />
+        <V-M-APP-SESSIONS />
+        <V-M-APP-REMOTE-STATE />
+        <V-M-INFRA-PERSISTENCE-SQLITE />
+        <V-M-INFRA-DROPBOX-STATE />
+        <V-M-TUI-RECORDS />
+        <V-M-TUI-CATALOG />
+        <V-M-DOMAIN-SESSION-EXERCISE />
+        <V-M-APP-SESSION-EXERCISES />
+      </VerificationAnchors>
+      <GraphDocuments>
+        <GD-MAIN />
+      </GraphDocuments>
+      <VerificationDocuments>
+        <VD-MAIN />
+      </VerificationDocuments>
+      <ContextArtifact>deployment.xml</ContextArtifact>
+    </DurableScope>
+    <ObservedWriteScope>
+      <File>.grace/changes/active/C-PERFORMANCE-DOMAIN-REFACTOR/spec.xml</File>
+      <File>.grace/changes/archive/C-CONSISTENT-TUI-SPACING/plan.xml</File>
+      <File>.grace/changes/archive/C-CONSISTENT-TUI-SPACING/spec.xml</File>
+      <File>.grace/changes/archive/C-FULLSCREEN-EXERCISE-CATALOG/plan.xml</File>
+      <File>.grace/changes/archive/C-FULLSCREEN-EXERCISE-CATALOG/spec.xml</File>
+      <File>.grace/changes/archive/C-HELP-CONTENT-LAYOUT/plan.xml</File>
+      <File>.grace/changes/archive/C-HELP-CONTENT-LAYOUT/spec.xml</File>
+      <File>.grace/changes/archive/C-INITIAL-SCHEMA-BASELINE/plan.xml</File>
+      <File>.grace/changes/archive/C-INITIAL-SCHEMA-BASELINE/spec.xml</File>
+      <File>.grace/changes/archive/C-PERSISTED-SESSIONS/plan.xml</File>
+      <File>.grace/changes/archive/C-PERSISTED-SESSIONS/spec.xml</File>
+      <File>.grace/changes/archive/C-RECORDS-FOOTER-BODY-WEIGHT/plan.xml</File>
+      <File>.grace/changes/archive/C-RECORDS-FOOTER-BODY-WEIGHT/spec.xml</File>
+      <File>.grace/changes/archive/C-SESSION-INDEX/plan.xml</File>
+      <File>.grace/changes/archive/C-SESSION-INDEX/spec.xml</File>
+      <File>.grace/changes/archive/C-WORKOUT-SESSIONS-FOUR-PANELS/plan.xml</File>
+      <File>.grace/changes/archive/C-WORKOUT-SESSIONS-FOUR-PANELS/spec.xml</File>
+      <File>.grace/context/deployment.xml</File>
+      <File>.grace/graph/index.xml</File>
+      <File>.grace/graph/main.xml</File>
+      <File>.grace/verification/index.xml</File>
+      <File>.grace/verification/main.xml</File>
+      <File>README.md</File>
+      <File>cmd/cli/bootstrap.go</File>
+      <File>cmd/cli/main.go</File>
+      <File>internal/app/command/add_session_exercise.go</File>
+      <File>internal/app/command/complete_questionnaire.go</File>
+      <File>internal/app/command/create_exercise.go</File>
+      <File>internal/app/command/create_session.go</File>
+      <File>internal/app/command/create_set.go</File>
+      <File>internal/app/command/delete_exercise.go</File>
+      <File>internal/app/command/delete_session.go</File>
+      <File>internal/app/command/delete_session_exercise.go</File>
+      <File>internal/app/command/delete_set.go</File>
+      <File>internal/app/command/load_remote_state.go</File>
+      <File>internal/app/command/save_remote_state.go</File>
+      <File>internal/app/command/update_exercise.go</File>
+      <File>internal/app/command/update_preferences.go</File>
+      <File>internal/app/command/update_set.go</File>
+      <File>internal/app/ports/backup_reader.go</File>
+      <File>internal/app/ports/backup_writer.go</File>
+      <File>internal/app/ports/identity_linker.go</File>
+      <File>internal/app/ports/state_exporter.go</File>
+      <File>internal/app/ports/state_importer.go</File>
+      <File>internal/app/ports/transaction_runner.go</File>
+      <File>internal/app/query/get_preferences.go</File>
+      <File>internal/app/query/list_exercises.go</File>
+      <File>internal/app/query/list_session_exercises.go</File>
+      <File>internal/app/query/list_sessions.go</File>
+      <File>internal/app/query/list_sets.go</File>
+      <File>internal/domain/exercise/errors.go</File>
+      <File>internal/domain/exercise/exercise.go</File>
+      <File>internal/domain/exercise/exercise_repository.go</File>
+      <File>internal/domain/exercise/session/errors.go</File>
+      <File>internal/domain/exercise/session/session.go</File>
+      <File>internal/domain/exercise/session/session_repository.go</File>
+      <File>internal/domain/exercise/sessionexercise/errors.go</File>
+      <File>internal/domain/exercise/sessionexercise/session_exercise.go</File>
+      <File>internal/domain/exercise/sessionexercise/session_exercise_repository.go</File>
+      <File>internal/domain/exercise/set/errors.go</File>
+      <File>internal/domain/exercise/set/exercise_weight.go</File>
+      <File>internal/domain/exercise/set/set.go</File>
+      <File>internal/domain/exercise/set/set_repository.go</File>
+      <File>internal/domain/shared/errors.go</File>
+      <File>internal/domain/shared/weight.go</File>
+      <File>internal/domain/shared/weight_unit.go</File>
+      <File>internal/domain/state/errors.go</File>
+      <File>internal/domain/state/snapshot.go</File>
+      <File>internal/domain/state/version.go</File>
+      <File>internal/domain/user/identity/errors.go</File>
+      <File>internal/domain/user/identity/identity.go</File>
+      <File>internal/domain/user/identity/identity_credentials.go</File>
+      <File>internal/domain/user/identity/identity_credentials_repository.go</File>
+      <File>internal/domain/user/identity/identity_repository.go</File>
+      <File>internal/domain/user/identity/provider.go</File>
+      <File>internal/domain/user/preferences/errors.go</File>
+      <File>internal/domain/user/preferences/preferences.go</File>
+      <File>internal/domain/user/preferences/preferences_repository.go</File>
+      <File>internal/infra/dropbox/browser.go</File>
+      <File>internal/infra/dropbox/linker.go</File>
+      <File>internal/infra/dropbox/state_store.go</File>
+      <File>internal/infra/persistence/executor.go</File>
+      <File>internal/infra/persistence/sqlite/database.go</File>
+      <File>internal/infra/persistence/sqlite/exercise_repository.go</File>
+      <File>internal/infra/persistence/sqlite/identity_credentials_repository.go</File>
+      <File>internal/infra/persistence/sqlite/identity_repository.go</File>
+      <File>internal/infra/persistence/sqlite/migrate.go</File>
+      <File>internal/infra/persistence/sqlite/preferences_repository.go</File>
+      <File>internal/infra/persistence/sqlite/session_exercise_repository.go</File>
+      <File>internal/infra/persistence/sqlite/session_repository.go</File>
+      <File>internal/infra/persistence/sqlite/set_repository.go</File>
+      <File>internal/infra/persistence/sqlite/state_exporter.go</File>
+      <File>internal/infra/persistence/sqlite/state_importer.go</File>
+      <File>internal/infra/persistence/transaction_runner.go</File>
+      <File>internal/infra/tui/app.go</File>
+      <File>internal/infra/tui/components/dialog.go</File>
+      <File>internal/infra/tui/components/dialog_help.go</File>
+      <File>internal/infra/tui/components/dialog_keys.go</File>
+      <File>internal/infra/tui/components/dialog_layout.go</File>
+      <File>internal/infra/tui/components/dialog_view.go</File>
+      <File>internal/infra/tui/components/input.go</File>
+      <File>internal/infra/tui/components/layout.go</File>
+      <File>internal/infra/tui/components/pagination.go</File>
+      <File>internal/infra/tui/components/styles.go</File>
+      <File>internal/infra/tui/starter/model.go</File>
+      <File>internal/infra/tui/views/catalog.go</File>
+      <File>internal/infra/tui/views/help.go</File>
+      <File>internal/infra/tui/views/questionnaire.go</File>
+      <File>internal/infra/tui/views/records.go</File>
+      <File>internal/infra/tui/views/records_actions.go</File>
+      <File>internal/infra/tui/views/records_data.go</File>
+      <File>internal/infra/tui/views/records_dialog.go</File>
+      <File>internal/infra/tui/views/records_exercises.go</File>
+      <File>internal/infra/tui/views/records_help.go</File>
+      <File>internal/infra/tui/views/records_keys.go</File>
+      <File>internal/infra/tui/views/records_layout.go</File>
+      <File>internal/infra/tui/views/records_pagination.go</File>
+      <File>internal/infra/tui/views/records_save.go</File>
+      <File>internal/infra/tui/views/records_sessions.go</File>
+      <File>internal/infra/tui/views/records_sets.go</File>
+      <File>internal/infra/tui/views/records_store.go</File>
+      <File>internal/infra/tui/views/records_transfer.go</File>
+      <File>internal/infra/tui/views/records_update.go</File>
+      <File>internal/infra/tui/views/records_view.go</File>
+      <File>migrations/sqlite/20260927094609_initial.down.sql</File>
+      <File>migrations/sqlite/20260927094609_initial.up.sql</File>
+      <File>migrations/sqlite/20261004160000_identity_sync.down.sql</File>
+      <File>migrations/sqlite/20261004160000_identity_sync.up.sql</File>
+      <File>migrations/sqlite/20261024155102_init.down.sql</File>
+      <File>migrations/sqlite/20261024155102_init.up.sql</File>
+      <Glob>internal/domain/session/*.go</Glob>
+      <Glob>internal/domain/session/exercise/*.go</Glob>
+      <Glob>internal/domain/session/exercise/set/*.go</Glob>
+      <Glob>internal/domain/session/exercise/performance/*.go</Glob>
+      <File>internal/infra/persistence/sqlite/performance_repository.go</File>
+      <File>internal/app/command/add_performance.go</File>
+      <File>internal/app/command/delete_performance.go</File>
+      <File>internal/app/query/list_performances.go</File>
+      <File>internal/infra/tui/views/records_performances.go</File>
+      <File>.grace/changes/active/C-PERFORMANCE-DOMAIN-REFACTOR/spec.xml</File>
+      <File>.grace/changes/active/C-PERFORMANCE-DOMAIN-REFACTOR/plan.xml</File>
+      <File>.grace/changes/archive/C-PERFORMANCE-DOMAIN-REFACTOR/spec.xml</File>
+      <File>.grace/changes/archive/C-PERFORMANCE-DOMAIN-REFACTOR/plan.xml</File>
+    </ObservedWriteScope>
+    <ImplementationPlan>
+      <T-001>
+        <Title>Move domain packages and rename performance ownership end to end</Title>
+        <DependsOn />
+        <AcceptanceCriteria>
+          <Criterion>All runtime paths, symbols, SQL and version-4 backup fields use performance naming; existing invariants and TUI behavior remain.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go build ./...</Command>
+          <Command>go vet ./...</Command>
+        </Verification>
+      </T-001>
+      <T-002>
+        <Title>Reconcile GRACE and documentation, verify and archive</Title>
+        <DependsOn>T-001</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Current projections and semantic contracts match moved files and renamed modules; build/vet and temporary database/TUI checks pass before authorized archive.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go build ./...</Command>
+          <Command>go vet ./...</Command>
+        </Verification>
+      </T-002>
+    </ImplementationPlan>
+    <ExecutionNotes>
+      <Note>Execute sequentially; existing staged/unstaged files are deliberate preservation scope. Do not change staging or rewrite archived bundles. Final apply/archive authorization persists from the user request to move everything into the GRACE archive.</Note>
+    </ExecutionNotes>
+  </C-PERFORMANCE-DOMAIN-REFACTOR>
+</GraceChangePlan>

@@ -1,68 +1,98 @@
+// START_MODULE_CONTRACT
+//   PURPOSE: Validate and submit active-panel forms.
+//   SCOPE: Invoke application commands and reload retained workout/catalog/performance/set IDs.
+//   DEPENDS: M-APP-SESSIONS, M-APP-PERFORMANCES, M-DOMAIN-SESSION, M-DOMAIN-PERFORMANCE, M-DOMAIN-EXERCISE, M-DOMAIN-SET
+//   LINKS: M-TUI-RECORDS, V-M-TUI-RECORDS
+//   MAP_MODE: SUMMARY
+// END_MODULE_CONTRACT
+//
+// START_MODULE_MAP
+//   nonnegativeNumber - parse a finite nonnegative number
+//   saveDialog - save a catalog definition or set
+// END_MODULE_MAP
+
 package views
 
 import (
+	"context"
 	"math"
 	"strconv"
 	"strings"
-	"time"
 
 	tea "charm.land/bubbletea/v2"
+
+	"github.com/danielsavinoff/trainings-logger/internal/app/command"
 )
 
+// START_BLOCK_RECORDS_SAVE
 func nonnegativeNumber(value string) (float64, bool) {
-	n, err := strconv.ParseFloat(value, 64)
-
-	return n, err == nil && !math.IsNaN(n) && !math.IsInf(n, 0) && n >= 0
+	n, err := strconv.ParseFloat(
+		value,
+		64,
+	)
+	return n, err == nil && !math.IsNaN(n) && !math.IsInf(
+		n,
+		0,
+	) && n >= 0
 }
 
 func (m *RecordsModel) saveDialog() tea.Cmd {
 	d := m.dialog
-	value := func(i int) string {
-		return strings.TrimSpace(d.Value(i))
+	if m.store == nil {
+		return d.Invalid(
+			0,
+			"Records storage is unavailable.",
+		)
 	}
 
-	if d.panel == exercisesPanel {
+	value := func(i int) string { return strings.TrimSpace(d.Value(i)) }
+	sessionID, catalogID, performanceID, setID := m.selectionIDs()
+	ctx := context.Background()
+	var err error
+	switch d.panel {
+	case catalogPanel:
 		name := value(0)
 		if name == "" {
-			return d.Invalid(0, "Enter an exercise name.")
+			return d.Invalid(
+				0,
+				"Enter an exercise name.",
+			)
 		}
 
-		bodyWeight := 0.0
+		share := 0.0
 		if value(1) != "" {
 			var ok bool
-			bodyWeight, ok = nonnegativeNumber(value(1))
-			if !ok || bodyWeight > 100 {
-				return d.Invalid(1, "Body weight share must be between 0 and 100%.")
+			share, ok = nonnegativeNumber(value(1))
+			if !ok || share > 100 {
+				return d.Invalid(
+					1,
+					"Body weight share must be between 0 and 100%.",
+				)
 			}
 		}
 
-		record := exerciseRecord{
-			name:            name,
-			bodyWeightShare: float32(bodyWeight / 100),
-		}
-
 		if d.editing {
-			record.id = m.exercises[d.exercise].id
-			record.sessions = m.exercises[d.exercise].sessions
-		}
-
-		if m.store != nil {
-			saved, err := m.store.saveExercise(record, d.editing)
-			if err != nil {
-				return d.Invalid(0, err.Error())
-			}
-
-			record = saved
-		}
-
-		if d.editing {
-			m.exercises[d.exercise] = record
+			err = m.store.UpdateExercise.Handle(
+				ctx,
+				command.UpdateExercise{
+					ID:              d.recordID,
+					Name:            name,
+					BodyWeightShare: float32(share / 100),
+				},
+			)
+			catalogID = d.recordID
 		} else {
-			m.exercises = append(m.exercises, record)
-			d.exercise = len(m.exercises) - 1
-			m.setCursor = 0
+			result, saveErr := m.store.CreateExercise.Handle(
+				ctx,
+				command.CreateExercise{
+					Name:            name,
+					BodyWeightShare: float32(share / 100),
+				},
+			)
+			err = saveErr
+			catalogID = result.Result.ID
 		}
-	} else {
+	case setsPanel:
 		number := func(i int) string {
 			if value(i) == "" {
 				return "0"
@@ -70,56 +100,76 @@ func (m *RecordsModel) saveDialog() tea.Cmd {
 
 			return value(i)
 		}
-
-		reps, err := strconv.Atoi(number(0))
-		if err != nil || reps < 0 || reps > 255 {
-			return d.Invalid(0, "Reps must be a whole number from 0 to 255.")
+		reps, parseErr := strconv.Atoi(number(0))
+		if parseErr != nil || reps < 0 || reps > 255 {
+			return d.Invalid(
+				0,
+				"Reps must be a whole number from 0 to 255.",
+			)
 		}
-
 		weight, ok := nonnegativeNumber(number(1))
 		if !ok {
-			return d.Invalid(1, "Weight must be a number of 0 or more.")
-		}
-
-		seconds, err := strconv.ParseInt(number(2), 10, 64)
-		if err != nil || seconds < 0 ||
-			seconds > int64(math.MaxInt64)/int64(time.Second) {
-			return d.Invalid(2, "Rest must be a whole number of seconds, 0 or more.")
-		}
-
-		set := workoutSet{
-			reps:      reps,
-			weight:    weight,
-			rest:      time.Duration(seconds) * time.Second,
-			createdAt: time.Now(),
-		}
-
-		if d.editing {
-			original := m.exercises[d.exercise].sessions[d.session].sets[d.set]
-			set.id, set.createdAt = original.id, original.createdAt
-		}
-
-		if m.store != nil {
-			saved, err := m.store.saveSet(
-				m.exercises[d.exercise].id, set, d.editing, m.weightUnit,
+			return d.Invalid(
+				1,
+				"Weight must be a number of 0 or more.",
 			)
-			if err != nil {
-				return d.Invalid(0, err.Error())
-			}
-
-			set = saved
+		}
+		rest, parseErr := strconv.Atoi(number(2))
+		if parseErr != nil || rest < 0 {
+			return d.Invalid(
+				2,
+				"Rest must be a whole number of seconds, 0 or more.",
+			)
 		}
 
 		if d.editing {
-			m.exercises[d.exercise].sessions[d.session].sets[d.set] = set
+			err = m.store.UpdateSet.Handle(
+				ctx,
+				command.UpdateSet{
+					ID:             d.recordID,
+					Repetitions:    uint8(reps),
+					ExerciseWeight: weight,
+					WeightUnit:     m.weightUnit,
+					RestInSeconds:  rest,
+				},
+			)
 		} else {
-			m.appendSet(d.exercise, set, set.createdAt.Local())
+			result, saveErr := m.store.CreateSet.Handle(
+				ctx,
+				command.CreateSet{
+					PerformanceID:  d.performanceID,
+					Repetitions:    uint8(reps),
+					ExerciseWeight: weight,
+					RestInSeconds:  rest,
+				},
+			)
+			err = saveErr
+			setID = result.Result.ID
 		}
 	}
 
-	m.err = ""
-	m.refreshRecords(d.exercise)
+	if err != nil {
+		return d.Invalid(
+			0,
+			err.Error(),
+		)
+	}
+
 	m.dialog = nil
+	m.err = ""
+	if err := m.reloadRecords(
+		ctx,
+		sessionID,
+		catalogID,
+		performanceID,
+		setID,
+	); err != nil {
+		m.err = err.Error()
+	}
+
+	*m = m.resize()
 
 	return nil
 }
+
+// END_BLOCK_RECORDS_SAVE

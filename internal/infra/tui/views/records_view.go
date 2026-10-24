@@ -1,18 +1,21 @@
 // START_MODULE_CONTRACT
-//   PURPOSE: Render records, help, or setup in the alternate screen.
-//   SCOPE: Terminal modes, panels, dialog layers, and cursor.
-//   DEPENDS: M-TUI-HELP, M-TUI-QUESTIONNAIRE
+//   PURPOSE: Render the workout workspace, help, or setup.
+//   SCOPE: Three compact records panes or a full-screen catalog, footer, modal layers, and terminal cursor.
+//   DEPENDS: M-APP-SESSIONS, M-APP-PERFORMANCES, M-DOMAIN-SESSION, M-DOMAIN-PERFORMANCE, M-DOMAIN-EXERCISE, M-DOMAIN-SET
 //   LINKS: M-TUI-RECORDS, V-M-TUI-RECORDS, M-TUI-QUESTIONNAIRE
 //   MAP_MODE: SUMMARY
 // END_MODULE_CONTRACT
 //
 // START_MODULE_MAP
-//   View - compose the active screen and terminal modes
+//   recordsPane - render and bound a single panel
+//   View - compose the active alternate-screen view
 // END_MODULE_MAP
 
 package views
 
 import (
+	"charm.land/bubbles/v2/paginator"
+	"charm.land/bubbles/v2/table"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
@@ -20,48 +23,85 @@ import (
 )
 
 // START_BLOCK_RECORDS_VIEW
+func (m RecordsModel) recordsPane(p panel, title string, t table.Model, pager paginator.Model) string {
+	width, height := m.panelSize(p)
+	if width <= 0 || height <= 0 {
+		return ""
+	}
+
+	style := recordsPaneStyle
+	if p == m.activePanel {
+		style = style.BorderForeground(components.ActivePanelColor)
+	}
+
+	pane := recordsPaneSpacing.Render(components.RenderPane(
+		style,
+		title,
+		pageTableView(
+			t,
+			pager,
+		),
+		components.Position(
+			t.Cursor(),
+			len(t.Rows()),
+		),
+	))
+	return lipgloss.NewStyle().MaxWidth(width).MaxHeight(height).Render(pane)
+}
+
 func (m RecordsModel) View() tea.View {
+	if m.width <= 0 || m.height <= 0 {
+		v := tea.NewView("")
+		v.AltScreen = true
+		return v
+	}
+
 	if m.questionnaire != nil {
 		return m.questionnaireView()
 	}
+
 	if m.showingHelp {
 		v := tea.NewView(m.help.view())
 		v.AltScreen = true
 		v.MouseMode = tea.MouseModeCellMotion
 		return v
 	}
-	styles := []lipgloss.Style{components.BaseStyle, components.BaseStyle}
-	styles[m.activePanel] = styles[m.activePanel].BorderForeground(components.ActivePanelColor)
 
-	content := lipgloss.JoinVertical(
-		lipgloss.Left,
-		lipgloss.JoinHorizontal(
-			lipgloss.Top,
-			components.PanelSpacing.Render(components.RenderPane(
-				styles[exercisesPanel],
-				"Exercises <1>",
-				m.exercisesView(),
-				components.Position(
-					m.table.Cursor(),
-					len(m.table.Rows()),
+	var content string
+	if m.showingCatalog {
+		content = m.catalogView()
+	} else {
+		content = lipgloss.JoinVertical(
+			lipgloss.Left,
+			lipgloss.JoinHorizontal(
+				lipgloss.Top,
+				m.recordsPane(
+					sessionsPanel,
+					"Sessions <1>",
+					m.sessionTable,
+					m.sessionPager,
 				),
-			)),
-			components.PanelSpacing.Render(components.RenderPane(
-				styles[setsPanel],
-				"Sets <2>",
-				m.setsView(),
-				components.Position(
-					m.setCursor,
-					len(m.setLines),
+				lipgloss.JoinVertical(
+					lipgloss.Left,
+					m.recordsPane(
+						performancesPanel,
+						"Performances <2>",
+						m.performanceTable,
+						m.performancePager,
+					),
+					m.recordsPane(
+						setsPanel,
+						"Sets <3>",
+						m.setTable,
+						m.setPager,
+					),
 				),
-			)),
-		),
-		m.helpView(),
-	)
-	if m.width > 0 && m.height > 0 {
-		content = lipgloss.NewStyle().MaxWidth(m.width).MaxHeight(m.height).Render(content)
+			),
+			m.helpView(),
+		)
 	}
 
+	content = lipgloss.NewStyle().MaxWidth(m.width).MaxHeight(m.height).Render(content)
 	layers := []*lipgloss.Layer{lipgloss.NewLayer(content).ID("panels")}
 	var cursor *tea.Cursor
 	if m.dialog != nil {
@@ -74,22 +114,16 @@ func (m RecordsModel) View() tea.View {
 	}
 
 	canvas := lipgloss.NewCanvas(
-		max(
-			0,
-			m.width,
-		),
-		max(
-			0,
-			m.height,
-		),
+		m.width,
+		m.height,
 	)
-	content = canvas.Compose(lipgloss.NewCompositor(layers...)).Render()
-
+	content = canvas.Compose(lipgloss.NewCompositor(
+		layers...,
+	)).Render()
 	v := tea.NewView(content)
 	v.Cursor = cursor
 	v.AltScreen = true
 	v.MouseMode = tea.MouseModeCellMotion
-
 	return v
 }
 

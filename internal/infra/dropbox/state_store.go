@@ -53,7 +53,12 @@ func NewStateStore(
 	accounts identity.IdentityRepository,
 	credentials identity.IdentityCredentialsRepository,
 ) *StateStore {
-	return &StateStore{linker: linker, accounts: accounts, credentials: credentials, contentURL: "https://content.dropboxapi.com/2/files/"}
+	return &StateStore{
+		linker:      linker,
+		accounts:    accounts,
+		credentials: credentials,
+		contentURL:  "https://content.dropboxapi.com/2/files/",
+	}
 }
 
 func (s *StateStore) Write(
@@ -63,6 +68,8 @@ func (s *StateStore) Write(
 	validated, err := state.NewSnapshot(
 		snapshot.Version,
 		snapshot.Exercises,
+		snapshot.Sessions,
+		snapshot.Performances,
 		snapshot.Sets,
 		snapshot.Preferences,
 	)
@@ -73,9 +80,11 @@ func (s *StateStore) Write(
 	if err != nil {
 		return errors.New("could not encode the workout backup")
 	}
+
 	if len(data) > maxSnapshotBytes {
 		return errors.New("workout backup exceeds the 16 MiB transfer limit")
 	}
+
 	argument := `{"path":"` + backupPath + `","mode":"overwrite","autorename":false,"mute":true}`
 	response, err := s.contentRequest(
 		ctx,
@@ -97,6 +106,7 @@ func (s *StateStore) Write(
 	if err != nil {
 		return errors.New("Dropbox upload response could not be read; try saving again")
 	}
+
 	return nil
 }
 
@@ -118,21 +128,27 @@ func (s *StateStore) Read(ctx context.Context) (state.Snapshot, error) {
 	if err != nil {
 		return state.Snapshot{}, errors.New("Dropbox backup could not be downloaded")
 	}
+
 	if len(data) > maxSnapshotBytes {
 		return state.Snapshot{}, errors.New("Dropbox backup exceeds the 16 MiB transfer limit")
 	}
+
 	var snapshot state.Snapshot
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&snapshot); err != nil {
 		return state.Snapshot{}, errors.New("Dropbox backup is not a valid workout snapshot")
 	}
+
 	if err := decoder.Decode(new(any)); err != io.EOF {
 		return state.Snapshot{}, errors.New("Dropbox backup contains trailing data")
 	}
+
 	return state.NewSnapshot(
 		snapshot.Version,
 		snapshot.Exercises,
+		snapshot.Sessions,
+		snapshot.Performances,
 		snapshot.Sets,
 		snapshot.Preferences,
 	)
@@ -180,8 +196,10 @@ func (s *StateStore) contentRequest(
 			if ctx.Err() != nil {
 				return nil, ctx.Err()
 			}
+
 			return nil, errors.New("could not connect to Dropbox; try again")
 		}
+
 		if response.StatusCode == http.StatusOK {
 			return response, nil
 		}
@@ -194,6 +212,7 @@ func (s *StateStore) contentRequest(
 			return nil, err
 		}
 	}
+
 	return nil, errors.New("Dropbox authorization expired; press r to link again")
 }
 
@@ -212,6 +231,7 @@ func contentError(
 			RequiredScope string `json:"required_scope"`
 		} `json:"error"`
 	}
+
 	_ = json.Unmarshal(
 		data,
 		&result,
@@ -238,6 +258,7 @@ func contentError(
 					break
 				}
 			}
+
 			if requiredScope == "" && strings.Contains(
 				string(data),
 				"Your app is not authorized to use this endpoint",
@@ -249,30 +270,36 @@ func contentError(
 					requiredScope = "files.content.read"
 				}
 			}
+
 			if requiredScope != "" {
 				return fmt.Errorf(
 					"Dropbox requires %s; enable it in App Console > Permissions, Submit, then press r to link again",
 					requiredScope,
 				), false
 			}
+
 			return errors.New("Dropbox file permissions are missing; enable file read/write and press r to link again"), false
 		}
 	}
+
 	if response.StatusCode == http.StatusUnauthorized {
 		return errors.New("Dropbox authorization is no longer valid; press r to link again"), strings.HasPrefix(
 			result.Summary,
 			"expired_access_token/",
 		)
 	}
+
 	if operation == "download" && response.StatusCode == http.StatusConflict && strings.HasPrefix(
 		result.Summary,
 		"path/not_found/",
 	) {
 		return errors.New("no Dropbox backup found; press s to save one first"), false
 	}
+
 	if response.StatusCode == http.StatusTooManyRequests {
 		return errors.New("Dropbox is busy; try again later"), false
 	}
+
 	if response.StatusCode == http.StatusBadRequest {
 		requestID := dropboxRequestID(response.Header)
 		if requestID != "" {
@@ -282,11 +309,13 @@ func contentError(
 				requestID,
 			), false
 		}
+
 		return fmt.Errorf(
 			"Dropbox %s rejected the request (HTTP 400)",
 			operation,
 		), false
 	}
+
 	return fmt.Errorf(
 		"Dropbox %s failed (HTTP %d); try again",
 		operation,
@@ -304,6 +333,7 @@ func dropboxRequestID(header http.Header) string {
 			return ""
 		}
 	}
+
 	return value
 }
 
@@ -324,6 +354,7 @@ func (s *StateStore) accessToken(
 	) {
 		return "", errors.New("no Dropbox account linked; press r to set up Dropbox")
 	}
+
 	if err != nil {
 		return "", errors.New("could not read the linked Dropbox account")
 	}
@@ -334,6 +365,7 @@ func (s *StateStore) accessToken(
 	if err != nil || account.Provider != identity.ProviderDropbox {
 		return "", errors.New("the linked Dropbox account is unavailable; press r to link again")
 	}
+
 	if !forceRefresh && credentials.AccessTokenExpiresAt.After(time.Now().Add(time.Minute)) {
 		return credentials.AccessToken, nil
 	}
@@ -351,6 +383,7 @@ func (s *StateStore) refresh(
 	if s.linker.appKey == "" {
 		return "", errors.New("Dropbox app key is not configured")
 	}
+
 	parameters := url.Values{
 		"grant_type":    {"refresh_token"},
 		"refresh_token": {previous.RefreshToken},
@@ -374,18 +407,21 @@ func (s *StateStore) refresh(
 		if ctx.Err() != nil {
 			return "", ctx.Err()
 		}
+
 		return "", errors.New("could not refresh Dropbox authorization; try again")
 	}
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
 		return "", errors.New("Dropbox authorization could not be refreshed; press r to link again")
 	}
+
 	var value struct {
 		AccessToken  string      `json:"access_token"`
 		RefreshToken string      `json:"refresh_token"`
 		AccountID    string      `json:"account_id"`
 		ExpiresIn    json.Number `json:"expires_in"`
 	}
+
 	if err := json.NewDecoder(io.LimitReader(
 		response.Body,
 		1<<20,
@@ -396,9 +432,11 @@ func (s *StateStore) refresh(
 	if err != nil || seconds <= 0 || seconds > 365*24*60*60 || value.AccessToken == "" || (value.AccountID != "" && value.AccountID != previous.IdentityID) {
 		return "", errors.New("Dropbox returned incomplete refreshed credentials")
 	}
+
 	if err := ctx.Err(); err != nil {
 		return "", err
 	}
+
 	refresh := previous.RefreshToken
 	if value.RefreshToken != "" {
 		refresh = value.RefreshToken
@@ -415,12 +453,14 @@ func (s *StateStore) refresh(
 	if err != nil {
 		return "", err
 	}
+
 	if err := s.credentials.Save(
 		ctx,
 		credentials,
 	); err != nil {
 		return "", errors.New("could not save refreshed Dropbox authorization")
 	}
+
 	return value.AccessToken, nil
 }
 

@@ -4,6 +4,7 @@
       <Path>graph/main.xml</Path>
       <Owns>
         <M-TUI-RECORDS />
+        <M-TUI-CATALOG />
         <M-TUI-HELP />
         <M-TUI-STARTER />
         <M-TUI-QUESTIONNAIRE />
@@ -16,8 +17,13 @@
         <M-INFRA-DROPBOX-STATE />
         <M-INFRA-PERSISTENCE-SQLITE />
         <M-DOMAIN-EXERCISE />
+        <M-DOMAIN-SESSION />
+        <M-DOMAIN-PERFORMANCE />
+        <M-APP-PERFORMANCES />
+        <M-APP-SESSIONS />
         <M-DOMAIN-SET />
         <M-DOMAIN-SHARED-WEIGHT />
+        <M-TUI-COMPONENTS />
       </Owns>
     </GD-MAIN>
   </GraphDocuments>

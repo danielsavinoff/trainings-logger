@@ -1,0 +1,50 @@
+<GraceChangeSpec graceVersion="4.0" status="applied">
+  <C-PERFORMANCE-DOMAIN-REFACTOR>
+    <Summary>Reorganize domain as session/exercise/{set,performance}; rename workout exercise memberships to performances across code, schema, backups and documentation without changing workout behavior.</Summary>
+    <Goals>
+      <Goal>Move session to internal/domain/session, catalog exercise to internal/domain/session/exercise, and set/performance beneath that exercise package.</Goal>
+      <Goal>Replace SessionExercise/sessionexercise/session_exercises names with Performance/performance/performances, including operations, repositories, foreign keys and TUI ownership names.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>Preserve UUID relationships, automatic positive session indices, unique(session_id, exercise_id), idempotent add, insertion ordering, cascade boundaries and referenced-catalog deletion protection.</Constraint>
+      <Constraint>Retain the existing CLI-generated single initial migration pair, editing its latest schema in place. Do not open or modify the real user database; no legacy database conversion is requested.</Constraint>
+      <Constraint>Use backup version 4 with performances and performance_id fields. Reject earlier versions before writes; retain atomic import and local credentials.</Constraint>
+      <Constraint>Retain records layout, catalog picker, body-weight percentage columns, help content and compact shared spacing; label the workout performance panel Performances &lt;2&gt;.</Constraint>
+      <Constraint>Preserve staged and unstaged user changes and the git index. Use constructors, existing source formatting and one operation per use-case file. Do not add committed automated tests.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>No new workout features, relationship/cardinality changes, database reset, legacy data/backup conversion, or unrelated cleanup.</NonGoal>
+      <NonGoal>Do not rewrite archived change history; rename current durable graph/verification identifiers and file-local anchors only.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>Only domain/session/exercise/{set,performance} remains for moved models; all imports compile without aliases for old packages.</Criterion>
+      <Criterion>Performance, PerformanceRepository, AddPerformance, DeletePerformance and ListPerformances replace their old names; sets reference PerformanceID and FindAllByPerformanceID.</Criterion>
+      <Criterion>The schema uses performances, performance_id and matching index names. Up/down/up yields seven tables and preserves constraints.</Criterion>
+      <Criterion>Version-4 JSON round trips workouts, catalog exercises, performances and sets; older versions and orphan/duplicate performances are rejected before mutation.</Criterion>
+      <Criterion>TUI selection, catalog creation/edit/add/removal, cascading set behavior, backup/restore and compact layouts remain correct with performance naming.</Criterion>
+      <Criterion>Current graph, verification commands, semantic anchors and README match the new names. Build/vet/format and temporary database/TUI scenarios pass. Apply/archive after successful checks, using the user’s continuing archive instruction.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-DOMAIN-SESSION />
+      <M-DOMAIN-EXERCISE />
+      <M-DOMAIN-SET />
+      <M-DOMAIN-SESSION-EXERCISE />
+      <M-DOMAIN-PERFORMANCE />
+      <M-DOMAIN-STATE />
+      <M-APP-SESSION-EXERCISES />
+      <M-APP-PERFORMANCES />
+      <M-INFRA-PERSISTENCE-SQLITE />
+      <M-INFRA-DROPBOX-STATE />
+      <M-TUI-RECORDS />
+      <M-TUI-CATALOG />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>go build ./...</ExpectedCommand>
+      <ExpectedCommand>go vet ./...</ExpectedCommand>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>The explicit rename request authorizes the described mechanical refactor and public/internal symbol updates. Prior sequential execution and final archive preferences persist.</Assumption>
+      <Assumption>Performances remain one catalog exercise in one session; this naming change does not move sets under a performance subdirectory. The requested set and performance folders are siblings.</Assumption>
+    </Assumptions>
+  </C-PERFORMANCE-DOMAIN-REFACTOR>
+</GraceChangeSpec>

@@ -4,6 +4,7 @@
       <Path>verification/main.xml</Path>
       <Owns>
         <V-M-TUI-RECORDS />
+        <V-M-TUI-CATALOG />
         <V-M-TUI-HELP />
         <V-M-TUI-STARTER />
         <V-M-TUI-QUESTIONNAIRE />
@@ -16,8 +17,13 @@
         <V-M-INFRA-DROPBOX-STATE />
         <V-M-INFRA-PERSISTENCE-SQLITE />
         <V-M-DOMAIN-EXERCISE />
+        <V-M-DOMAIN-SESSION />
+        <V-M-DOMAIN-PERFORMANCE />
+        <V-M-APP-PERFORMANCES />
+        <V-M-APP-SESSIONS />
         <V-M-DOMAIN-SET />
         <V-M-DOMAIN-SHARED-WEIGHT />
+        <V-M-TUI-COMPONENTS />
       </Owns>
     </VD-MAIN>
   </VerificationDocuments>

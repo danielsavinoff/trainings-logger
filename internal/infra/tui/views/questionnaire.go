@@ -17,7 +17,6 @@
 //   questionnaireURLContent - expose the complete scrollable authorization URL
 //   saveQuestionnaire - save explicit answers, or return without writes when skipped
 //   questionnaireView - render a bounded full-screen frame and native input cursor
-//   convertVisibleWeights - convert retained sets after successful preference persistence
 // END_MODULE_MAP
 
 package views
@@ -80,7 +79,12 @@ func (m *RecordsModel) openQuestionnaire() tea.Cmd {
 	styles.Focused.Prompt = lipgloss.NewStyle().Foreground(components.ActivePanelColor)
 	styles.Cursor.Color = components.ActivePanelColor
 	input.SetStyles(styles)
-	m.questionnaire = &questionnaireModel{input: input, ctx: ctx, cancel: cancel}
+	m.questionnaire = &questionnaireModel{
+		input:  input,
+		ctx:    ctx,
+		cancel: cancel,
+	}
+
 	m.goPending = false
 
 	return m.questionnaire.input.Focus()
@@ -98,12 +102,14 @@ func (m *RecordsModel) updateQuestionnaire(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.owner != q {
 			return *m, nil
 		}
+
 		q.busy = false
 		if msg.err != nil {
 			q.status = msg.err.Error()
 			q.input.SetValue("")
 			return *m, nil
 		}
+
 		q.authorization = &msg.authorization
 		q.step = 2
 		q.status = ""
@@ -120,6 +126,7 @@ func (m *RecordsModel) updateQuestionnaire(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.owner != q {
 			return *m, nil
 		}
+
 		q.busy = false
 		q.linked = msg.linked
 		if msg.err != nil {
@@ -127,15 +134,17 @@ func (m *RecordsModel) updateQuestionnaire(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if msg.linked == nil {
 				q.input.SetValue("")
 			}
+
 			return *m, nil
 		}
+
 		if q.unit != nil {
-			if err := m.convertVisibleWeights(*q.unit); err != nil {
+			m.weightUnit = *q.unit
+			if err := m.refreshSetRows(); err != nil {
 				q.status = err.Error()
 				return *m, nil
 			}
-			m.weightUnit = *q.unit
-			m.refreshTimeline()
+			m.syncPagers()
 		}
 		m.closeQuestionnaire()
 		return *m, nil
@@ -162,9 +171,11 @@ func (m *RecordsModel) updateQuestionnaire(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if msg.String() == "pgdown" || msg.String() == "pgup" {
 					delta = height
 				}
+
 				if msg.String() == "k" || msg.String() == "up" || msg.String() == "pgup" {
 					delta = -delta
 				}
+
 				q.urlOffset = min(
 					limit,
 					max(
@@ -176,24 +187,30 @@ func (m *RecordsModel) updateQuestionnaire(msg tea.Msg) (tea.Model, tea.Cmd) {
 					),
 				)
 			}
+
 			return *m, nil
 		}
+
 		if msg.String() == "esc" {
 			m.closeQuestionnaire()
 			return *m, nil
 		}
+
 		if q.busy {
 			return *m, nil
 		}
+
 		if q.step == 2 && msg.String() == "ctrl+r" {
 			cmd := m.startQuestionnaireAuthorization(q)
 			return *m, cmd
 		}
+
 		if q.step == 2 && msg.String() == "ctrl+o" && q.authorization != nil {
 			q.showURL = true
 			q.urlOffset = 0
 			return *m, nil
 		}
+
 		if msg.String() != "enter" {
 			break
 		}
@@ -205,13 +222,16 @@ func (m *RecordsModel) updateQuestionnaire(msg tea.Msg) (tea.Model, tea.Cmd) {
 				q.status = "Choose 1 or 2, or clear the input to skip."
 				return *m, nil
 			}
+
 			if answer != "" {
 				unit := shared.WeightUnitKg
 				if answer == "2" {
 					unit = shared.WeightUnitLb
 				}
+
 				q.unit = &unit
 			}
+
 			q.step = 1
 			q.status = ""
 			q.input.SetValue("")
@@ -222,10 +242,12 @@ func (m *RecordsModel) updateQuestionnaire(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if answer == "" {
 				return *m, m.saveQuestionnaire(q)
 			}
+
 			if answer != "1" {
 				q.status = "Choose 1, or clear the input to skip."
 				return *m, nil
 			}
+
 			cmd := m.startQuestionnaireAuthorization(q)
 			return *m, cmd
 
@@ -237,6 +259,7 @@ func (m *RecordsModel) updateQuestionnaire(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if q.busy {
 		return *m, nil
 	}
+
 	var cmd tea.Cmd
 	q.input, cmd = q.input.Update(msg)
 
@@ -267,7 +290,11 @@ func (m *RecordsModel) startQuestionnaireAuthorization(q *questionnaireModel) te
 			next.ctx,
 			identity.ProviderDropbox,
 		)
-		return questionnaireStartedMsg{owner: &next, authorization: authorization, err: err}
+		return questionnaireStartedMsg{
+			owner:         &next,
+			authorization: authorization,
+			err:           err,
+		}
 	}
 }
 
@@ -276,10 +303,12 @@ func (m *RecordsModel) saveQuestionnaire(q *questionnaireModel) tea.Cmd {
 	if q.step != 2 || code == "" {
 		q.linked = nil
 	}
+
 	if q.unit == nil && (q.step != 2 || code == "") {
 		m.closeQuestionnaire()
 		return nil
 	}
+
 	if m.store == nil || m.store.CompleteQuestionnaire == nil {
 		q.status = "Setup could not be saved. Press Esc to cancel."
 		return nil
@@ -301,16 +330,28 @@ func (m *RecordsModel) saveQuestionnaire(q *questionnaireModel) tea.Cmd {
 				code,
 			)
 			if err != nil {
-				return questionnaireSavedMsg{owner: q, err: err}
+				return questionnaireSavedMsg{
+					owner: q,
+					err:   err,
+				}
 			}
+
 			linked = &value
 		}
+
 		err := save(
 			ctx,
-			command.CompleteQuestionnaire{WeightUnit: q.unit, LinkedIdentity: linked},
+			command.CompleteQuestionnaire{
+				WeightUnit:     q.unit,
+				LinkedIdentity: linked,
+			},
 		)
 
-		return questionnaireSavedMsg{owner: q, linked: linked, err: err}
+		return questionnaireSavedMsg{
+			owner:  q,
+			linked: linked,
+			err:    err,
+		}
 	}
 }
 
@@ -361,6 +402,7 @@ func (m RecordsModel) questionnaireView() tea.View {
 		))
 		return v
 	}
+
 	question := "Preferred weight unit?"
 	choices := "1. kg\n2. lb"
 	hint := "Enter to skip (default: kg)."
@@ -368,6 +410,7 @@ func (m RecordsModel) questionnaireView() tea.View {
 	if m.weightUnit != shared.WeightUnitKg {
 		hint = "Enter to skip (keep: " + string(m.weightUnit) + ")."
 	}
+
 	if q.step == 1 {
 		question = "Link an identity account?"
 		choices = "1. Dropbox"
@@ -379,10 +422,9 @@ func (m RecordsModel) questionnaireView() tea.View {
 		hint = "Enter to skip (no account saved)."
 		title = "Link Dropbox"
 	}
-	gap := "\n\n"
-	if contentHeight < 10 {
-		gap = "\n"
-	}
+
+	gap := "\n"
+
 	bodyStyle := lipgloss.NewStyle().Width(contentWidth).MaxWidth(contentWidth)
 	prefix := bodyStyle.Render(question + gap + choices + gap + hint)
 	input := q.input
@@ -394,9 +436,11 @@ func (m RecordsModel) questionnaireView() tea.View {
 	if q.status != "" {
 		body += gap + q.status
 	}
+
 	if q.authorization != nil {
 		body += gap + "Sign-in URL: " + q.authorization.URL
 	}
+
 	body = bodyStyle.MaxHeight(contentHeight).Render(body)
 	v.Content = components.PanelSpacing.Render(components.RenderPane(
 		style.Width(panelWidth).Height(panelHeight),
@@ -429,32 +473,8 @@ func (m RecordsModel) questionnaireView() tea.View {
 
 func (m RecordsModel) questionnaireURLContent(width int) string {
 	return lipgloss.NewStyle().Width(width).MaxWidth(width).Render(
-		"Open this URL in your browser:\n\n" + m.questionnaire.authorization.URL,
+		"Open this URL in your browser:\n" + m.questionnaire.authorization.URL,
 	)
-}
-
-func (m *RecordsModel) convertVisibleWeights(unit shared.WeightUnit) error {
-	for exerciseIndex := range m.exercises {
-		for sessionIndex := range m.exercises[exerciseIndex].sessions {
-			for setIndex := range m.exercises[exerciseIndex].sessions[sessionIndex].sets {
-				workoutSet := &m.exercises[exerciseIndex].sessions[sessionIndex].sets[setIndex]
-				currentWeight, err := shared.NewWeight(
-					workoutSet.weight,
-					m.weightUnit,
-				)
-				if err != nil {
-					return err
-				}
-				weight, err := currentWeight.To(unit)
-				if err != nil {
-					return err
-				}
-				workoutSet.weight = weight.Value
-			}
-		}
-	}
-
-	return nil
 }
 
 // END_BLOCK_QUESTIONNAIRE_VIEW

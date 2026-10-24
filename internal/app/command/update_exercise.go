@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/danielsavinoff/trainings-logger/internal/app/ports"
-	"github.com/danielsavinoff/trainings-logger/internal/domain/exercise"
+	"github.com/danielsavinoff/trainings-logger/internal/domain/session/exercise"
 )
 
 type UpdateExercise struct {
@@ -33,26 +33,37 @@ func (h UpdateExerciseHandler) Handle(
 	command UpdateExercise,
 ) error {
 	validated, err := exercise.NewExercise(
-		command.ID, command.Name, command.BodyWeightShare,
+		command.ID,
+		command.Name,
+		command.BodyWeightShare,
 	)
 	if err != nil {
 		return err
 	}
 
-	_, err = h.transactions.Run(ctx, func(
-		ctx context.Context,
-	) (ports.TransactionNoResult, error) {
-		exists, err := h.exerciseRepo.ExistsByID(ctx, command.ID)
-		if err != nil {
-			return ports.TransactionNoResult{}, err
-		}
+	_, err = h.transactions.Run(
+		ctx,
+		func(
+			ctx context.Context,
+		) (ports.TransactionNoResult, error) {
+			exists, err := h.exerciseRepo.ExistsByID(
+				ctx,
+				command.ID,
+			)
+			if err != nil {
+				return ports.TransactionNoResult{}, err
+			}
 
-		if !exists {
-			return ports.TransactionNoResult{}, exercise.ErrExerciseNotFound
-		}
+			if !exists {
+				return ports.TransactionNoResult{}, exercise.ErrExerciseNotFound
+			}
 
-		return ports.TransactionNoResult{}, h.exerciseRepo.Save(ctx, validated)
-	})
+			return ports.TransactionNoResult{}, h.exerciseRepo.Save(
+				ctx,
+				validated,
+			)
+		},
+	)
 
 	return err
 }

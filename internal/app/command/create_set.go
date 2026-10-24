@@ -2,18 +2,19 @@ package command
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"uuid"
 
 	"github.com/danielsavinoff/trainings-logger/internal/app/ports"
-	"github.com/danielsavinoff/trainings-logger/internal/domain/exercise"
-	"github.com/danielsavinoff/trainings-logger/internal/domain/exercise/set"
+	"github.com/danielsavinoff/trainings-logger/internal/domain/session/exercise/performance"
+	"github.com/danielsavinoff/trainings-logger/internal/domain/session/exercise/set"
 	"github.com/danielsavinoff/trainings-logger/internal/domain/shared"
 	"github.com/danielsavinoff/trainings-logger/internal/domain/user/preferences"
 )
 
 type CreateSet struct {
-	ExerciseID     string
+	PerformanceID  string
 	ExerciseWeight float64
 	RestInSeconds  int
 	Repetitions    uint8
@@ -27,20 +28,20 @@ type CreateSetHandler struct {
 	transactions    ports.TransactionRunner[CreateSetResult]
 	preferencesRepo preferences.PreferencesRepository
 	setRepo         set.SetRepository
-	exerciseRepo    exercise.ExerciseRepository
+	performanceRepo performance.PerformanceRepository
 }
 
 func NewCreateSetHandler(
 	preferencesRepo preferences.PreferencesRepository,
 	setRepo set.SetRepository,
-	exerciseRepo exercise.ExerciseRepository,
+	performanceRepo performance.PerformanceRepository,
 	transactions ports.TransactionRunner[CreateSetResult],
 ) CreateSetHandler {
 	return CreateSetHandler{
 		transactions:    transactions,
 		preferencesRepo: preferencesRepo,
 		setRepo:         setRepo,
-		exerciseRepo:    exerciseRepo,
+		performanceRepo: performanceRepo,
 	}
 }
 
@@ -67,7 +68,7 @@ func (h CreateSetHandler) Handle(
 
 			userSet, err := set.NewSet(
 				uuid.NewV4().String(),
-				command.ExerciseID,
+				command.PerformanceID,
 				command.Repetitions,
 				command.ExerciseWeight,
 				prefs.WeightUnit,
@@ -78,16 +79,18 @@ func (h CreateSetHandler) Handle(
 				return CreateSetResult{}, err
 			}
 
-			exists, err := h.exerciseRepo.ExistsByID(
+			if _, err := h.performanceRepo.FindByID(
 				ctx,
-				command.ExerciseID,
-			)
-			if err != nil {
-				return CreateSetResult{}, err
-			}
+				command.PerformanceID,
+			); err != nil {
+				if errors.Is(
+					err,
+					sql.ErrNoRows,
+				) {
+					return CreateSetResult{}, set.ErrPerformanceOfSetNotFound
+				}
 
-			if !exists {
-				return CreateSetResult{}, set.ErrExerciseOfSetNotFound
+				return CreateSetResult{}, err
 			}
 
 			if err := h.setRepo.Save(

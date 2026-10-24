@@ -6,7 +6,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/danielsavinoff/trainings-logger/internal/domain/exercise/set"
+	"github.com/danielsavinoff/trainings-logger/internal/domain/session/exercise/set"
 	"github.com/danielsavinoff/trainings-logger/internal/domain/shared"
 	"github.com/danielsavinoff/trainings-logger/internal/infra/persistence"
 )
@@ -19,7 +19,10 @@ func NewSetRepository(db *sql.DB) *SetRepository {
 	return &SetRepository{db: db}
 }
 
-func (r *SetRepository) Save(ctx context.Context, s set.Set) error {
+func (r *SetRepository) Save(
+	ctx context.Context,
+	s set.Set,
+) error {
 	grams, err := s.ExerciseWeight.Weight.Grams()
 	if err != nil {
 		return err
@@ -27,7 +30,7 @@ func (r *SetRepository) Save(ctx context.Context, s set.Set) error {
 
 	const query = `
 		INSERT INTO sets (
-			id, exercise_id, exercise_weight_in_grams,
+			id, performance_id, exercise_weight_in_grams,
 			repetitions, rest_in_seconds, created_at
 		)
 		VALUES (?, ?, ?, ?, ?, ?)
@@ -37,11 +40,14 @@ func (r *SetRepository) Save(ctx context.Context, s set.Set) error {
 			rest_in_seconds = excluded.rest_in_seconds
 	`
 
-	_, err = persistence.ExecutorFromContext(ctx, r.db).ExecContext(
+	_, err = persistence.ExecutorFromContext(
+		ctx,
+		r.db,
+	).ExecContext(
 		ctx,
 		query,
 		s.ID,
-		s.ExerciseID,
+		s.PerformanceID,
 		int64(math.Round(grams)),
 		s.Repetitions,
 		s.RestInSeconds,
@@ -56,25 +62,28 @@ func (r *SetRepository) FindByID(
 	id string,
 ) (set.Set, error) {
 	const query = `
-		SELECT id, exercise_id, exercise_weight_in_grams,
+		SELECT id, performance_id, exercise_weight_in_grams,
 			repetitions, rest_in_seconds, created_at
 		FROM sets
 		WHERE id = ?
 	`
 
 	var storedID string
-	var exerciseID string
+	var performanceID string
 	var repetitions uint8
 	var restInSeconds int
 	var createdAt time.Time
 	var grams int64
-	err := persistence.ExecutorFromContext(ctx, r.db).QueryRowContext(
+	err := persistence.ExecutorFromContext(
+		ctx,
+		r.db,
+	).QueryRowContext(
 		ctx,
 		query,
 		id,
 	).Scan(
 		&storedID,
-		&exerciseID,
+		&performanceID,
 		&grams,
 		&repetitions,
 		&restInSeconds,
@@ -86,7 +95,7 @@ func (r *SetRepository) FindByID(
 
 	return set.NewSet(
 		storedID,
-		exerciseID,
+		performanceID,
 		repetitions,
 		float64(grams),
 		shared.WeightUnitG,
@@ -95,21 +104,24 @@ func (r *SetRepository) FindByID(
 	)
 }
 
-func (r *SetRepository) FindAllByExerciseId(
+func (r *SetRepository) FindAllByPerformanceID(
 	ctx context.Context,
-	exerciseID string,
+	performanceID string,
 ) ([]set.Set, error) {
 	const query = `
-		SELECT id, exercise_id, exercise_weight_in_grams,
+		SELECT id, performance_id, exercise_weight_in_grams,
 			repetitions, rest_in_seconds, created_at
-		FROM sets WHERE exercise_id = ?
-		ORDER BY created_at DESC, rowid DESC
+		FROM sets WHERE performance_id = ?
+		ORDER BY created_at DESC, id DESC
 	`
 
-	rows, err := persistence.ExecutorFromContext(ctx, r.db).QueryContext(
+	rows, err := persistence.ExecutorFromContext(
+		ctx,
+		r.db,
+	).QueryContext(
 		ctx,
 		query,
-		exerciseID,
+		performanceID,
 	)
 	if err != nil {
 		return nil, err
@@ -119,14 +131,14 @@ func (r *SetRepository) FindAllByExerciseId(
 	var result []set.Set
 	for rows.Next() {
 		var id string
-		var storedExerciseID string
+		var storedPerformanceID string
 		var repetitions uint8
 		var restInSeconds int
 		var createdAt time.Time
 		var grams int64
 		err := rows.Scan(
 			&id,
-			&storedExerciseID,
+			&storedPerformanceID,
 			&grams,
 			&repetitions,
 			&restInSeconds,
@@ -138,7 +150,7 @@ func (r *SetRepository) FindAllByExerciseId(
 
 		s, err := set.NewSet(
 			id,
-			storedExerciseID,
+			storedPerformanceID,
 			repetitions,
 			float64(grams),
 			shared.WeightUnitG,
@@ -148,15 +160,27 @@ func (r *SetRepository) FindAllByExerciseId(
 		if err != nil {
 			return nil, err
 		}
-		result = append(result, s)
+
+		result = append(
+			result,
+			s,
+		)
 	}
 
 	return result, rows.Err()
 }
 
-func (r *SetRepository) DeleteByID(ctx context.Context, id string) error {
-	_, err := persistence.ExecutorFromContext(ctx, r.db).ExecContext(
-		ctx, "DELETE FROM sets WHERE id = ?", id,
+func (r *SetRepository) DeleteByID(
+	ctx context.Context,
+	id string,
+) error {
+	_, err := persistence.ExecutorFromContext(
+		ctx,
+		r.db,
+	).ExecContext(
+		ctx,
+		"DELETE FROM sets WHERE id = ?",
+		id,
 	)
 
 	return err

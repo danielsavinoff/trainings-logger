@@ -4,35 +4,63 @@
       <Name>Records screen and help routing</Name>
       <Type>runtime</Type>
       <Path>internal/infra/tui/views</Path>
-      <Purpose>Retain workout browsing state, route records/dialog/help and questionnaire input, render the active screen in the alternate terminal screen, and display compact help/load/save/quit hints and asynchronous transfer outcomes.</Purpose>
+      <Purpose>Retain workout sessions, performances, sets, and catalog definitions as domain objects; render a compact records workspace and route a separate full-screen catalog, dialogs, help, setup, and transfers.</Purpose>
       <Files>
         <File>internal/infra/tui/views/records.go</File>
+        <File>internal/infra/tui/views/records_actions.go</File>
+        <File>internal/infra/tui/views/records_dialog.go</File>
+        <File>internal/infra/tui/views/records_performances.go</File>
+        <File>internal/infra/tui/views/records_help.go</File>
+        <File>internal/infra/tui/views/records_keys.go</File>
+        <File>internal/infra/tui/views/records_layout.go</File>
+        <File>internal/infra/tui/views/records_pagination.go</File>
+        <File>internal/infra/tui/views/records_save.go</File>
+        <File>internal/infra/tui/views/records_sessions.go</File>
+        <File>internal/infra/tui/views/records_sets.go</File>
+        <File>internal/infra/tui/views/records_transfer.go</File>
         <File>internal/infra/tui/views/records_update.go</File>
         <File>internal/infra/tui/views/records_view.go</File>
-        <File>internal/infra/tui/views/records_layout.go</File>
-        <File>internal/infra/tui/views/records_keys.go</File>
-        <File>internal/infra/tui/views/records_help.go</File>
-        <File>internal/infra/tui/views/records_transfer.go</File>
       </Files>
-      <Links><M-TUI-HELP /><M-TUI-QUESTIONNAIRE /><M-APP-REMOTE-STATE /></Links>
-      <Boundary>Ownership is limited to these seven governed files. Existing data, persistence, dialog, and navigation helpers in the package remain outside this initial markup coverage.</Boundary>
-      <Behavior>r opens optional setup without resetting stored data. Missing preferences open setup automatically; saved preferences open records. ? opens help outside dialogs; any key returns to records without running its records action. s saves a Dropbox snapshot and l restores it, with progress and error status in the borderless inactive-color footer. Transfer ownership rejects stale messages and overlapping actions; restore blocks unsafe editing and refreshes records while retaining selected IDs where available. Right arrow, Page Down, f, and Space retain next-page navigation. gg selects the first row in the active panel, while G selects its last row; this applies to exercises and sets. Home and End remain supported.</Behavior>
+      <Links>
+        <M-TUI-CATALOG />
+        <M-TUI-HELP />
+        <M-TUI-QUESTIONNAIRE />
+        <M-APP-REMOTE-STATE />
+        <M-APP-SESSIONS />
+        <M-APP-PERFORMANCES />
+        <M-DOMAIN-EXERCISE />
+        <M-DOMAIN-SESSION />
+        <M-DOMAIN-PERFORMANCE />
+        <M-DOMAIN-SET />
+        <M-TUI-COMPONENTS />
+      </Links>
+      <Boundary>Ownership includes all listed records helpers. TUI state retains domain models; generic dialog components remain reusable presentation infrastructure.</Boundary>
+      <Behavior>Records show only Sessions &lt;1&gt; in the left fifth and Performances &lt;2&gt; above Sets &lt;3&gt; splitting the remaining four fifths. Pane outer spacing is zero vertical/one horizontal cell, and inner padding is zero vertical/one horizontal cell; the same shared BaseStyle and PanelSpacing apply to catalog, help, setup and dialogs. 1/2/3 focus records panes and Enter advances sessions to performances to sets. n in Performances opens the separate full-screen catalog; there is no catalog column or focus shortcut on records. Session/performance changes filter descendants, records keep their existing border counters, and sets have no date separators. Both the catalog and workout performance tables display Name and Body Weight % from the same catalog definition formatter. The records footer renders only ? - help as a shortcut, using the same outer panel spacing and padding-aware wrapping as tables; real errors and transfer outcomes remain visible. n creates/selects a numbered session immediately and d deletes it; e does nothing in Sessions. The session table contains only Index. n/e/d manage sets; performance d removes only that membership and its sets, and performance e has no independent edit. Help/setup/dialog/catalog input is isolated. Save/load prevent unsafe overlap and preserve IDs on version-4 restore. Mouse input is ignored.</Behavior>
     </M-TUI-RECORDS>
     <M-TUI-HELP>
       <Name>Records keyboard help</Name>
       <Type>runtime</Type>
       <Path>internal/infra/tui/views/help.go</Path>
       <Purpose>Render titled shortcut groups in responsive columns with aligned descriptions and active-color keys, without an extra page heading.</Purpose>
-      <Files><File>internal/infra/tui/views/help.go</File></Files>
-      <Behavior>Arrange groups side by side when space allows and stack them on narrow terminals. Document home/gg for the first row and end/G for the last row. Document r for reset setup and l/s for direct load/save; p is removed and l no longer pages right. Any key returns to records; scrolling and display do not access persistence.</Behavior>
+      <Files>
+        <File>internal/infra/tui/views/help.go</File>
+      </Files>
+      <Behavior>Navigation documents up/down, gg first row, G last row, and enter select. Actions use n new record, e edit record, d delete record, r reset setup, l load backup, and s save backup. Pages and 1/2/3 focus descriptions are omitted from help; actual keyboard bindings remain unchanged. Wide layouts place Navigation above Actions on the left and Help in the top-right position formerly occupied by Pages. Compact layouts stack Navigation, Actions and Help. Shared spacing is zero vertical/one horizontal with a two-cell column gap and no extra blank rows between groups. Any key returns from help without running its records action; help does not access persistence.</Behavior>
+      <Links>
+        <M-TUI-COMPONENTS />
+      </Links>
     </M-TUI-HELP>
     <M-TUI-STARTER>
       <Name>Application input wrapper</Name>
       <Type>runtime</Type>
       <Path>internal/infra/tui/starter/model.go</Path>
       <Purpose>Load the records model and intercept Ctrl+C and Ctrl+Z as application-wide quit commands before child input handling.</Purpose>
-      <Files><File>internal/infra/tui/starter/model.go</File></Files>
-      <Links><M-TUI-RECORDS /></Links>
+      <Files>
+        <File>internal/infra/tui/starter/model.go</File>
+      </Files>
+      <Links>
+        <M-TUI-RECORDS />
+      </Links>
       <Behavior>Ctrl+C and Ctrl+Z emit quit outside help. In help every key, including both control shortcuts, is delegated so it returns to records rather than quitting.</Behavior>
     </M-TUI-STARTER>
     <M-TUI-QUESTIONNAIRE>
@@ -40,9 +68,17 @@
       <Type>runtime</Type>
       <Path>internal/infra/tui/views/questionnaire.go</Path>
       <Purpose>Collect optional weight-unit and Dropbox identity answers before opening records, with staged persistence and main-view full-screen styling.</Purpose>
-      <Files><File>internal/infra/tui/views/questionnaire.go</File></Files>
-      <Links><M-TUI-RECORDS /><M-APP-QUESTIONNAIRE /><M-DOMAIN-USER-PREFERENCES /><M-INFRA-DROPBOX-AUTH /></Links>
-      <Behavior>Missing preferences trigger setup; r reopens it without deleting anything. Numeric input selects kg/lb then Dropbox; empty Enter skips. Answers are saved together only after completion, and skipping everything performs no writes. Esc cancels pending work and restores records. Browser authorization and code exchange run asynchronously, stale messages are ignored, and failures allow retry. ctrl+r replaces the authorization session with a fresh attempt; ctrl+o opens a bounded full-screen scrollable URL view with j/k and Escape to return. A full-screen active border uses main-view outer spacing and internal padding, clipping body content before drawing the frame and positioning the native input cursor within terminal bounds.</Behavior>
+      <Files>
+        <File>internal/infra/tui/views/questionnaire.go</File>
+      </Files>
+      <Links>
+        <M-TUI-RECORDS />
+        <M-APP-QUESTIONNAIRE />
+        <M-DOMAIN-USER-PREFERENCES />
+        <M-INFRA-DROPBOX-AUTH />
+        <M-TUI-COMPONENTS />
+      </Links>
+      <Behavior>Missing preferences trigger optional setup; r reopens it without deleting anything. Stage numeric kg/lb and optional Dropbox answers and save only at completion; Escape restores record state. Authorization, code exchange, and persistence run asynchronously with cancellation, stale-message rejection, retry, and a scrollable authorization URL view. Successful preference changes reformat domain weights for display without mutating cached weights. Use the shared zero vertical/one horizontal inner and outer padding, with single line breaks between content blocks and in the URL disclosure. Keep full-screen framing and native cursors bounded at compact sizes.</Behavior>
     </M-TUI-QUESTIONNAIRE>
     <M-APP-QUESTIONNAIRE>
       <Name>Questionnaire completion and authorization port</Name>
@@ -55,7 +91,12 @@
         <File>internal/infra/tui/app.go</File>
         <File>cmd/cli/bootstrap.go</File>
       </Files>
-      <Links><M-DOMAIN-USER-PREFERENCES /><M-DOMAIN-IDENTITY /><M-INFRA-PERSISTENCE-SQLITE /><M-INFRA-DROPBOX-AUTH /></Links>
+      <Links>
+        <M-DOMAIN-USER-PREFERENCES />
+        <M-DOMAIN-IDENTITY />
+        <M-INFRA-PERSISTENCE-SQLITE />
+        <M-INFRA-DROPBOX-AUTH />
+      </Links>
       <Behavior>Validate models through constructors and matching identity IDs. An empty completion returns before opening a transaction; explicit answers save through one transaction and roll back together on failure. Bootstrap wires real Dropbox linking using DROPBOX_APP_KEY. Access and refresh tokens are persisted in the local SQLite database.</Behavior>
     </M-APP-QUESTIONNAIRE>
     <M-INFRA-DROPBOX-AUTH>
@@ -67,7 +108,10 @@
         <File>internal/infra/dropbox/linker.go</File>
         <File>internal/infra/dropbox/browser.go</File>
       </Files>
-      <Links><M-APP-QUESTIONNAIRE /><M-DOMAIN-IDENTITY /></Links>
+      <Links>
+        <M-APP-QUESTIONNAIRE />
+        <M-DOMAIN-IDENTITY />
+      </Links>
       <Behavior>Open a browser authorization URL with offline access, account_info.read, files.content.read, and files.content.write scopes, and explicit reapproval, omit redirect_uri and client secret, and exchange the pasted authorization code with its verifier. Requests are bounded and cancellation-aware; browser-launch failure exposes the URL and HTTP errors are sanitized. DROPBOX_BROWSER optionally chooses a browser using literal process arguments. The reported Safari consent-page failure remains unconfirmed and is not attributed to its /1 URL prefix. Use the verified token-response account ID. Validate the returned access and refresh tokens through the identity credentials constructor.</Behavior>
     </M-INFRA-DROPBOX-AUTH>
     <M-DOMAIN-IDENTITY>
@@ -111,8 +155,12 @@
         <File>internal/app/command/save_remote_state.go</File>
         <File>internal/app/command/load_remote_state.go</File>
       </Files>
-      <Links><M-DOMAIN-STATE /><M-INFRA-DROPBOX-STATE /><M-INFRA-PERSISTENCE-SQLITE /></Links>
-      <Behavior>Application ports StateImporter, StateExporter, BackupWriter, and BackupReader exchange state.Snapshot domain values. Save exports a consistent local snapshot before writing a backup. Load reads a backup and validates through state.NewSnapshot before importing local workout tables in one transaction. Storage limits are enforced by the SQLite adapter.</Behavior>
+      <Links>
+        <M-DOMAIN-STATE />
+        <M-INFRA-DROPBOX-STATE />
+        <M-INFRA-PERSISTENCE-SQLITE />
+      </Links>
+      <Behavior>Application ports exchange version-4 snapshots containing catalog exercises, workout sessions, performances, sets, and preferences. Save exports one consistent snapshot. Load validates all references and duplicate membership before atomic replacement. Old backups are rejected and local credentials remain intact.</Behavior>
     </M-APP-REMOTE-STATE>
     <M-DOMAIN-STATE>
       <Name>Workout state snapshot</Name>
@@ -124,60 +172,74 @@
         <File>internal/domain/state/version.go</File>
         <File>internal/domain/state/errors.go</File>
       </Files>
-      <Links><M-DOMAIN-EXERCISE /><M-DOMAIN-SET /><M-DOMAIN-USER-PREFERENCES /></Links>
-      <Behavior>NewVersion accepts version 1. NewSnapshot reconstructs exercises, sets, and optional preferences through constructors, rejects duplicate IDs/names, missing exercise references and invalid timestamps, and excludes local identities and credentials. Existing JSON field names and numeric version encoding remain compatible. SQLite weight limits belong to persistence.</Behavior>
+      <Links>
+        <M-DOMAIN-EXERCISE />
+        <M-DOMAIN-SESSION />
+        <M-DOMAIN-PERFORMANCE />
+        <M-DOMAIN-SET />
+        <M-DOMAIN-USER-PREFERENCES />
+      </Links>
+      <Behavior>Only snapshot version 4 is accepted. Snapshots contain catalog exercises, whole-workout sessions, performances, sets, and optional preferences. Constructor validation rejects duplicate IDs, duplicate catalog names, duplicate membership pairs, invalid positive unique session indices/timestamps, missing session/catalog parents, and orphaned sets. Empty workouts and performances are preserved. Old versions fail before local writes. Credentials and identities remain excluded; SQLite storage bounds are enforced by persistence.</Behavior>
     </M-DOMAIN-STATE>
     <M-INFRA-DROPBOX-STATE>
       <Name>Dropbox workout snapshot adapter</Name>
       <Type>infrastructure</Type>
       <Path>internal/infra/dropbox/state_store.go</Path>
       <Purpose>Upload and download /trainings-logger/data.json with local credentials, public-client token refresh, and bounded payloads.</Purpose>
-      <Files><File>internal/infra/dropbox/state_store.go</File></Files>
-      <Links><M-INFRA-DROPBOX-AUTH /><M-DOMAIN-IDENTITY /><M-APP-REMOTE-STATE /></Links>
-      <Behavior>Select the latest credential update deterministically, verify the Dropbox account, and use its local access and refresh tokens. Refresh expired access tokens using the app key and refresh token, saving replacement credentials before transfer; retry one provider-reported expired-token response. Upload overwrites the fixed backup path and sends application/octet-stream; download sends no Content-Type or request body and strictly decodes and validates a snapshot with a 16 MiB limit. Bounded HTTP requests report missing accounts/backups, permissions, and network errors without exposing response bodies or credentials. Required-scope HTTP 400/401 failures tolerate provider app-ID wording and single/double quoted scope names. JSON missing_scope tags and documented legacy endpoint-authorization failures also name the required file permission with App Console submission and relinking instructions. Unclassified HTTP 400 failures retain only a bounded hexadecimal Dropbox request ID.</Behavior>
+      <Files>
+        <File>internal/infra/dropbox/state_store.go</File>
+      </Files>
+      <Links>
+        <M-INFRA-DROPBOX-AUTH />
+        <M-DOMAIN-IDENTITY />
+        <M-APP-REMOTE-STATE />
+      </Links>
+      <Behavior>Select the latest credential update deterministically, verify the Dropbox account, and use its local access and refresh tokens. Refresh expired access tokens using the app key and refresh token, saving replacement credentials before transfer; retry one provider-reported expired-token response. Upload overwrites the fixed backup path and sends application/octet-stream; download sends no Content-Type or request body and strictly decodes and validates a snapshot with a 16 MiB limit. Bounded HTTP requests report missing accounts/backups, permissions, and network errors without exposing response bodies or credentials. Required-scope HTTP 400/401 failures tolerate provider app-ID wording and single/double quoted scope names. JSON missing_scope tags and documented legacy endpoint-authorization failures also name the required file permission with App Console submission and relinking instructions. Unclassified HTTP 400 failures retain only a bounded hexadecimal Dropbox request ID. Version-4 payloads include workouts, performances, and performance-owned sets; old payloads fail validation before import.</Behavior>
     </M-INFRA-DROPBOX-STATE>
     <M-INFRA-PERSISTENCE-SQLITE>
       <Name>SQLite workout and identity persistence</Name>
       <Type>infrastructure</Type>
       <Path>internal/infra/persistence/sqlite</Path>
-      <Purpose>Persist workouts, preferences, identities, and local credentials in data.db; export consistent snapshots and atomically restore workout state.</Purpose>
+      <Purpose>Persist catalog definitions, whole-workout sessions, performances, sets, preferences, and local identities/credentials; export and atomically restore version-4 workout snapshots.</Purpose>
       <Files>
         <File>internal/infra/persistence/sqlite/identity_repository.go</File>
         <File>internal/infra/persistence/sqlite/identity_credentials_repository.go</File>
         <File>internal/infra/persistence/sqlite/exercise_repository.go</File>
+        <File>internal/infra/persistence/sqlite/session_repository.go</File>
+        <File>internal/infra/persistence/sqlite/performance_repository.go</File>
         <File>internal/infra/persistence/sqlite/set_repository.go</File>
         <File>internal/infra/persistence/sqlite/preferences_repository.go</File>
         <File>internal/infra/persistence/sqlite/state_importer.go</File>
         <File>internal/infra/persistence/sqlite/state_exporter.go</File>
-        <File>migrations/sqlite/20261004160000_identity_sync.up.sql</File>
-        <File>migrations/sqlite/20261004160000_identity_sync.down.sql</File>
+        <File>migrations/sqlite/20261024155102_init.up.sql</File>
+        <File>migrations/sqlite/20261024155102_init.down.sql</File>
       </Files>
-      <Behavior>Credential rows cascade with identities, and access and refresh token fields are stored in the local database. Identity and credential operations use the transaction-context executor. Missing preference reads return defaults and false without writing. Snapshot export uses a transaction and preserves missing preferences; validated restore replaces exercise/set/preference rows atomically while retaining identities and credentials. Latest credential selection orders by update timestamp and identity ID.</Behavior>
+      <Behavior>A single CLI-generated initial migration creates seven application tables for fresh databases. Sessions contain UUID id, positive unique integer index, and created_at. Creation queries the maximum existing index inside its transaction and adds one, starting at 1; listing sorts by descending index. Deletion leaves remaining indices unchanged. performances reference a session and catalog exercise, enforce unique(session_id, exercise_id), and list in created_at ASC/id ASC insertion order. Session deletion cascades memberships and sets; catalog deletion is restricted while referenced. Repeated adds are idempotent through unique-pair insertion and lookup. Sets reference performance_id and order newest first. SQL defaults use CURRENT_TIMESTAMP; edits retain ownership and timestamps. Down drops tables in dependency-safe order; up/down/up recreates the baseline. Version-4 export preserves empty workouts/performances. Import validates first and replaces workout tables atomically with membership deletion/insertion in foreign-key order, retaining credentials and rolling back on failures. Existing databases using earlier baselines need separate handling; the application does not reset them.</Behavior>
     </M-INFRA-PERSISTENCE-SQLITE>
     <M-DOMAIN-EXERCISE>
       <Name>Exercise domain model</Name>
       <Type>domain</Type>
-      <Path>internal/domain/exercise</Path>
+      <Path>internal/domain/session/exercise</Path>
       <Purpose>Construct validated exercises with non-empty identifiers, names, and bounded body-weight shares.</Purpose>
       <Files>
-        <File>internal/domain/exercise/exercise.go</File>
-        <File>internal/domain/exercise/errors.go</File>
-        <File>internal/domain/exercise/exercise_repository.go</File>
+        <File>internal/domain/session/exercise/exercise.go</File>
+        <File>internal/domain/session/exercise/errors.go</File>
+        <File>internal/domain/session/exercise/exercise_repository.go</File>
       </Files>
-      <Behavior>NewExercise validates all exercise invariants; persistence reads reconstruct models through that constructor.</Behavior>
+      <Behavior>NewExercise validates reusable catalog definitions with nonempty IDs/names and bounded body-weight shares; persistence reads reconstruct models through the constructor. Definitions can be referenced by performances in many workouts. Deletion of a referenced definition is rejected to preserve history.</Behavior>
     </M-DOMAIN-EXERCISE>
     <M-DOMAIN-SET>
       <Name>Workout set domain model</Name>
       <Type>domain</Type>
-      <Path>internal/domain/exercise/set</Path>
-      <Purpose>Construct validated sets and exercise weights with required IDs and valid weight/rest values.</Purpose>
+      <Path>internal/domain/session/exercise/set</Path>
+      <Purpose>Construct validated sets owned by performances and validated exercise weights.</Purpose>
       <Files>
-        <File>internal/domain/exercise/set/set.go</File>
-        <File>internal/domain/exercise/set/exercise_weight.go</File>
-        <File>internal/domain/exercise/set/errors.go</File>
-        <File>internal/domain/exercise/set/set_repository.go</File>
+        <File>internal/domain/session/exercise/set/set.go</File>
+        <File>internal/domain/session/exercise/set/exercise_weight.go</File>
+        <File>internal/domain/session/exercise/set/errors.go</File>
+        <File>internal/domain/session/exercise/set/set_repository.go</File>
       </Files>
-      <Behavior>NewSet and NewExerciseWeight enforce invariants; SQLite reads use constructors.</Behavior>
+      <Behavior>NewSet requires set and PerformanceID values and validates weight and rest. JSON uses performance_id. Creation timestamps remain for deterministic ordering; edits retain original ownership and timestamps. Persistence reads reconstruct through constructors.</Behavior>
     </M-DOMAIN-SET>
     <M-DOMAIN-SHARED-WEIGHT>
       <Name>Shared weight values and units</Name>
@@ -191,5 +253,105 @@
       </Files>
       <Behavior>NewWeight and NewWeightUnit validate values; unit enums remain in their own source file.</Behavior>
     </M-DOMAIN-SHARED-WEIGHT>
+    <M-DOMAIN-SESSION>
+      <Name>Workout sessions</Name>
+      <Type>domain</Type>
+      <Path>internal/domain/session</Path>
+      <Purpose>Represent whole workouts with validated UUID identity, positive integer index, and UTC creation time, independent of catalog exercise definitions.</Purpose>
+      <Files>
+        <File>internal/domain/session/session.go</File>
+        <File>internal/domain/session/errors.go</File>
+        <File>internal/domain/session/session_repository.go</File>
+      </Files>
+      <Links>
+        <M-DOMAIN-PERFORMANCE />
+      </Links>
+      <Behavior>NewSession validates UUID identity, a positive integer index, and supported creation time, defaulting to UTC now when omitted. Sessions have neither Title nor ExerciseID. Empty workouts are allowed. Repository ports save, find, compute maximum index plus one, list by descending index, and delete workouts. Indices remain stable when other workouts are deleted.</Behavior>
+    </M-DOMAIN-SESSION>
+    <M-APP-SESSIONS>
+      <Name>Workout session operations</Name>
+      <Type>application</Type>
+      <Path>internal/app</Path>
+      <Purpose>Create, delete, and list automatically numbered whole-workout sessions without requiring a catalog exercise.</Purpose>
+      <Files>
+        <File>internal/app/command/create_session.go</File>
+        <File>internal/app/command/delete_session.go</File>
+        <File>internal/app/query/list_sessions.go</File>
+      </Files>
+      <Links>
+        <M-DOMAIN-SESSION />
+        <M-INFRA-PERSISTENCE-SQLITE />
+      </Links>
+      <Behavior>Create has no input fields, queries the maximum existing index plus one and generates a UUID in its transaction. List returns workouts by descending index. No rename operation exists. Delete cascades memberships and sets through persistence. Empty sessions remain valid. Each use case has one operation per file and a transaction runner.</Behavior>
+    </M-APP-SESSIONS>
+    <M-DOMAIN-PERFORMANCE>
+      <Name>Workout performances</Name>
+      <Type>domain</Type>
+      <Path>internal/domain/session/exercise/performance</Path>
+      <Purpose>Represent one reusable exercise added to one workout session.</Purpose>
+      <Files>
+        <File>internal/domain/session/exercise/performance/performance.go</File>
+        <File>internal/domain/session/exercise/performance/errors.go</File>
+        <File>internal/domain/session/exercise/performance/performance_repository.go</File>
+      </Files>
+      <Links>
+        <M-DOMAIN-SESSION />
+        <M-DOMAIN-EXERCISE />
+      </Links>
+      <Behavior>NewPerformance validates UUID identity, required session/catalog IDs, and UTC insertion time. Repository ports save once per pair, find by ID or pair, list by workout, and delete performances. The model stores no duplicate catalog name or set data.</Behavior>
+    </M-DOMAIN-PERFORMANCE>
+    <M-APP-PERFORMANCES>
+      <Name>Workout performances and sets</Name>
+      <Type>application</Type>
+      <Path>internal/app</Path>
+      <Purpose>Add, list, and remove workout performances and operate on their sets.</Purpose>
+      <Files>
+        <File>internal/app/command/add_performance.go</File>
+        <File>internal/app/command/delete_performance.go</File>
+        <File>internal/app/query/list_performances.go</File>
+        <File>internal/app/command/create_set.go</File>
+        <File>internal/app/command/update_set.go</File>
+        <File>internal/app/query/list_sets.go</File>
+        <File>internal/infra/tui/app.go</File>
+        <File>cmd/cli/bootstrap.go</File>
+      </Files>
+      <Links>
+        <M-DOMAIN-SESSION />
+        <M-DOMAIN-EXERCISE />
+        <M-DOMAIN-PERFORMANCE />
+        <M-DOMAIN-SET />
+        <M-INFRA-PERSISTENCE-SQLITE />
+      </Links>
+      <Behavior>AddPerformance validates both parents and returns the unique existing or created performance in one transaction. ListPerformances preserves insertion order. DeletePerformance affects only that workout performance and its sets. Set creation/listing use PerformanceID; creation rejects missing performances and edits retain their original owner and timestamp.</Behavior>
+    </M-APP-PERFORMANCES>
+    <M-TUI-CATALOG>
+      <Name>Full-screen exercise catalog</Name>
+      <Type>runtime</Type>
+      <Path>internal/infra/tui/views/catalog.go</Path>
+      <Purpose>Select and manage reusable exercise definitions in an isolated full-screen view.</Purpose>
+      <Files>
+        <File>internal/infra/tui/views/catalog.go</File>
+      </Files>
+      <Links>
+        <M-TUI-RECORDS />
+        <M-APP-PERFORMANCES />
+        <M-DOMAIN-EXERCISE />
+        <M-TUI-COMPONENTS />
+      </Links>
+      <Boundary>Own catalog input, entry/return behavior, and full-screen table/error rendering. RecordsModel retains shared catalog data/table state; editing and membership operations delegate to the existing records actions and application handlers.</Boundary>
+      <Behavior>n in workout Performances opens catalog, retains records error and selection, clears pending g, and refreshes domain data. Enter adds/selects the highlighted definition and returns to Performances; duplicates select the existing membership. Esc returns without adding a performance and restores records errors and browsing state. Catalog n/e/d manage definitions, forms save/cancel back into catalog, and referenced deletion remains protected. Local errors stay in catalog. Records focus/save/load/setup/help/quit shortcuts cannot trigger records actions here. Keyboard row/page/half-page/gg/G navigation remains available, and mouse input is ignored. Catalog and forms resize within terminal bounds. The table shows Name and Body Weight % using the shared formatter. No shortcut/help footer is rendered; the table uses all available height when there is no error, and actual local errors appear with the same outer spacing as tables.</Behavior>
+    </M-TUI-CATALOG>
+    <M-TUI-COMPONENTS>
+      <Name>Shared TUI spacing and modal geometry</Name>
+      <Type>runtime</Type>
+      <Path>internal/infra/tui/components</Path>
+      <Purpose>Keep every view on the same compact padding and render bounded modal forms with matching native cursors.</Purpose>
+      <Files>
+        <File>internal/infra/tui/components/styles.go</File>
+        <File>internal/infra/tui/components/dialog_layout.go</File>
+        <File>internal/infra/tui/components/dialog_view.go</File>
+      </Files>
+      <Behavior>BaseStyle and PanelSpacing use zero vertical/one horizontal padding. Records/catalog, help and setup share those styles. Dialogs retain centered overlays with shared inner padding, consecutive wide field rows, compact label/input rows, and no extra blank help rows. Field sizing and native cursor offsets derive from the shared frame; tiny forms and cursors stay bounded.</Behavior>
+    </M-TUI-COMPONENTS>
   </GD-MAIN>
 </GraceGraphDocument>

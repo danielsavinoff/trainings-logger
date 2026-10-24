@@ -1,6 +1,6 @@
 // START_MODULE_CONTRACT
 //   PURPOSE: Validate and atomically import a workout snapshot.
-//   SCOPE: Replace exercises, sets, and optional preferences while retaining local identities.
+//   SCOPE: Replace exercises, sessions, performances, sets, and optional preferences while retaining local identities.
 //   DEPENDS: M-APP-REMOTE-STATE, M-DOMAIN-STATE
 //   LINKS: M-INFRA-PERSISTENCE-SQLITE, V-M-INFRA-PERSISTENCE-SQLITE
 //   MAP_MODE: SUMMARY
@@ -25,7 +25,9 @@ import (
 )
 
 // START_BLOCK_STATE_IMPORT
-type StateImporter struct{ db *sql.DB }
+type StateImporter struct {
+	db *sql.DB
+}
 
 func NewStateImporter(db *sql.DB) *StateImporter {
 	return &StateImporter{db: db}
@@ -38,6 +40,8 @@ func (r *StateImporter) Import(
 	validated, err := state.NewSnapshot(
 		snapshot.Version,
 		snapshot.Exercises,
+		snapshot.Sessions,
+		snapshot.Performances,
 		snapshot.Sets,
 		snapshot.Preferences,
 	)
@@ -58,7 +62,7 @@ func (r *StateImporter) Import(
 	_, err = persistence.NewTransactionRunner[ports.TransactionNoResult](r.db).Run(
 		ctx,
 		func(ctx context.Context) (ports.TransactionNoResult, error) {
-			for _, statement := range []string{"DELETE FROM sets", "DELETE FROM exercises", "DELETE FROM preferences"} {
+			for _, statement := range []string{"DELETE FROM sets", "DELETE FROM performances", "DELETE FROM sessions", "DELETE FROM exercises", "DELETE FROM preferences"} {
 				if _, err := persistence.ExecutorFromContext(
 					ctx,
 					r.db,
@@ -77,6 +81,23 @@ func (r *StateImporter) Import(
 					return ports.TransactionNoResult{}, err
 				}
 			}
+			for _, item := range validated.Sessions {
+				if err := NewSessionRepository(r.db).Save(
+					ctx,
+					item,
+				); err != nil {
+					return ports.TransactionNoResult{}, err
+				}
+			}
+			for _, item := range validated.Performances {
+				if err := NewPerformanceRepository(r.db).Save(
+					ctx,
+					item,
+				); err != nil {
+					return ports.TransactionNoResult{}, err
+				}
+			}
+
 			for _, item := range validated.Sets {
 				if err := NewSetRepository(r.db).Save(
 					ctx,
@@ -85,6 +106,7 @@ func (r *StateImporter) Import(
 					return ports.TransactionNoResult{}, err
 				}
 			}
+
 			if validated.Preferences != nil {
 				if err := NewPreferencesRepository(r.db).Save(
 					ctx,
@@ -93,6 +115,7 @@ func (r *StateImporter) Import(
 					return ports.TransactionNoResult{}, err
 				}
 			}
+
 			return ports.TransactionNoResult{}, nil
 		},
 	)

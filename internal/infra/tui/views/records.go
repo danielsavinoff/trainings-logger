@@ -1,16 +1,16 @@
 // START_MODULE_CONTRACT
-//   PURPOSE: Construct records state and open first-start setup when preferences are absent.
-//   SCOPE: Records model types, initial queries, and help/setup/transfer state.
-//   DEPENDS: M-TUI-HELP, M-TUI-QUESTIONNAIRE, M-DOMAIN-USER-PREFERENCES, M-APP-REMOTE-STATE
+//   PURPOSE: Construct workout, catalog, membership, and set state.
+//   SCOPE: Independent roots, domain-backed rows, startup setup, and transfer ownership.
+//   DEPENDS: M-APP-SESSIONS, M-APP-PERFORMANCES, M-DOMAIN-SESSION, M-DOMAIN-PERFORMANCE, M-DOMAIN-EXERCISE, M-DOMAIN-SET
 //   LINKS: M-TUI-RECORDS, V-M-TUI-RECORDS
 //   MAP_MODE: SUMMARY
 // END_MODULE_CONTRACT
 //
 // START_MODULE_MAP
-//   RecordsModel - retain records, dialogs, help, setup, and transfer state
-//   NewRecordsModel - load records and use preference presence to select startup setup
-//   newRecordsModel - construct initial browsing state
-//   Init - focus startup questionnaire input when present
+//   RecordsModel - retain domain data, records focus, and catalog visibility
+//   NewRecordsModel - load preferences and workout records
+//   newRecordsModel - construct records/catalog tables and default session focus
+//   Init - focus startup setup when required
 // END_MODULE_MAP
 
 package views
@@ -20,10 +20,13 @@ import (
 
 	"charm.land/bubbles/v2/paginator"
 	"charm.land/bubbles/v2/table"
-	"charm.land/bubbles/v2/viewport"
 	tea "charm.land/bubbletea/v2"
 
 	"github.com/danielsavinoff/trainings-logger/internal/app/query"
+	"github.com/danielsavinoff/trainings-logger/internal/domain/session"
+	"github.com/danielsavinoff/trainings-logger/internal/domain/session/exercise"
+	"github.com/danielsavinoff/trainings-logger/internal/domain/session/exercise/performance"
+	"github.com/danielsavinoff/trainings-logger/internal/domain/session/exercise/set"
 	"github.com/danielsavinoff/trainings-logger/internal/domain/shared"
 	"github.com/danielsavinoff/trainings-logger/internal/infra/tui"
 	"github.com/danielsavinoff/trainings-logger/internal/infra/tui/components"
@@ -33,42 +36,47 @@ import (
 type panel int
 
 const (
-	exercisesPanel panel = iota
+	sessionsPanel panel = iota
+	performancesPanel
 	setsPanel
+	catalogPanel
 )
 
 type RecordsModel struct {
-	keys           recordsKeyMap
-	store          *recordStore
-	weightUnit     shared.WeightUnit
-	err            string
-	exercises      []exerciseRecord
-	setsExerciseID string
-	table          table.Model
-	timeline       viewport.Model
-	exercisePager  paginator.Model
-	setPager       paginator.Model
-	setPageStarts  []int
-	activePanel    panel
-	goPending      bool
-	setCursor      int
-	setLines       []int
-	width          int
-	height         int
-	dialog         *recordDialog
-	help           helpModel
-	showingHelp    bool
-	questionnaire  *questionnaireModel
-	transfer       *recordTransfer
-	transferStatus string
+	keys                  recordsKeyMap
+	store                 *tui.App
+	weightUnit            shared.WeightUnit
+	err                   string
+	catalog               []exercise.Exercise
+	sessions              []session.Session
+	performances          []performance.Performance
+	sets                  []set.Set
+	performancesSessionID string
+	setsPerformanceID     string
+	sessionTable          table.Model
+	catalogTable          table.Model
+	performanceTable      table.Model
+	setTable              table.Model
+	sessionPager          paginator.Model
+	catalogPager          paginator.Model
+	performancePager      paginator.Model
+	setPager              paginator.Model
+	activePanel           panel
+	goPending             bool
+	width                 int
+	height                int
+	dialog                *recordDialog
+	help                  helpModel
+	showingHelp           bool
+	showingCatalog        bool
+	catalogRecordsError   string
+	questionnaire         *questionnaireModel
+	transfer              *recordTransfer
+	transferStatus        string
 }
 
-func NewRecordsModel(
-	ctx context.Context,
-	app tui.App,
-) (RecordsModel, error) {
-	store := &recordStore{App: app}
-	prefs, err := store.GetPreferences.Handle(
+func NewRecordsModel(ctx context.Context, app tui.App) (RecordsModel, error) {
+	prefs, err := app.GetPreferences.Handle(
 		ctx,
 		query.GetPreferences{},
 	)
@@ -76,37 +84,19 @@ func NewRecordsModel(
 		return RecordsModel{}, err
 	}
 
-	data, err := store.ListExercises.Handle(
+	m := newRecordsModel(nil)
+	m.store = &app
+	m.weightUnit = prefs.Result.WeightUnit
+	if err := m.reloadRecords(
 		ctx,
-		query.ListExercises{},
-	)
-	if err != nil {
+		"",
+		"",
+		"",
+		"",
+	); err != nil {
 		return RecordsModel{}, err
 	}
 
-	exercises := make(
-		[]exerciseRecord,
-		0,
-		len(data.Result),
-	)
-	for _, e := range data.Result {
-		exercises = append(
-			exercises,
-			exerciseRecord{
-				id:              e.ID,
-				name:            e.Name,
-				bodyWeightShare: e.BodyWeightShare,
-			},
-		)
-	}
-
-	m := newRecordsModel(exercises)
-	m.store, m.weightUnit = store, prefs.Result.WeightUnit
-	if err := m.loadSelectedSets(ctx); err != nil {
-		return RecordsModel{}, err
-	}
-
-	m.refreshTimeline()
 	if !prefs.Exists {
 		m.openQuestionnaire()
 	}
@@ -114,19 +104,35 @@ func NewRecordsModel(
 	return m, nil
 }
 
-func newRecordsModel(exercises []exerciseRecord) RecordsModel {
+func newRecordsModel(catalog []exercise.Exercise) RecordsModel {
 	m := RecordsModel{
-		keys:          defaultRecordsKeyMap(),
-		weightUnit:    shared.WeightUnitKg,
-		exercises:     exercises,
-		table:         newExerciseTable(exercises),
-		timeline:      viewport.New(),
-		exercisePager: components.NewPaginator(),
-		setPager:      components.NewPaginator(),
-		width:         100,
-		height:        24,
+		keys:       defaultRecordsKeyMap(),
+		weightUnit: shared.WeightUnitKg,
+		catalog:    catalog,
+		sessionTable: newRecordsTable(
+			[]table.Column{{Title: "Index"}},
+			nil,
+		),
+		catalogTable: newRecordsTable(
+			[]table.Column{{Title: "Name"}, {Title: "Body Weight %"}},
+			catalogRows(catalog),
+		),
+		performanceTable: newRecordsTable(
+			[]table.Column{{Title: "Name"}, {Title: "Body Weight %"}},
+			nil,
+		),
+		setTable: newRecordsTable(
+			[]table.Column{{Title: "Reps"}, {Title: "Exercise Weight"}, {Title: "Rest (seconds)"}},
+			nil,
+		),
+		sessionPager:     components.NewPaginator(),
+		catalogPager:     components.NewPaginator(),
+		performancePager: components.NewPaginator(),
+		setPager:         components.NewPaginator(),
+		width:            120,
+		height:           30,
 	}
-
+	m.focusPanel(sessionsPanel)
 	return m.resize()
 }
 

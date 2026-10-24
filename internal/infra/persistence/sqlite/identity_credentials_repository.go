@@ -9,7 +9,9 @@ import (
 	"github.com/danielsavinoff/trainings-logger/internal/infra/persistence"
 )
 
-type IdentityCredentialsRepository struct{ db *sql.DB }
+type IdentityCredentialsRepository struct {
+	db *sql.DB
+}
 
 func NewIdentityCredentialsRepository(db *sql.DB) *IdentityCredentialsRepository {
 	return &IdentityCredentialsRepository{db: db}
@@ -115,6 +117,7 @@ func (r *IdentityCredentialsRepository) FindLatest(ctx context.Context) (identit
 	if err != nil {
 		return identity.IdentityCredentials{}, err
 	}
+
 	return r.FindByID(
 		ctx,
 		id,

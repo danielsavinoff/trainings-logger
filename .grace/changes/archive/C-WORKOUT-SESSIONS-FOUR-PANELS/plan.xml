@@ -1,0 +1,301 @@
+<GraceChangePlan graceVersion="4.0" status="superseded">
+  <C-WORKOUT-SESSIONS-FOUR-PANELS>
+    <Replacement>C-FULLSCREEN-EXERCISE-CATALOG</Replacement>
+    <IntentSummary>Implement the user-approved workout-session model and four-panel 20/20/60 TUI sequentially, preserving existing unrelated state and the single initial migration baseline.</IntentSummary>
+    <BaselineAssertions>
+      <MustExist>
+        <Value>M-DOMAIN-SESSION</Value>
+        <Value>M-TUI-RECORDS</Value>
+        <Value>migrations/sqlite/20261024155102_init.up.sql</Value>
+      </MustExist>
+      <MustContain>
+        <File>internal/domain/state/version.go</File>
+        <Text>const Version2 Version = 2</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/exercise/session/session.go</File>
+        <Text>ExerciseID</Text>
+      </MustContain>
+    </BaselineAssertions>
+    <TargetAssertions>
+      <MustExist>
+        <Value>internal/domain/exercise/session/session.go</Value>
+        <Value>internal/infra/persistence/sqlite/session_repository.go</Value>
+        <Value>migrations/sqlite/20261024155102_init.down.sql</Value>
+        <Value>migrations/sqlite/20261024155102_init.up.sql</Value>
+        <Value>internal/domain/exercise/sessionexercise/session_exercise.go</Value>
+        <Value>internal/infra/persistence/sqlite/session_exercise_repository.go</Value>
+        <Value>internal/app/command/add_session_exercise.go</Value>
+        <Value>internal/app/query/list_session_exercises.go</Value>
+      </MustExist>
+      <MustNotExist>
+        <Value>internal/infra/tui/views/records_data.go</Value>
+        <Value>migrations/sqlite/20260927094609_initial.down.sql</Value>
+        <Value>migrations/sqlite/20260927094609_initial.up.sql</Value>
+        <Value>migrations/sqlite/20261004160000_identity_sync.down.sql</Value>
+        <Value>migrations/sqlite/20261004160000_identity_sync.up.sql</Value>
+        <Value>migrations/sqlite/20261024140000_sessions.down.sql</Value>
+        <Value>migrations/sqlite/20261024140000_sessions.up.sql</Value>
+      </MustNotExist>
+      <MustContain>
+        <File>internal/domain/state/version.go</File>
+        <Text>const Version3 Version = 3</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/domain/exercise/set/set.go</File>
+        <Text>SessionExerciseID</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/records_view.go</File>
+        <Text>Sessions &lt;1&gt;</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/records_view.go</File>
+        <Text>Sets &lt;4&gt;</Text>
+      </MustContain>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-DOMAIN-SESSION</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-APP-SESSIONS</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-DOMAIN-SESSION</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-APP-SESSIONS</Anchor>
+      </MustOwn>
+      <MustVerify>
+        <Module>M-DOMAIN-SESSION</Module>
+        <Module>M-DOMAIN-SET</Module>
+        <Module>M-DOMAIN-STATE</Module>
+        <Module>M-APP-SESSIONS</Module>
+        <Module>M-APP-REMOTE-STATE</Module>
+        <Module>M-INFRA-PERSISTENCE-SQLITE</Module>
+        <Module>M-INFRA-DROPBOX-STATE</Module>
+        <Module>M-TUI-RECORDS</Module>
+        <Module>M-TUI-HELP</Module>
+        <Module>M-TUI-QUESTIONNAIRE</Module>
+        <Module>M-DOMAIN-SESSION-EXERCISE</Module>
+        <Module>M-APP-SESSION-EXERCISES</Module>
+      </MustVerify>
+      <MustPassCommand>
+        <Command budgetSeconds="60">go build ./...</Command>
+        <Command budgetSeconds="60">go vet ./...</Command>
+      </MustPassCommand>
+      <MustContain>
+        <File>README.md</File>
+        <Text>single initial migration</Text>
+      </MustContain>
+      <MustContain>
+        <File>internal/infra/tui/views/records_view.go</File>
+        <Text>Catalog &lt;2&gt;</Text>
+      </MustContain>
+      <MustContain>
+        <File>migrations/sqlite/20261024155102_init.up.sql</File>
+        <Text>CREATE TABLE session_exercises</Text>
+      </MustContain>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-DOMAIN-SESSION-EXERCISE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-DOMAIN-SESSION-EXERCISE</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>GD-MAIN</Owner>
+        <Anchor>M-APP-SESSION-EXERCISES</Anchor>
+      </MustOwn>
+      <MustOwn>
+        <Owner>VD-MAIN</Owner>
+        <Anchor>V-M-APP-SESSION-EXERCISES</Anchor>
+      </MustOwn>
+    </TargetAssertions>
+    <DurableScope>
+      <GraphAnchors>
+        <M-DOMAIN-SESSION />
+        <M-DOMAIN-SET />
+        <M-DOMAIN-STATE />
+        <M-APP-SESSIONS />
+        <M-APP-REMOTE-STATE />
+        <M-INFRA-PERSISTENCE-SQLITE />
+        <M-INFRA-DROPBOX-STATE />
+        <M-TUI-RECORDS />
+        <M-TUI-HELP />
+        <M-TUI-QUESTIONNAIRE />
+        <M-DOMAIN-SESSION-EXERCISE />
+        <M-APP-SESSION-EXERCISES />
+        <M-DOMAIN-EXERCISE />
+      </GraphAnchors>
+      <VerificationAnchors>
+        <V-M-DOMAIN-SESSION />
+        <V-M-DOMAIN-SET />
+        <V-M-DOMAIN-STATE />
+        <V-M-APP-SESSIONS />
+        <V-M-APP-REMOTE-STATE />
+        <V-M-INFRA-PERSISTENCE-SQLITE />
+        <V-M-INFRA-DROPBOX-STATE />
+        <V-M-TUI-RECORDS />
+        <V-M-TUI-HELP />
+        <V-M-TUI-QUESTIONNAIRE />
+        <V-M-DOMAIN-SESSION-EXERCISE />
+        <V-M-APP-SESSION-EXERCISES />
+        <V-M-DOMAIN-EXERCISE />
+      </VerificationAnchors>
+      <GraphDocuments>
+        <GD-MAIN />
+      </GraphDocuments>
+      <VerificationDocuments>
+        <VD-MAIN />
+      </VerificationDocuments>
+      <ContextArtifact>deployment.xml</ContextArtifact>
+    </DurableScope>
+    <ObservedWriteScope>
+      <File>README.md</File>
+      <File>cmd/cli/bootstrap.go</File>
+      <File>internal/infra/tui/app.go</File>
+      <File>internal/infra/persistence/sqlite/set_repository.go</File>
+      <File>internal/infra/persistence/sqlite/session_repository.go</File>
+      <File>internal/infra/persistence/sqlite/state_exporter.go</File>
+      <File>internal/infra/persistence/sqlite/state_importer.go</File>
+      <File>internal/infra/dropbox/state_store.go</File>
+      <File>.grace/graph/index.xml</File>
+      <File>.grace/graph/main.xml</File>
+      <File>.grace/verification/index.xml</File>
+      <File>.grace/verification/main.xml</File>
+      <Glob>internal/domain/exercise/session/*.go</Glob>
+      <Glob>internal/domain/exercise/set/*.go</Glob>
+      <Glob>internal/domain/state/*.go</Glob>
+      <Glob>internal/app/command/*session.go</Glob>
+      <Glob>internal/app/command/*set.go</Glob>
+      <Glob>internal/app/command/load_remote_state.go</Glob>
+      <Glob>internal/app/query/list_sessions.go</Glob>
+      <Glob>internal/app/query/list_sets.go</Glob>
+      <Glob>internal/infra/tui/views/*.go</Glob>
+      <Glob>migrations/sqlite/20261024140000_sessions.*.sql</Glob>
+      <File>migrations/sqlite/20260927094609_initial.down.sql</File>
+      <File>migrations/sqlite/20260927094609_initial.up.sql</File>
+      <File>migrations/sqlite/20261004160000_identity_sync.down.sql</File>
+      <File>migrations/sqlite/20261004160000_identity_sync.up.sql</File>
+      <File>migrations/sqlite/20261024140000_sessions.down.sql</File>
+      <File>migrations/sqlite/20261024140000_sessions.up.sql</File>
+      <File>migrations/sqlite/20261024155102_init.down.sql</File>
+      <File>migrations/sqlite/20261024155102_init.up.sql</File>
+      <File>.grace/context/deployment.xml</File>
+      <File>.grace/changes/active/C-PERSISTED-SESSIONS/spec.xml</File>
+      <File>.grace/changes/active/C-PERSISTED-SESSIONS/plan.xml</File>
+      <File>.grace/changes/archive/C-PERSISTED-SESSIONS/spec.xml</File>
+      <File>.grace/changes/archive/C-PERSISTED-SESSIONS/plan.xml</File>
+      <File>internal/domain/exercise/errors.go</File>
+      <File>internal/infra/persistence/sqlite/exercise_repository.go</File>
+      <File>internal/infra/persistence/sqlite/session_exercise_repository.go</File>
+      <File>internal/app/query/list_session_exercises.go</File>
+      <Glob>internal/domain/exercise/sessionexercise/*.go</Glob>
+      <Glob>internal/app/command/*session_exercise.go</Glob>
+      <File>.grace/changes/active/C-INITIAL-SCHEMA-BASELINE/plan.xml</File>
+      <File>.grace/changes/active/C-INITIAL-SCHEMA-BASELINE/spec.xml</File>
+      <File>.grace/changes/archive/C-PERSISTED-SESSIONS/plan.xml</File>
+      <File>.grace/changes/archive/C-PERSISTED-SESSIONS/spec.xml</File>
+      <File>.grace/context/deployment.xml</File>
+      <File>.grace/graph/index.xml</File>
+      <File>.grace/graph/main.xml</File>
+      <File>.grace/verification/index.xml</File>
+      <File>.grace/verification/main.xml</File>
+      <File>README.md</File>
+      <File>cmd/cli/bootstrap.go</File>
+      <File>internal/app/command/create_session.go</File>
+      <File>internal/app/command/create_set.go</File>
+      <File>internal/app/command/delete_session.go</File>
+      <File>internal/app/command/load_remote_state.go</File>
+      <File>internal/app/command/update_session.go</File>
+      <File>internal/app/command/update_set.go</File>
+      <File>internal/app/query/list_sessions.go</File>
+      <File>internal/app/query/list_sets.go</File>
+      <File>internal/domain/exercise/session/errors.go</File>
+      <File>internal/domain/exercise/session/session.go</File>
+      <File>internal/domain/exercise/session/session_repository.go</File>
+      <File>internal/domain/exercise/set/errors.go</File>
+      <File>internal/domain/exercise/set/set.go</File>
+      <File>internal/domain/exercise/set/set_repository.go</File>
+      <File>internal/domain/state/errors.go</File>
+      <File>internal/domain/state/snapshot.go</File>
+      <File>internal/domain/state/version.go</File>
+      <File>internal/infra/dropbox/state_store.go</File>
+      <File>internal/infra/persistence/sqlite/identity_credentials_repository.go</File>
+      <File>internal/infra/persistence/sqlite/identity_repository.go</File>
+      <File>internal/infra/persistence/sqlite/session_repository.go</File>
+      <File>internal/infra/persistence/sqlite/set_repository.go</File>
+      <File>internal/infra/persistence/sqlite/state_exporter.go</File>
+      <File>internal/infra/persistence/sqlite/state_importer.go</File>
+      <File>internal/infra/tui/app.go</File>
+      <File>internal/infra/tui/views/help.go</File>
+      <File>internal/infra/tui/views/questionnaire.go</File>
+      <File>internal/infra/tui/views/records.go</File>
+      <File>internal/infra/tui/views/records_actions.go</File>
+      <File>internal/infra/tui/views/records_data.go</File>
+      <File>internal/infra/tui/views/records_dialog.go</File>
+      <File>internal/infra/tui/views/records_exercises.go</File>
+      <File>internal/infra/tui/views/records_layout.go</File>
+      <File>internal/infra/tui/views/records_pagination.go</File>
+      <File>internal/infra/tui/views/records_save.go</File>
+      <File>internal/infra/tui/views/records_sessions.go</File>
+      <File>internal/infra/tui/views/records_sets.go</File>
+      <File>internal/infra/tui/views/records_store.go</File>
+      <File>internal/infra/tui/views/records_transfer.go</File>
+      <File>internal/infra/tui/views/records_update.go</File>
+      <File>internal/infra/tui/views/records_view.go</File>
+      <File>migrations/sqlite/20260927094609_initial.down.sql</File>
+      <File>migrations/sqlite/20260927094609_initial.up.sql</File>
+      <File>migrations/sqlite/20261004160000_identity_sync.down.sql</File>
+      <File>migrations/sqlite/20261004160000_identity_sync.up.sql</File>
+      <File>migrations/sqlite/20261024155102_init.down.sql</File>
+      <File>migrations/sqlite/20261024155102_init.up.sql</File>
+      <File>.grace/changes/archive/C-INITIAL-SCHEMA-BASELINE/spec.xml</File>
+      <File>.grace/changes/archive/C-INITIAL-SCHEMA-BASELINE/plan.xml</File>
+    </ObservedWriteScope>
+    <ImplementationPlan>
+      <T-001>
+        <Title>Implement whole-workout sessions and session-exercise persistence</Title>
+        <DependsOn />
+        <AcceptanceCriteria>
+          <Criterion>Independent sessions, validated session-exercise membership, unique idempotent adds, session-exercise-owned sets, safe catalog deletion, seven-table init schema, version-3 snapshots, and application wiring pass temporary database checks.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go vet ./internal/domain/... ./internal/app/... ./internal/infra/persistence/... ./internal/infra/dropbox</Command>
+        </Verification>
+      </T-001>
+      <T-002>
+        <Title>Implement four-panel catalog and workout interactions</Title>
+        <DependsOn>T-001</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>20/20/60 geometry, 1/2/3/4, catalog add/repeated add, all defined active-panel actions, independent browsing, filtered sets, stable selection IDs, bounded rendering, and transfer/input ownership match the spec.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go build ./...</Command>
+          <Command>go vet ./...</Command>
+        </Verification>
+      </T-002>
+      <T-003>
+        <Title>Reconcile durable state and verify the complete change</Title>
+        <DependsOn>T-002</DependsOn>
+        <AcceptanceCriteria>
+          <Criterion>Update graph/verification anchors, semantic contracts, README and deployment context centrally; pass temporary database/TUI scenarios, formatting and final selected build/vet gate. Keep approved active until final apply/archive confirmation.</Criterion>
+        </AcceptanceCriteria>
+        <Verification>
+          <Command>go build ./...</Command>
+          <Command>go vet ./...</Command>
+        </Verification>
+      </T-003>
+    </ImplementationPlan>
+    <ExecutionNotes>
+      <Note>The user approved the four-panel specification and implementation outline by saying start. Sequential execution remains explicitly authorized. Existing staged and unstaged changes are inherited preservation scope; do not modify the git index.</Note>
+      <Note>Use existing package locations for sessions and sets and add internal/domain/exercise/sessionexercise. Retain the CLI-generated initial migration filename. Verify only temporary databases; do not add automated test files or open the real database.</Note>
+      <Note>Current and selected baseline are pre-edit gates. Execute task checks sequentially, then reconcile durable state and run selected final assertions with commands. Final apply/archive requires explicit confirmation.</Note>
+    </ExecutionNotes>
+  </C-WORKOUT-SESSIONS-FOUR-PANELS>
+</GraceChangePlan>

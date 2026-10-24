@@ -9,7 +9,7 @@ import (
 
 type Set struct {
 	ID             string         `json:"id"`
-	ExerciseID     string         `json:"exercise_id"`
+	PerformanceID  string         `json:"performance_id"`
 	RestInSeconds  int            `json:"rest_in_seconds"`
 	Repetitions    uint8          `json:"repetitions"`
 	ExerciseWeight ExerciseWeight `json:"exercise_weight"`
@@ -18,7 +18,7 @@ type Set struct {
 
 func NewSet(
 	id string,
-	exerciseID string,
+	performanceID string,
 	repetitions uint8,
 	value float64,
 	unit shared.WeightUnit,
@@ -29,8 +29,8 @@ func NewSet(
 		return Set{}, ErrEmptySetID
 	}
 
-	if strings.TrimSpace(exerciseID) == "" {
-		return Set{}, ErrExerciseOfSetNotFound
+	if strings.TrimSpace(performanceID) == "" {
+		return Set{}, ErrPerformanceOfSetNotFound
 	}
 
 	if restInSeconds < 0 {
@@ -52,7 +52,7 @@ func NewSet(
 
 	return Set{
 		ID:             id,
-		ExerciseID:     exerciseID,
+		PerformanceID:  performanceID,
 		RestInSeconds:  restInSeconds,
 		Repetitions:    repetitions,
 		ExerciseWeight: weight,

@@ -1,6 +1,6 @@
 // START_MODULE_CONTRACT
 //   PURPOSE: Export a consistent snapshot of local workout state.
-//   SCOPE: Exercises, sets, and optional preferences without local identities.
+//   SCOPE: Exercises, sessions, performances, sets, and optional preferences without local identities.
 //   DEPENDS: M-APP-REMOTE-STATE, M-DOMAIN-STATE
 //   LINKS: M-INFRA-PERSISTENCE-SQLITE, V-M-INFRA-PERSISTENCE-SQLITE
 //   MAP_MODE: SUMMARY
@@ -19,14 +19,17 @@ import (
 	"errors"
 
 	"github.com/danielsavinoff/trainings-logger/internal/app/ports"
-	"github.com/danielsavinoff/trainings-logger/internal/domain/exercise/set"
+	"github.com/danielsavinoff/trainings-logger/internal/domain/session/exercise/performance"
+	"github.com/danielsavinoff/trainings-logger/internal/domain/session/exercise/set"
 	"github.com/danielsavinoff/trainings-logger/internal/domain/state"
 	"github.com/danielsavinoff/trainings-logger/internal/domain/user/preferences"
 	"github.com/danielsavinoff/trainings-logger/internal/infra/persistence"
 )
 
 // START_BLOCK_STATE_EXPORT
-type StateExporter struct{ db *sql.DB }
+type StateExporter struct {
+	db *sql.DB
+}
 
 func NewStateExporter(db *sql.DB) *StateExporter {
 	return &StateExporter{db: db}
@@ -40,19 +43,41 @@ func (r *StateExporter) Export(ctx context.Context) (state.Snapshot, error) {
 			if err != nil {
 				return state.Snapshot{}, err
 			}
+
+			sessions, err := NewSessionRepository(r.db).FindAll(ctx)
+			if err != nil {
+				return state.Snapshot{}, err
+			}
+
+			performances := []performance.Performance{}
 			sets := []set.Set{}
-			for _, item := range exercises {
-				values, err := NewSetRepository(r.db).FindAllByExerciseId(
+			for _, workout := range sessions {
+				children, err := NewPerformanceRepository(r.db).FindAllBySessionID(
 					ctx,
-					item.ID,
+					workout.ID,
 				)
 				if err != nil {
 					return state.Snapshot{}, err
 				}
-				sets = append(
-					sets,
-					values...,
+
+				performances = append(
+					performances,
+					children...,
 				)
+				for _, performance := range children {
+					values, err := NewSetRepository(r.db).FindAllByPerformanceID(
+						ctx,
+						performance.ID,
+					)
+					if err != nil {
+						return state.Snapshot{}, err
+					}
+
+					sets = append(
+						sets,
+						values...,
+					)
+				}
 			}
 
 			value, err := NewPreferencesRepository(r.db).Find(ctx)
@@ -69,8 +94,10 @@ func (r *StateExporter) Export(ctx context.Context) (state.Snapshot, error) {
 			}
 
 			return state.NewSnapshot(
-				state.Version1,
+				state.Version4,
 				exercises,
+				sessions,
+				performances,
 				sets,
 				prefs,
 			)

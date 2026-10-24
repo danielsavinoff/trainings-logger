@@ -5,7 +5,7 @@ import (
 	"uuid"
 
 	"github.com/danielsavinoff/trainings-logger/internal/app/ports"
-	"github.com/danielsavinoff/trainings-logger/internal/domain/exercise"
+	"github.com/danielsavinoff/trainings-logger/internal/domain/session/exercise"
 )
 
 type CreateExercise struct {
@@ -46,22 +46,31 @@ func (h CreateExerciseHandler) Handle(
 		return CreateExerciseResult{}, err
 	}
 
-	return h.transactions.Run(ctx, func(
-		ctx context.Context,
-	) (CreateExerciseResult, error) {
-		exists, err := h.exerciseRepo.ExistsByName(ctx, userExercise.Name)
-		if err != nil {
-			return CreateExerciseResult{}, err
-		}
+	return h.transactions.Run(
+		ctx,
+		func(
+			ctx context.Context,
+		) (CreateExerciseResult, error) {
+			exists, err := h.exerciseRepo.ExistsByName(
+				ctx,
+				userExercise.Name,
+			)
+			if err != nil {
+				return CreateExerciseResult{}, err
+			}
 
-		if exists {
-			return CreateExerciseResult{}, exercise.ErrExerciseNameConflict
-		}
+			if exists {
+				return CreateExerciseResult{}, exercise.ErrExerciseNameConflict
+			}
 
-		if err := h.exerciseRepo.Save(ctx, userExercise); err != nil {
-			return CreateExerciseResult{}, err
-		}
+			if err := h.exerciseRepo.Save(
+				ctx,
+				userExercise,
+			); err != nil {
+				return CreateExerciseResult{}, err
+			}
 
-		return CreateExerciseResult{Result: userExercise}, nil
-	})
+			return CreateExerciseResult{Result: userExercise}, nil
+		},
+	)
 }

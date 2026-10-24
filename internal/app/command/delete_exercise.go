@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/danielsavinoff/trainings-logger/internal/app/ports"
-	"github.com/danielsavinoff/trainings-logger/internal/domain/exercise"
+	"github.com/danielsavinoff/trainings-logger/internal/domain/session/exercise"
 )
 
 type DeleteExercise struct {
@@ -30,12 +30,18 @@ func (h DeleteExerciseHandler) Handle(
 	ctx context.Context,
 	command DeleteExercise,
 ) error {
-	_, err := h.transactions.Run(ctx, func(
-		ctx context.Context,
-	) (ports.TransactionNoResult, error) {
-		return ports.TransactionNoResult{},
-			h.exerciseRepo.DeleteByID(ctx, command.ID)
-	})
+	_, err := h.transactions.Run(
+		ctx,
+		func(
+			ctx context.Context,
+		) (ports.TransactionNoResult, error) {
+			return ports.TransactionNoResult{},
+				h.exerciseRepo.DeleteByID(
+					ctx,
+					command.ID,
+				)
+		},
+	)
 
 	return err
 }

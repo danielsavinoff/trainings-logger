@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/danielsavinoff/trainings-logger/internal/app/ports"
-	"github.com/danielsavinoff/trainings-logger/internal/domain/exercise/set"
+	"github.com/danielsavinoff/trainings-logger/internal/domain/session/exercise/set"
 )
 
 type DeleteSet struct {
@@ -30,11 +30,17 @@ func (h DeleteSetHandler) Handle(
 	ctx context.Context,
 	command DeleteSet,
 ) error {
-	_, err := h.transactions.Run(ctx, func(
-		ctx context.Context,
-	) (ports.TransactionNoResult, error) {
-		return ports.TransactionNoResult{}, h.setRepo.DeleteByID(ctx, command.ID)
-	})
+	_, err := h.transactions.Run(
+		ctx,
+		func(
+			ctx context.Context,
+		) (ports.TransactionNoResult, error) {
+			return ports.TransactionNoResult{}, h.setRepo.DeleteByID(
+				ctx,
+				command.ID,
+			)
+		},
+	)
 
 	return err
 }

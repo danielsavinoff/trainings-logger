@@ -8,7 +8,9 @@ import (
 	"github.com/danielsavinoff/trainings-logger/internal/infra/persistence"
 )
 
-type IdentityRepository struct{ db *sql.DB }
+type IdentityRepository struct {
+	db *sql.DB
+}
 
 func NewIdentityRepository(db *sql.DB) *IdentityRepository {
 	return &IdentityRepository{db: db}

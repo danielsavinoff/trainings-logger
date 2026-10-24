@@ -1,0 +1,61 @@
+<GraceChangeSpec graceVersion="4.0" status="superseded">
+  <C-FULLSCREEN-EXERCISE-CATALOG>
+    <Replacement>C-RECORDS-FOOTER-BODY-WEIGHT</Replacement>
+    <Summary>Keep the workout-session model and move the exercise catalog into a dedicated full-screen selection/management view opened by n from Exercises; compact the three-panel records layout.</Summary>
+    <Goals>
+      <Goal>Replace exercise-owned sessions with independent workout sessions containing session-exercise entries, each of which owns sets.</Goal>
+      <Goal>Keep the reusable catalog out of records and open it full screen when adding a workout exercise. Enter selects/adds; Escape returns; n/e/d manage catalog definitions.</Goal>
+      <Goal>Use 1/2/3 for sessions, exercises, and sets on records; allocate one fifth to sessions and the remaining four fifths to exercises above sets with compact spacing.</Goal>
+    </Goals>
+    <Constraints>
+      <Constraint>Sessions retain UUID id, required trimmed title, and created_at default UTC now; remove their exercise_id. Add a constructor-validated SessionExercise with UUID id, session_id, exercise_id, and created_at for stable insertion ordering. Replace sets.session_id with sets.session_exercise_id. Keep stored set timestamps.</Constraint>
+      <Constraint>Each exercise can occur once per session; enforce unique(session_id, exercise_id). Repeated add selects the existing entry without duplication. Exercise definitions remain shared across workouts.</Constraint>
+      <Constraint>Deleting a session cascades its exercise entries and sets. Removing one session-exercise entry cascades only its sets and keeps the catalog exercise. Reject catalog deletion while referenced so historical workouts are preserved.</Constraint>
+      <Constraint>Keep the recently requested single initial migration baseline; revise that CLI-generated init pair to the new seven-table schema rather than introducing a legacy-data conversion. Do not open, reset, or mutate the real user database.</Constraint>
+      <Constraint>Use snapshot version 3 with sessions, catalog exercises, session_exercises, sets, and optional preferences. Reject older snapshots before import. Keep restore atomic and retain local credentials.</Constraint>
+      <Constraint>Preserve help/setup/dialog input isolation, asynchronous transfer ownership, stable selected IDs across refresh/restore, Vim navigation, keyboard paging, and existing border counters. No date separators in set rows, no extra paginator indicators, and no mouse-wheel navigation.</Constraint>
+      <Constraint>Use constructors at domain/application/persistence boundaries, one operation per use case source file, domain errors.go files, one argument per line for multiargument calls, multiline structs with fields, compact empty structs, and blank lines between type declarations. Do not add automated test files.</Constraint>
+    </Constraints>
+    <NonGoals>
+      <NonGoal>No routines, workout templates, analytics, exercise-entry reordering, duplicated exercise blocks in a single workout, or backward snapshot/data conversion.</NonGoal>
+      <NonGoal>No database reset, network sign-in, or unrelated Dropbox/browser behavior changes.</NonGoal>
+    </NonGoals>
+    <AcceptanceCriteria>
+      <Criterion>After reserving the footer, sessions use floor(width/5) and exercises above sets share the remaining width equally by height. Only three panels appear on records. Reduce record-pane outer spacing to zero vertical/one horizontal cell and pane inner padding to zero vertical/one horizontal cell, giving two columns between adjacent borders and no blank rows between stacked borders. Keep shared help/setup/dialog styles unchanged and all output bounded.</Criterion>
+      <Criterion>Sessions &lt;1&gt; show workout titles, Exercises &lt;2&gt; show selected workout exercise names, and Sets &lt;3&gt; show selected entry reps, display-unit weight, and rest with no date separators. The full-screen Exercise catalog lists reusable exercise names and has a footer describing Enter select, Esc back, and n/e/d management.</Criterion>
+      <Criterion>n from Exercises opens the full-screen catalog. Enter adds/selects the highlighted definition in the selected workout and returns to Exercises; repeated add selects the existing entry. Escape returns without adding an entry, retaining workout/entry/set selection. Catalog definition edits persist as normal. Missing-session selection reports a nonmutating error and stays in the catalog.</Criterion>
+      <Criterion>In records, 1/2/3 focus sessions/exercises/sets, Enter advances sessions to exercises to sets, and n/e/d manage sessions and sets. Exercises n opens catalog, e has no independent edit, and d removes only that entry and its sets. In catalog, n/e/d create/edit/delete definitions; form save/cancel returns to catalog. Referenced catalog definitions remain protected.</Criterion>
+      <Criterion>Catalog owns its input: records focus keys, save/load/setup/help/quit shortcuts do not trigger records actions there. Keep Vim row/jump/half-page/page navigation and ignore mouse input. Escape clears a pending g prefix before returning. Catalog browsing and Escape preserve records selection, paging, focus on Exercises, and pre-existing errors at unchanged dimensions; resizes propagate to catalog and forms. Catalog-local errors do not replace retained records errors.</Criterion>
+      <Criterion>Domain models and repository/application operations support standalone session CRUD/listing, catalog CRUD/listing, idempotent AddSessionExercise, ListSessionExercises, DeleteSessionExercise, and set operations by SessionExerciseID. Validate both parents and ownership; preserve parent IDs and creation timestamps on edits.</Criterion>
+      <Criterion>The single initial up/down pair creates/drops the complete seven-table schema with foreign keys, unique entry membership, indexes, and timestamp defaults. Snapshot version 3 validates all references and duplicates, preserves empty sessions/entries, and rejects invalid/older payloads before mutation.</Criterion>
+      <Criterion>Update help, README, semantic contracts, and GRACE graph/verification through an approved replacement lifecycle. Build/vet/formatting, temporary-database constraint and snapshot checks, and four-panel interaction/layout checks pass.</Criterion>
+      <Criterion>Keep session-exercise ownership, version-3 snapshots, initial migration contents, and domain/application operations unchanged. Save-time input ownership prevents opening or mutating the catalog during transfers; stale transfer replies cannot leave a hidden catalog active.</Criterion>
+    </AcceptanceCriteria>
+    <AffectedAreas>
+      <M-DOMAIN-SESSION />
+      <M-DOMAIN-SESSION-EXERCISE />
+      <M-DOMAIN-SET />
+      <M-DOMAIN-STATE />
+      <M-APP-SESSIONS />
+      <M-APP-SESSION-EXERCISES />
+      <M-APP-REMOTE-STATE />
+      <M-INFRA-PERSISTENCE-SQLITE />
+      <M-INFRA-DROPBOX-STATE />
+      <M-TUI-RECORDS />
+      <M-TUI-HELP />
+      <M-TUI-CATALOG />
+    </AffectedAreas>
+    <VerificationIntent>
+      <ExpectedCommand>go build ./...</ExpectedCommand>
+      <ExpectedCommand>go vet ./...</ExpectedCommand>
+      <ExpectedCommand>grace lint --path .</ExpectedCommand>
+      <ExpectedEvidence>Temporary TUI checks cover hidden catalog on records, n/full-screen entry, Enter selection, Escape cancellation, catalog CRUD and dialog ownership, retained selection/errors, isolated records shortcuts, transfers, reduced gaps, paging, and compact/zero-size output; preserve backend regression checks.</ExpectedEvidence>
+      <ExpectedEvidence>Temporary TUI checks cover hidden catalog on records, n/full-screen entry, Enter selection, Escape cancellation, catalog CRUD and dialog ownership, retained selection/errors, isolated records shortcuts, transfers, reduced gaps, paging, and compact/zero-size output; preserve backend regression checks.</ExpectedEvidence>
+    </VerificationIntent>
+    <Assumptions>
+      <Assumption>The user changed the active task to a full-screen catalog with Enter/Esc and n/e/d, and requested reduced table gaps. These instructions authorize this replacement scope; the prior explicit sequential execution choice persists.</Assumption>
+      <Assumption>Removing the catalog column gives its width to the exercise/set column: records use 20/80 proportions and sequential 1/2/3 focus keys. Catalog opens only through n in Exercises and returns focus there.</Assumption>
+      <Assumption>Existing workout data, version-3 backups, and the single initial schema are preservation scope. No real database is opened or reset. Supersede the immutable four-panel bundle rather than editing its assertions in place.</Assumption>
+    </Assumptions>
+  </C-FULLSCREEN-EXERCISE-CATALOG>
+</GraceChangeSpec>

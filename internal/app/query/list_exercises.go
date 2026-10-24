@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/danielsavinoff/trainings-logger/internal/app/ports"
-	"github.com/danielsavinoff/trainings-logger/internal/domain/exercise"
+	"github.com/danielsavinoff/trainings-logger/internal/domain/session/exercise"
 )
 
 type ListExercises struct{}
@@ -32,14 +32,17 @@ func (h ListExercisesHandler) Handle(
 	ctx context.Context,
 	query ListExercises,
 ) (ListExercisesResult, error) {
-	return h.transactions.Run(ctx, func(
-		ctx context.Context,
-	) (ListExercisesResult, error) {
-		exercises, err := h.exerciseRepo.FindAll(ctx)
-		if err != nil {
-			return ListExercisesResult{}, err
-		}
+	return h.transactions.Run(
+		ctx,
+		func(
+			ctx context.Context,
+		) (ListExercisesResult, error) {
+			exercises, err := h.exerciseRepo.FindAll(ctx)
+			if err != nil {
+				return ListExercisesResult{}, err
+			}
 
-		return ListExercisesResult{Result: exercises}, nil
-	})
+			return ListExercisesResult{Result: exercises}, nil
+		},
+	)
 }
