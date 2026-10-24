@@ -44,8 +44,8 @@ var recordsHelp = []helpGroup{
 		entries: []helpEntry{
 			{key: "↑/k", explanation: "move up"},
 			{key: "↓/j", explanation: "move down"},
-			{key: "ge", explanation: "focus exercises"},
-			{key: "gs", explanation: "focus sets"},
+			{key: "1", explanation: "focus exercises"},
+			{key: "2", explanation: "focus sets"},
 			{key: "enter", explanation: "focus sets from exercises"},
 			{key: "r", explanation: "reset setup"},
 			{key: "l", explanation: "load"},

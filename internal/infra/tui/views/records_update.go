@@ -1,6 +1,6 @@
 // START_MODULE_CONTRACT
 //   PURPOSE: Route records, dialog, help, questionnaire, and asynchronous transfers.
-//   SCOPE: Preserve input ownership; r reopens setup, s saves, and l loads.
+//   SCOPE: Preserve input ownership; 1/2 focus panels, r reopens setup, s saves, and l loads.
 //   DEPENDS: M-TUI-HELP, M-TUI-QUESTIONNAIRE, M-APP-REMOTE-STATE
 //   LINKS: M-TUI-RECORDS, V-M-TUI-RECORDS
 //   MAP_MODE: SUMMARY
@@ -90,18 +90,23 @@ func (m RecordsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 		}
+		switch msg.String() {
+		case "1":
+			m.goPending = false
+			m.focusPanel(exercisesPanel)
+
+			return m, nil
+		case "2":
+			m.goPending = false
+			m.focusPanel(setsPanel)
+
+			return m, nil
+		}
+
 		if m.goPending {
 			m.goPending = false
 
 			switch msg.String() {
-			case "e":
-				m.focusPanel(exercisesPanel)
-
-				return m, nil
-			case "s":
-				m.focusPanel(setsPanel)
-
-				return m, nil
 			case "g":
 				if m.activePanel == exercisesPanel {
 					m.table.GotoTop()

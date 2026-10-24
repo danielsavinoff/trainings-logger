@@ -39,7 +39,7 @@ func (m RecordsModel) View() tea.View {
 			lipgloss.Top,
 			components.PanelSpacing.Render(components.RenderPane(
 				styles[exercisesPanel],
-				"Exercises <ge>",
+				"Exercises <1>",
 				m.exercisesView(),
 				components.Position(
 					m.table.Cursor(),
@@ -48,7 +48,7 @@ func (m RecordsModel) View() tea.View {
 			)),
 			components.PanelSpacing.Render(components.RenderPane(
 				styles[setsPanel],
-				"Sets <gs>",
+				"Sets <2>",
 				m.setsView(),
 				components.Position(
 					m.setCursor,
